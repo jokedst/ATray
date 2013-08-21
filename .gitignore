@@ -5,3 +5,7 @@
 /ATray.sln.DotSettings.user
 /ATray.suo
 /_ReSharper.ATray
+/ATray/obj
+/ATray/bin
+
+/ATray.v11.suo

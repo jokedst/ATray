@@ -13,6 +13,9 @@
         /// <summary>How long the user may keep working without taking a break</summary>
         private const uint MaxWorkTime = 20 * 60 * 1000; // 20 mins
 
+        /// <summary>How long the user may keep working without taking a break</summary>
+        private const uint SaveInterval = 60; // every minute
+
         private uint workingtime;
 
         private DateTime startTime = DateTime.Now;
@@ -20,6 +23,8 @@
         private bool inWarnState;
 
         private bool reallyClose;
+
+        private DateTime lastSave = DateTime.MinValue;
 
         public Form1()
         {
@@ -71,20 +76,22 @@
         {
             var idle = UserInputChecker.GetIdleTime();
             ////lblSmall.Text = ((double)UserInputChecker.GetIdleTime() / 1000d).ToString("0");
-            lblSmall.Text = this.MilisecondsToString(UserInputChecker.GetIdleTime());
+            lblSmall.Text = this.MilisecondsToString(idle);
+
+            // Only call Now once to avoid annoying bugs
+            var now = DateTime.Now;
 
             if (idle > MinBrake)
             {
                 this.BackColor = Color.Green;
                 lblInfo.Text = "You can start working now";
                 this.workingtime = 0;
-                this.startTime = DateTime.Now;
+                this.startTime = now;
                 this.TopMost = false;
                 this.inWarnState = false;
             }
             else
             {
-                var now = DateTime.Now;
                 this.workingtime += (uint)now.Subtract(this.startTime).TotalMilliseconds;
                 this.startTime = now;
 
@@ -98,6 +105,15 @@
                     ////this.BringToFront();
                 }
             }
+
+            if (now.Subtract(lastSave).TotalSeconds > SaveInterval)
+            {
+                // Time to save
+                var wasActive = idle < SaveInterval * 1000;
+                ActivityManager.SaveActivity(now, SaveInterval, wasActive);
+                lastSave = now;
+            }
+
             ////lblWork.Text = (workingtime / 1000d).ToString("0");
             this.lblWork.Text = this.MilisecondsToString(this.workingtime);
             lblDebug.Text = Pinvoke.GetForegroundWindowText();

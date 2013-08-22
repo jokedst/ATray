@@ -38,6 +38,7 @@
             this.lblSmall = new System.Windows.Forms.Label();
             this.lblWork = new System.Windows.Forms.Label();
             this.lblDebug = new System.Windows.Forms.Label();
+            this.menuHistory = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -52,14 +53,15 @@
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuHistory,
             this.menuExit});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(93, 26);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 70);
             // 
             // menuExit
             // 
             this.menuExit.Name = "menuExit";
-            this.menuExit.Size = new System.Drawing.Size(92, 22);
+            this.menuExit.Size = new System.Drawing.Size(152, 22);
             this.menuExit.Text = "&Exit";
             this.menuExit.Click += new System.EventHandler(this.menuExit_Click);
             // 
@@ -107,6 +109,13 @@
             this.lblDebug.Size = new System.Drawing.Size(0, 13);
             this.lblDebug.TabIndex = 4;
             // 
+            // menuHistory
+            // 
+            this.menuHistory.Name = "menuHistory";
+            this.menuHistory.Size = new System.Drawing.Size(152, 22);
+            this.menuHistory.Text = "Show &History";
+            this.menuHistory.Click += new System.EventHandler(this.menuHistory_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -139,6 +148,7 @@
         private System.Windows.Forms.Label lblSmall;
         private System.Windows.Forms.Label lblWork;
         private System.Windows.Forms.Label lblDebug;
+        private System.Windows.Forms.ToolStripMenuItem menuHistory;
     }
 }
 

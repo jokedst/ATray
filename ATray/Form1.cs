@@ -26,11 +26,17 @@
 
         private DateTime lastSave = DateTime.MinValue;
 
+        private ActivityHistoryForm historyForm;
+
         public Form1()
         {
             InitializeComponent();
             WindowState = FormWindowState.Minimized;
             this.ShowInTaskbar = false;
+#if DEBUG
+            this.Icon = new Icon(GetType(), "debug.ico");
+            this.notifyIcon1.Icon = this.Icon;
+#endif
         }
 
         private string MilisecondsToString(uint ms)
@@ -138,6 +144,18 @@
                 e.Cancel = true;
                 this.WindowState = FormWindowState.Minimized;
             }
+            else
+            {
+                if (historyForm != null)
+                    historyForm.Close();
+            }
+        }
+
+        private void menuHistory_Click(object sender, EventArgs e)
+        {
+            if (historyForm == null)
+                historyForm = new ActivityHistoryForm();
+            historyForm.Show();
         }
     }
 }

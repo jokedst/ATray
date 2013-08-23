@@ -67,6 +67,7 @@
             this.historyPicture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.historyPicture.TabIndex = 0;
             this.historyPicture.TabStop = false;
+            this.historyPicture.MouseEnter += new System.EventHandler(this.historyPicture_MouseEnter);
             // 
             // ActivityHistoryForm
             // 
@@ -79,6 +80,7 @@
             this.Name = "ActivityHistoryForm";
             this.Text = "Activity History";
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.ActivityHistoryForm_Paint);
+            this.Resize += new System.EventHandler(this.ActivityHistoryForm_Resize);
             this.historyPanel.ResumeLayout(false);
             this.historyPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.historyPicture)).EndInit();

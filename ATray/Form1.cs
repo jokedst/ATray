@@ -153,7 +153,7 @@
 
         private void menuHistory_Click(object sender, EventArgs e)
         {
-            if (historyForm == null)
+            if (historyForm == null || historyForm.IsDisposed)
                 historyForm = new ActivityHistoryForm();
             historyForm.Show();
         }

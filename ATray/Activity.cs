@@ -58,16 +58,11 @@ namespace ATray
         private static void StoreActivity(MonthActivities activities)
         {
             var key = activities.Year * 100 + activities.Month;
-            //// Using the worthless BinaryFormatter, but at least it's better than XML...
-            //var formatter = new BinaryFormatter();
-            //Stream stream = new FileStream(Path.Combine(SavePath, "Act" + key + ".bin"), FileMode.Create, FileAccess.Write, FileShare.None);
-            //formatter.Serialize(stream, activities);
-            //stream.Close();
 
             activities.WriteToFile(Path.Combine(SavePath, "Acts" + key + ".bin"));
         }
 
-        private static readonly Dictionary<int, MonthActivities> FakeStorage = new Dictionary<int, MonthActivities>();
+        private static readonly Dictionary<int, MonthActivities> ActivityCache = new Dictionary<int, MonthActivities>();
 
         public static MonthActivities GetMonthActivity(short year, byte month)
         {
@@ -76,20 +71,15 @@ namespace ATray
             var filepath = Path.Combine(SavePath, "Acts" + key + ".bin");
             if (File.Exists(filepath))
             {
-                //Stream stream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.None);
-                //var formatter = new BinaryFormatter();
-                //var obj = (MonthActivities)formatter.Deserialize(stream);
-                //stream.Close();
-
-                //return obj;
                 return new MonthActivities(filepath);
             }
 
-            if (FakeStorage.ContainsKey(key))
-                return FakeStorage[key];
+            // TODO: Move this to top so the cache is used first
+            if (ActivityCache.ContainsKey(key))
+                return ActivityCache[key];
 
             var newMonth = new MonthActivities(year, month);
-            FakeStorage.Add(key, newMonth);
+            ActivityCache.Add(key, newMonth);
             return newMonth;
         }
     }
@@ -117,6 +107,7 @@ namespace ATray
             {
                 using (var br = new BinaryReader(filestream, Encoding.ASCII))
                 {
+                    // Read the header, always 12 bytes
                     var buffer = new byte[12];
                     br.Read(buffer, 0, 12);
                     var header = Encoding.ASCII.GetString(buffer);
@@ -153,10 +144,15 @@ namespace ATray
             }
         }
 
+        /// <summary>
+        /// Saves the current object to a file
+        /// </summary>
+        /// <param name="filepath"></param>
         public void WriteToFile(string filepath)
         {
             Stream filestream = new FileStream(filepath, FileMode.Create, FileAccess.Write, FileShare.None);
             var bw = new BinaryWriter(filestream, Encoding.ASCII);
+            // Header, including version number ("V1")
             bw.Write(Encoding.ASCII.GetBytes("ATRAY_ACTV1 "));
             bw.Write(Year);
             bw.Write(Month);
@@ -172,6 +168,7 @@ namespace ATray
                     bw.Write(act.WasActive);
                 }
             }
+            // Footer. Should perhaps have some crc or something?
             bw.Write("KTHXBYE");
             bw.Close();
             filestream.Close();

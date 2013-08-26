@@ -56,6 +56,10 @@
     <Compile Include="ActivityHistoryForm.Designer.cs">
       <DependentUpon>ActivityHistoryForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Config.cs" />
+    <Compile Include="FloatingLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

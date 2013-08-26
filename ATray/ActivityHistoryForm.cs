@@ -18,6 +18,12 @@ namespace ATray
         private Point lastPosition;
         private int lastScrollPositionY;
 
+        uint graphWidth;
+        uint graphSeconds;
+        
+        // 40 pixels margins
+        private const int graphStartPixel = 40;
+
         public ActivityHistoryForm()
         {
             InitializeComponent();
@@ -49,6 +55,11 @@ namespace ATray
             {
                 lastPosition = new Point(x, y);
                 tipLabel.Text = "Mouse at " + e.X + ", " + e.Y;
+                if (e.X >= graphStartPixel)
+                {
+                    tipLabel.Text = SecondToTime(((uint)e.X - graphStartPixel) * graphSeconds / graphWidth) + " " + tipLabel.Text;
+                }
+                
                 tipLabel.Location = lastPosition;
                 lastScrollPositionY = e.Y;
 
@@ -60,6 +71,14 @@ namespace ATray
         private void btnHistoryOk_Click(object sender, EventArgs e)
         {
             Hide();
+        }
+
+        private string SecondToTime(uint second)
+        {
+            var hour = second / (60 * 60);
+            var rest = second % (60 * 60);
+            var minute = rest/60;
+            return string.Format("{0}:{1:00}", hour, minute);
         }
 
         private void ActivityHistoryForm_Paint(object sender, PaintEventArgs e)
@@ -80,6 +99,7 @@ namespace ATray
                 }
 
                 // Create a new bitmap that is as wide as the windows and as high as it needs to be to fit all days
+                var width = this.ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth;
                 historyGraph = new Bitmap(width: this.ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth,
                                           height: history.Days.Count * (Config.GraphHeight + Config.GraphSpacing),
                                           format: System.Drawing.Imaging.PixelFormat.Format24bppRgb);
@@ -96,45 +116,69 @@ namespace ATray
                     timeLabels.Add(label);
                 }
 
+                var graphicsObj = Graphics.FromImage(historyGraph);
+                Pen pen = new Pen(Color.Olive, 1);
+                var brush = new SolidBrush(Color.Olive);
+
+                graphWidth = (uint) width - 80;
+                graphSeconds = lastTime - firstTime;
+                var daylineHeight = 2;
+
 
                 // Put labels
                 int index = 0;
                 int currentY = Config.GraphSpacing;
                 foreach (var dayNumber in history.Days.Keys.OrderBy(x => x))
                 {
+                    var todaysFirstSecond = history.Days[dayNumber].First(x => x.WasActive).StartSecond;
+                    var todaysLastSecond = history.Days[dayNumber].Last(x => x.WasActive).EndSecond;
+
                     var title = timeLabels[index++];
                     title.Location = new Point(0, currentY);
                     title.Text = "Day " + dayNumber;
 
                     var startTime = timeLabels[index++];
                     startTime.Location = new Point(0, currentY + 20);
-                    startTime.Text = history.Days[dayNumber].First().StartSecond.ToString();
+                    startTime.Text = SecondToTime(todaysFirstSecond);
 
                     var endTime = timeLabels[index++];
-                    endTime.Location = new Point(200, currentY + 20);
-                    endTime.Text = history.Days[dayNumber].Last().EndSecond.ToString();
+                    endTime.Text = SecondToTime(todaysLastSecond);
+                    endTime.Location = new Point(width - endTime.Width, currentY + 20);
+
+                    var startpixel = (todaysFirstSecond * graphWidth) / graphSeconds;
+                    var endPixel = (todaysLastSecond * graphWidth) / graphSeconds;
+                    var graphbox = new Rectangle((int)startpixel + graphStartPixel, currentY + Config.GraphHeight / 2 - daylineHeight / 2, (int)(endPixel - startpixel)+1, daylineHeight);
+
+                    graphicsObj.DrawRectangle(pen, graphbox);
+
+                    foreach (var span in history.Days[dayNumber])
+                    {
+                        startpixel = (span.StartSecond * graphWidth) / graphSeconds;
+                        endPixel = (span.EndSecond * graphWidth) / graphSeconds;
+
+                        var top = currentY + (span.WasActive ? 0 : 15);
+                        var height = span.WasActive ? Config.GraphHeight - 1 : Config.GraphHeight - 31;
+
+                        graphbox = new Rectangle((int)startpixel + graphStartPixel, top, (int)(endPixel - startpixel)+1, height);
+
+                        //graphicsObj.DrawRectangle(pen, graphbox);
+                        graphicsObj.FillRectangle(brush, graphbox);
+                    }
 
                     currentY += Config.GraphSpacing + Config.GraphHeight;
                 }
 
-                var graphicsObj = Graphics.FromImage(historyGraph);
-
-                // DEBUG just draw some shit
-                Pen myPen = new Pen(Color.Plum, 3);
-                Rectangle rectangleObj = new Rectangle(10, 10, 200, 200);
-
-                graphicsObj.DrawEllipse(myPen, rectangleObj);
                 graphicsObj.Dispose();
                 historyPicture.Image = historyGraph;
 
-                if (timeLabels.Any())
-                {
-                    foreach (var timeLabel in timeLabels)
-                    {
-                        historyPanel.Controls.Remove(timeLabel);
-                    }
-                    timeLabels.Clear();
-                }
+                //if (timeLabels.Any())
+                //{
+                //    foreach (var timeLabel in timeLabels)
+                //    {
+                //        historyPanel.Controls.Remove(timeLabel);
+                //    }
+                //    timeLabels.Clear();
+                //}
                 //{
                 //    var label = new Label();
                 //    label.Name = "label1";

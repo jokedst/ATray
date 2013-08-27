@@ -36,10 +36,11 @@
 #if DEBUG
             this.Icon = new Icon(GetType(), "debug.ico");
             this.notifyIcon1.Icon = this.Icon;
-#endif
 
             // DEBUG! Show history on boot
             menuHistory_Click(null, null);
+#endif
+
         }
 
         private string MilisecondsToString(uint ms)

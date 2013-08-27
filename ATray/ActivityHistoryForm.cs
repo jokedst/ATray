@@ -57,7 +57,7 @@ namespace ATray
                 tipLabel.Text = "Mouse at " + e.X + ", " + e.Y;
                 if (e.X >= graphStartPixel)
                 {
-                    tipLabel.Text = SecondToTime(((uint)e.X - graphStartPixel) * graphSeconds / graphWidth) + " " + tipLabel.Text;
+                    tipLabel.Text = SecondToTime(((uint)e.X - graphStartPixel) * graphSeconds / graphWidth);
                 }
                 
                 tipLabel.Location = lastPosition;
@@ -100,7 +100,8 @@ namespace ATray
 
                 // Create a new bitmap that is as wide as the windows and as high as it needs to be to fit all days
                 var width = this.ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth;
-                historyGraph = new Bitmap(width: this.ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth,
+                var height = history.Days.Count * (Config.GraphHeight + Config.GraphSpacing);
+                historyGraph = new Bitmap(width: width,
                                           height: history.Days.Count * (Config.GraphHeight + Config.GraphSpacing),
                                           format: System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                 historyGraph.MakeTransparent();
@@ -123,6 +124,16 @@ namespace ATray
                 graphWidth = (uint) width - 80;
                 graphSeconds = lastTime - firstTime;
                 var daylineHeight = 2;
+
+                // Draw hour lines
+                var greypen = new Pen(Color.LightGray, 1);
+                var firstHour = (int)Math.Ceiling(firstTime / 3600.0);
+                var lastHour = (int)Math.Floor(lastTime / 3600.0);
+                for (int x = firstHour; x <= lastHour; x++)
+                {
+                    var xpixel = (x * 3600 * graphWidth) / graphSeconds + graphStartPixel;
+                    graphicsObj.DrawLine(greypen, xpixel, 10, xpixel, height);
+                }
 
 
                 // Put labels
@@ -157,9 +168,9 @@ namespace ATray
                         endPixel = (span.EndSecond * graphWidth) / graphSeconds;
 
                         var top = currentY + (span.WasActive ? 0 : 15);
-                        var height = span.WasActive ? Config.GraphHeight - 1 : Config.GraphHeight - 31;
+                        var boxheight = span.WasActive ? Config.GraphHeight - 1 : Config.GraphHeight - 31;
 
-                        graphbox = new Rectangle((int)startpixel + graphStartPixel, top, (int)(endPixel - startpixel)+1, height);
+                        graphbox = new Rectangle((int)startpixel + graphStartPixel, top, (int)(endPixel - startpixel)+1, boxheight);
 
                         //graphicsObj.DrawRectangle(pen, graphbox);
                         graphicsObj.FillRectangle(brush, graphbox);

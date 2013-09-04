@@ -54,11 +54,12 @@ namespace ATray
             if (lastPosition.X != x || lastPosition.Y != y || lastScrollPositionY != e.Y)
             {
                 lastPosition = new Point(x, y);
-                tipLabel.Text = "Mouse at " + e.X + ", " + e.Y;
+                //tipLabel.Text = "Mouse at " + e.X + ", " + e.Y;
                 if (e.X >= graphStartPixel)
                 {
                     tipLabel.Text = SecondToTime(((uint)e.X - graphStartPixel) * graphSeconds / graphWidth);
                 }
+                else return;
                 
                 tipLabel.Location = lastPosition;
                 lastScrollPositionY = e.Y;
@@ -107,7 +108,7 @@ namespace ATray
                 historyGraph.MakeTransparent();
 
                 // Make sure we have as many labels as we need
-                for (int i = timeLabels.Count; i < history.Days.Count*3; i++)
+                for (int i = timeLabels.Count; i < history.Days.Count * 4; i++)
                 {
                     var label = new Label();
                     label.AutoSize = true;
@@ -146,7 +147,7 @@ namespace ATray
 
                     var title = timeLabels[index++];
                     title.Location = new Point(0, currentY);
-                    title.Text = "Day " + dayNumber;
+                    title.Text = (new DateTime(history.Year, history.Month, dayNumber).DayOfWeek) + " " + dayNumber + "/" + history.Month;
 
                     var startTime = timeLabels[index++];
                     startTime.Location = new Point(0, currentY + 20);
@@ -155,6 +156,10 @@ namespace ATray
                     var endTime = timeLabels[index++];
                     endTime.Text = SecondToTime(todaysLastSecond);
                     endTime.Location = new Point(width - endTime.Width, currentY + 20);
+
+                    var totalTime = timeLabels[index++];
+                    totalTime.Text = "("+SecondToTime(todaysLastSecond - todaysFirstSecond)+")";
+                    totalTime.Location = new Point(width - endTime.Width, currentY);
 
                     var startpixel = (todaysFirstSecond * graphWidth) / graphSeconds;
                     var endPixel = (todaysLastSecond * graphWidth) / graphSeconds;

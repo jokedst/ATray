@@ -11,7 +11,7 @@ namespace ATray
     {
         private const string SavePath = ".";
 
-        public static void SaveActivity(DateTime now, uint intervalLength, bool wasActive)
+        public static void SaveActivity(DateTime now, uint intervalLength, bool wasActive, string appName, string appTitle)
         {
             var currentSecond = (uint) now.TimeOfDay.TotalSeconds;
 
@@ -19,9 +19,9 @@ namespace ATray
             if (currentSecond + 1 < intervalLength)
             {
                 // Yeasterdays part
-                SaveActivity(now.Date.AddSeconds(-1), intervalLength - currentSecond - 1, wasActive);
+                SaveActivity(now.Date.AddSeconds(-1), intervalLength - currentSecond - 1, wasActive, appName, appTitle);
                 // Todays part
-                SaveActivity(now, currentSecond + 1, wasActive);
+                SaveActivity(now, currentSecond + 1, wasActive, appName,appTitle);
                 return;
             }
 
@@ -90,6 +90,8 @@ namespace ATray
         public short Year;
         public byte Month;
         public readonly Dictionary<byte, List<ActivitySpan>> Days = new Dictionary<byte, List<ActivitySpan>>();
+        public List<string> ApplicationNames;
+        public List<string> WindowTitles;
 
         public MonthActivities(short year, byte month)
         {
@@ -97,24 +99,10 @@ namespace ATray
             Month = month;
         }
 
-        /// <summary>
-        /// Creates a new MonthActivities loaded from a file
-        /// </summary>
-        /// <param name="filepath">The file to load</param>
-        public MonthActivities(string filepath)
-        {
-            using (Stream filestream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.None))
-            {
-                using (var br = new BinaryReader(filestream, Encoding.ASCII))
-                {
-                    // Read the header, always 12 bytes
-                    var buffer = new byte[12];
-                    br.Read(buffer, 0, 12);
-                    var header = Encoding.ASCII.GetString(buffer);
-                    if (header != "ATRAY_ACTV1 ")
-                        throw new Exception("Could not read file " + filepath + ", incorrect header");
 
-                    Year = br.ReadInt16();
+        private void LoadFileV1(BinaryReader br, string filepath)
+        {
+            Year = br.ReadInt16();
                     Month = br.ReadByte();
                     var days = br.ReadInt32();
                     for (int i = 0; i < days; i++)
@@ -140,6 +128,37 @@ namespace ATray
                     var footer = br.ReadString();
                     if (footer != "KTHXBYE")
                         throw new Exception("Could not read file " + filepath + ", incorrect footer");
+        }
+
+        private void LoadFileV2(BinaryReader br, string filepath)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Creates a new MonthActivities loaded from a file
+        /// </summary>
+        /// <param name="filepath">The file to load</param>
+        public MonthActivities(string filepath)
+        {
+            using (Stream filestream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.None))
+            {
+                using (var br = new BinaryReader(filestream, Encoding.ASCII))
+                {
+                    // Read the header, always 12 bytes
+                    var buffer = new byte[12];
+                    br.Read(buffer, 0, 12);
+                    var header = Encoding.ASCII.GetString(buffer);
+
+                    switch (header)
+                    {
+                        case "ATRAY_ACTV1 ": LoadFileV1(br, filepath);
+                            break;
+                        case "ATRAY_ACTV2 ": LoadFileV2(br, filepath);
+                            break;
+                        default:
+                            throw new Exception("Could not read file " + filepath + ", incorrect header");
+                    }
                 }
             }
         }
@@ -173,6 +192,54 @@ namespace ATray
             bw.Close();
             filestream.Close();
         }
+
+        /// <summary>
+        /// Saves the current object to a file
+        /// </summary>
+        /// <param name="filepath"></param>
+        public void WriteToFileV2(string filepath)
+        {
+            Stream filestream = new FileStream(filepath, FileMode.Create, FileAccess.Write, FileShare.None);
+            var bw = new BinaryWriter(filestream, Encoding.ASCII);
+            // Header, including version number ("V1")
+            bw.Write(Encoding.ASCII.GetBytes("ATRAY_ACTV2 "));
+            bw.Write(Year);
+            bw.Write(Month);
+            bw.Write(Days.Count);
+            foreach (var day in Days)
+            {
+                bw.Write(day.Key);
+                bw.Write(day.Value.Count);
+                foreach (var act in day.Value)
+                {
+                    bw.Write(act.StartSecond);
+                    bw.Write(act.EndSecond);
+                    bw.Write(act.WasActive);
+                    if (act.WasActive)
+                    {
+                        bw.Write(act.ApplicationNameIndex);
+                        bw.Write(act.WindowTitleIndex);
+                    }
+                }
+            }
+
+            bw.Write(ApplicationNames.Count);
+            foreach (var applicationName in ApplicationNames)
+            {
+                bw.Write(applicationName);
+            }
+
+            bw.Write(WindowTitles.Count);
+            foreach (var applicationName in WindowTitles)
+            {
+                bw.Write(applicationName);
+            }
+
+            // Footer. Should perhaps have some crc or something?
+            bw.Write("KTHXBYE");
+            bw.Close();
+            filestream.Close();
+        }
     }
 
     [Serializable]
@@ -181,5 +248,7 @@ namespace ATray
         public uint StartSecond;
         public uint EndSecond;
         public bool WasActive;
+        public int ApplicationNameIndex;
+        public int WindowTitleIndex;
     }
 }

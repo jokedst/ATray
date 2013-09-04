@@ -116,17 +116,20 @@
                 }
             }
 
+            var foregroundApp = Pinvoke.GetForegroundAppName();
+            var foregroundTitle = Pinvoke.GetForegroundWindowText();
+
             if (now.Subtract(lastSave).TotalSeconds > SaveInterval)
             {
                 // Time to save
                 var wasActive = idle < SaveInterval * 1000;
-                ActivityManager.SaveActivity(now, SaveInterval, wasActive);
+                ActivityManager.SaveActivity(now, SaveInterval, wasActive, foregroundApp, foregroundTitle);
                 lastSave = now;
             }
 
             ////lblWork.Text = (workingtime / 1000d).ToString("0");
             this.lblWork.Text = this.MilisecondsToString(this.workingtime);
-            lblDebug.Text = Pinvoke.GetForegroundWindowText();
+            lblDebug.Text = foregroundApp + " : " + foregroundTitle;
         }
 
         private void Form1_Load(object sender, EventArgs e)

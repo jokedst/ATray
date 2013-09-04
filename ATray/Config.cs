@@ -24,5 +24,15 @@ namespace ATray
         {
             get { return 20; }
         }
+
+        public static bool StoreActiveApp
+        {
+            get { return true; }
+        }
+
+        public static bool StoreActiveAppTitle
+        {
+            get { return true; }
+        }
     }
 }

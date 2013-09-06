@@ -5,10 +5,15 @@
     using System.IO;
     using System.Linq;
     using System.Text;
+    using System.Text.RegularExpressions;
 
     internal class ActivityManager
     {
         private const string SavePath = ".";
+
+        private const string SavefilePattern = "Acts{0}.bin";
+
+        private static readonly Dictionary<int, MonthActivities> ActivityCache = new Dictionary<int, MonthActivities>();
 
         public static void SaveActivity(DateTime now, uint intervalLength, bool wasActive, string appName, string appTitle)
         {
@@ -56,15 +61,6 @@
             StoreActivity(activities);
         }
 
-        private static void StoreActivity(MonthActivities activities)
-        {
-            var key = activities.Year * 100 + activities.Month;
-
-            activities.WriteToFile(Path.Combine(SavePath, "Acts" + key + ".bin"));
-        }
-
-        private static readonly Dictionary<int, MonthActivities> ActivityCache = new Dictionary<int, MonthActivities>();
-
         public static MonthActivities GetMonthActivity(short year, byte month)
         {
             var key = (year * 100) + month;
@@ -82,6 +78,28 @@
             var newMonth = new MonthActivities(year, month);
             ActivityCache.Add(key, newMonth);
             return newMonth;
+        }
+
+            static Regex fileNameParser = new Regex(string.Format(SavefilePattern, @"(\d*)"), RegexOptions.Compiled);
+
+        public static SortedDictionary<int, string> ListAvailableMonths()
+        {
+            var result = new SortedDictionary<int, string>();
+            var fileFilter = string.Format(SavefilePattern, "*");
+            foreach (var file in Directory.EnumerateFiles(SavePath, fileFilter, SearchOption.TopDirectoryOnly))
+            {
+                var match = fileNameParser.Match(file);
+                result.Add(int.Parse(match.Groups[1].Value), file);
+            }
+
+            return result;
+        }
+
+        private static void StoreActivity(MonthActivities activities)
+        {
+            var key = (activities.Year * 100) + activities.Month;
+
+            activities.WriteToFile(Path.Combine(SavePath, "Acts" + key + ".bin"));
         }
     }
 

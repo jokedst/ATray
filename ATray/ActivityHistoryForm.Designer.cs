@@ -32,6 +32,9 @@
             this.btnHistoryOk = new System.Windows.Forms.Button();
             this.historyPanel = new System.Windows.Forms.Panel();
             this.historyPicture = new System.Windows.Forms.PictureBox();
+            this.lastMonthButton = new System.Windows.Forms.Button();
+            this.monthDropDown = new System.Windows.Forms.ComboBox();
+            this.nextMonthButton = new System.Windows.Forms.Button();
             this.historyPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.historyPicture)).BeginInit();
             this.SuspendLayout();
@@ -39,7 +42,7 @@
             // btnHistoryOk
             // 
             this.btnHistoryOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnHistoryOk.Location = new System.Drawing.Point(197, 227);
+            this.btnHistoryOk.Location = new System.Drawing.Point(548, 433);
             this.btnHistoryOk.Name = "btnHistoryOk";
             this.btnHistoryOk.Size = new System.Drawing.Size(75, 23);
             this.btnHistoryOk.TabIndex = 0;
@@ -54,9 +57,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.historyPanel.AutoScroll = true;
             this.historyPanel.Controls.Add(this.historyPicture);
-            this.historyPanel.Location = new System.Drawing.Point(0, 0);
+            this.historyPanel.Location = new System.Drawing.Point(0, 32);
             this.historyPanel.Name = "historyPanel";
-            this.historyPanel.Size = new System.Drawing.Size(284, 221);
+            this.historyPanel.Size = new System.Drawing.Size(635, 395);
             this.historyPanel.TabIndex = 1;
             // 
             // historyPicture
@@ -69,11 +72,44 @@
             this.historyPicture.TabStop = false;
             this.historyPicture.MouseEnter += new System.EventHandler(this.historyPicture_MouseEnter);
             // 
+            // lastMonthButton
+            // 
+            this.lastMonthButton.Location = new System.Drawing.Point(0, 0);
+            this.lastMonthButton.Name = "lastMonthButton";
+            this.lastMonthButton.Size = new System.Drawing.Size(25, 26);
+            this.lastMonthButton.TabIndex = 2;
+            this.lastMonthButton.Text = "<";
+            this.lastMonthButton.UseVisualStyleBackColor = true;
+            this.lastMonthButton.Click += new System.EventHandler(this.lastMonthButton_Click);
+            // 
+            // monthDropDown
+            // 
+            this.monthDropDown.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.monthDropDown.FormattingEnabled = true;
+            this.monthDropDown.Location = new System.Drawing.Point(31, 4);
+            this.monthDropDown.Name = "monthDropDown";
+            this.monthDropDown.Size = new System.Drawing.Size(171, 21);
+            this.monthDropDown.TabIndex = 3;
+            this.monthDropDown.SelectedIndexChanged += new System.EventHandler(this.monthDropDown_SelectedIndexChanged);
+            // 
+            // nextMonthButton
+            // 
+            this.nextMonthButton.Location = new System.Drawing.Point(208, 0);
+            this.nextMonthButton.Name = "nextMonthButton";
+            this.nextMonthButton.Size = new System.Drawing.Size(25, 26);
+            this.nextMonthButton.TabIndex = 4;
+            this.nextMonthButton.Text = ">";
+            this.nextMonthButton.UseVisualStyleBackColor = true;
+            this.nextMonthButton.Click += new System.EventHandler(this.nextMonthButton_Click);
+            // 
             // ActivityHistoryForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 262);
+            this.ClientSize = new System.Drawing.Size(635, 468);
+            this.Controls.Add(this.nextMonthButton);
+            this.Controls.Add(this.monthDropDown);
+            this.Controls.Add(this.lastMonthButton);
             this.Controls.Add(this.historyPanel);
             this.Controls.Add(this.btnHistoryOk);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -93,5 +129,8 @@
         private System.Windows.Forms.Button btnHistoryOk;
         private System.Windows.Forms.Panel historyPanel;
         private System.Windows.Forms.PictureBox historyPicture;
+        private System.Windows.Forms.Button lastMonthButton;
+        private System.Windows.Forms.ComboBox monthDropDown;
+        private System.Windows.Forms.Button nextMonthButton;
     }
 }

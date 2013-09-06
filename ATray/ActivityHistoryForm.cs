@@ -1,31 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Globalization;
-using System.Linq;
-using System.Windows.Forms;
-
-namespace ATray
+﻿namespace ATray
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.Linq;
+    using System.Windows.Forms;
+
     public partial class ActivityHistoryForm : Form
     {
+        // 40 pixels margins
+        private const int GraphStartPixel = 40;
+
+        private readonly List<Label> timeLabels = new List<Label>();
+        private readonly FloatingLabel tipLabel = new FloatingLabel();
         private Bitmap historyGraph = null;
         private int lastWindowWidth = 0;
         private DateTime lastHistoryRedraw = DateTime.MinValue;
-        private readonly List<Label> timeLabels = new List<Label>();
 
-        private FloatingLabel tipLabel = new FloatingLabel();
         private Point lastPosition;
         private int lastScrollPositionY;
 
         private int currentMonth = (DateTime.Now.Year * 100) + DateTime.Now.Month;
 
-        uint graphWidth;
-        uint graphSeconds;
-        
-        // 40 pixels margins
-        private const int graphStartPixel = 40;
+        private bool forceRedraw = false;
 
+        private uint graphWidth;
+        private uint graphSeconds;
+        
         public ActivityHistoryForm()
         {
             InitializeComponent();
@@ -39,6 +40,28 @@ namespace ATray
 #if DEBUG
             Icon = new Icon(GetType(), "debug.ico");
 #endif
+
+            InitHistoryDropDown();
+        }
+
+        private void InitHistoryDropDown()
+        {
+            // Check what files exists
+            var rawMonths = ActivityManager.ListAvailableMonths();
+            ////var months = rawMonths.Select(x => new { Id = x.Key, Name = new DateTime(x.Key / 100, x.Key % 100, 1).ToString("MMMM yyyy") }).ToList();
+
+            ////monthDropDown.ValueMember = "Id";
+            ////monthDropDown.DisplayMember = "Name";
+            var months = rawMonths.Select(x => Tuple.Create(x.Key, new DateTime(x.Key / 100, x.Key % 100, 1).ToString("MMMM yyyy"))).ToList();
+
+            monthDropDown.ValueMember = "item1";
+            monthDropDown.DisplayMember = "item2";
+            monthDropDown.DataSource = months;
+
+            monthDropDown.SelectedValue = rawMonths.Keys.Last();
+
+            nextMonthButton.Enabled = false;
+            lastMonthButton.Enabled = rawMonths.Count > 1;
         }
 
         private void HistoryPictureOnMouseLeave(object sender, EventArgs eventArgs)
@@ -56,10 +79,10 @@ namespace ATray
             if (lastPosition.X != x || lastPosition.Y != y || lastScrollPositionY != e.Y)
             {
                 lastPosition = new Point(x, y);
-                //tipLabel.Text = "Mouse at " + e.X + ", " + e.Y;
-                if (e.X >= graphStartPixel)
+
+                if (e.X >= GraphStartPixel)
                 {
-                    tipLabel.Text = SecondToTime(((uint)e.X - graphStartPixel) * graphSeconds / graphWidth);
+                    tipLabel.Text = SecondToTime(((uint)e.X - GraphStartPixel) * graphSeconds / graphWidth);
                 }
                 else return;
                 
@@ -80,13 +103,13 @@ namespace ATray
         {
             var hour = second / (60 * 60);
             var rest = second % (60 * 60);
-            var minute = rest/60;
+            var minute = rest / 60;
             return string.Format("{0}:{1:00}", hour, minute);
         }
 
         private void ActivityHistoryForm_Paint(object sender, PaintEventArgs e)
         {
-            if (historyGraph == null || this.ClientRectangle.Width != lastWindowWidth || DateTime.Now.Subtract(lastHistoryRedraw).TotalMinutes > Config.HistoryRedrawTimeout)
+            if (historyGraph == null || this.ClientRectangle.Width != lastWindowWidth || DateTime.Now.Subtract(lastHistoryRedraw).TotalMinutes > Config.HistoryRedrawTimeout || forceRedraw)
             {
                 // TODO Allow user to select year/month
                 var history = ActivityManager.GetMonthActivity((short)(currentMonth / 100), (byte)(currentMonth % 100));
@@ -133,7 +156,7 @@ namespace ATray
                 var lastHour = (int)Math.Floor(lastTime / 3600.0);
                 for (int x = firstHour; x <= lastHour; x++)
                 {
-                    var xpixel = (x * 3600 * graphWidth) / graphSeconds + graphStartPixel;
+                    var xpixel = (x * 3600 * graphWidth) / graphSeconds + GraphStartPixel;
                     graphicsObj.DrawLine(greypen, xpixel, 10, xpixel, height);
                 }
 
@@ -164,7 +187,7 @@ namespace ATray
 
                     var startpixel = (todaysFirstSecond * graphWidth) / graphSeconds;
                     var endPixel = (todaysLastSecond * graphWidth) / graphSeconds;
-                    var graphbox = new Rectangle((int)startpixel + graphStartPixel, currentY + Config.GraphHeight / 2 - daylineHeight / 2, (int)(endPixel - startpixel)+1, daylineHeight);
+                    var graphbox = new Rectangle((int)startpixel + GraphStartPixel, currentY + Config.GraphHeight / 2 - daylineHeight / 2, (int)(endPixel - startpixel)+1, daylineHeight);
 
                     graphicsObj.DrawRectangle(pen, graphbox);
 
@@ -176,7 +199,7 @@ namespace ATray
                         var top = currentY + (span.WasActive ? 0 : 15);
                         var boxheight = span.WasActive ? Config.GraphHeight - 1 : Config.GraphHeight - 31;
 
-                        graphbox = new Rectangle((int)startpixel + graphStartPixel, top, (int)(endPixel - startpixel)+1, boxheight);
+                        graphbox = new Rectangle((int)startpixel + GraphStartPixel, top, (int)(endPixel - startpixel)+1, boxheight);
 
                         //graphicsObj.DrawRectangle(pen, graphbox);
                         graphicsObj.FillRectangle(brush, graphbox);
@@ -210,6 +233,7 @@ namespace ATray
                 //}
                 lastWindowWidth = this.ClientRectangle.Width;
                 lastHistoryRedraw = DateTime.Now;
+                forceRedraw = false;
             }
         }
 
@@ -223,6 +247,42 @@ namespace ATray
         {
             // To make the mouse weel scroll work
             historyPicture.Focus();
+        }
+
+        private void monthDropDown_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            currentMonth = (int)monthDropDown.SelectedValue;
+
+            var availableMonths = monthDropDown.Items.Cast<Tuple<int, string>>().Select(x => x.Item1);
+            lastMonthButton.Enabled = availableMonths.Any(x => x < currentMonth);
+            nextMonthButton.Enabled = availableMonths.Any(x => x > currentMonth);
+
+            forceRedraw = true;
+            this.Refresh();
+        }
+
+        private void lastMonthButton_Click(object sender, EventArgs e)
+        {
+            var earlierMonths =
+                monthDropDown.Items.Cast<Tuple<int, string>>()
+                             .Select(x => x.Item1)
+                             .Where(x => x < currentMonth)
+                             .OrderBy(x => x);
+            var previousMonth = earlierMonths.FirstOrDefault();
+
+            monthDropDown.SelectedValue = previousMonth;
+        }
+
+        private void nextMonthButton_Click(object sender, EventArgs e)
+        {
+            var laterMonths =
+                monthDropDown.Items.Cast<Tuple<int, string>>()
+                             .Select(x => x.Item1)
+                             .Where(x => x > currentMonth)
+                             .OrderByDescending(x => x);
+            var nextMonth = laterMonths.FirstOrDefault();
+
+            monthDropDown.SelectedValue = nextMonth;
         }
     }
 }

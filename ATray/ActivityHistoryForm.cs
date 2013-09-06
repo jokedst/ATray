@@ -18,6 +18,8 @@ namespace ATray
         private Point lastPosition;
         private int lastScrollPositionY;
 
+        private int currentMonth = (DateTime.Now.Year * 100) + DateTime.Now.Month;
+
         uint graphWidth;
         uint graphSeconds;
         
@@ -87,8 +89,7 @@ namespace ATray
             if (historyGraph == null || this.ClientRectangle.Width != lastWindowWidth || DateTime.Now.Subtract(lastHistoryRedraw).TotalMinutes > Config.HistoryRedrawTimeout)
             {
                 // TODO Allow user to select year/month
-                var date = DateTime.Now;
-                var history = ActivityManager.GetMonthActivity((short)date.Year, (byte)date.Month);
+                var history = ActivityManager.GetMonthActivity((short)(currentMonth / 100), (byte)(currentMonth % 100));
 
                 // Figure out when first activity started and when last activity ended (for the whole month)
                 var firstTime = (uint)60 * 60 * 24;

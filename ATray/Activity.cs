@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-
-namespace ATray
+﻿namespace ATray
 {
-    class ActivityManager
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+
+    internal class ActivityManager
     {
         private const string SavePath = ".";
 
@@ -18,8 +17,9 @@ namespace ATray
             // Check if we passed midnight. If so split it up into two activities and save those
             if (currentSecond + 1 < intervalLength)
             {
-                // Yeasterdays part
+                // Yesterdays part
                 SaveActivity(now.Date.AddSeconds(-1), intervalLength - currentSecond - 1, wasActive, appName, appTitle);
+
                 // Todays part
                 SaveActivity(now, currentSecond + 1, wasActive, appName,appTitle);
                 return;
@@ -34,8 +34,9 @@ namespace ATray
             if (activities.Days[day].Any())
             {
                 var last = activities.Days[day].Last();
+
                 // Check if the last activity was same type AND it didn't end too long ago (e.g. the computer was shut off or something)
-                if (last.WasActive == wasActive && last.EndSecond + intervalLength*2 >= currentSecond)
+                if (last.WasActive == wasActive && last.EndSecond + (intervalLength * 2) >= currentSecond)
                 {
                     // The last activity had the same state as this, just update it
                     activities.Days[day].Last().EndSecond = currentSecond;
@@ -66,7 +67,7 @@ namespace ATray
 
         public static MonthActivities GetMonthActivity(short year, byte month)
         {
-            var key = year*100 + month;
+            var key = (year * 100) + month;
 
             var filepath = Path.Combine(SavePath, "Acts" + key + ".bin");
             if (File.Exists(filepath))
@@ -85,7 +86,7 @@ namespace ATray
     }
 
     [Serializable]
-    class MonthActivities
+    internal class MonthActivities
     {
         public short Year;
         public byte Month;

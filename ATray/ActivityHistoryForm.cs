@@ -26,6 +26,7 @@
 
         private uint graphWidth;
         private uint graphSeconds;
+        private uint graphFirstSecond;
         
         public ActivityHistoryForm()
         {
@@ -82,7 +83,7 @@
 
                 if (e.X >= GraphStartPixel)
                 {
-                    tipLabel.Text = SecondToTime(((uint)e.X - GraphStartPixel) * graphSeconds / graphWidth);
+                    tipLabel.Text = SecondToTime((((uint)e.X - GraphStartPixel) * graphSeconds / graphWidth) + graphFirstSecond);
                 }
                 else return;
                 
@@ -123,6 +124,8 @@
                     lastTime = lastTime > activities.Last().EndSecond ? lastTime : activities.Last().EndSecond;
                 }
 
+                graphFirstSecond = firstTime;
+
                 // Create a new bitmap that is as wide as the windows and as high as it needs to be to fit all days
                 var width = this.ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth;
                 var height = history.Days.Count * (Config.GraphHeight + Config.GraphSpacing);
@@ -156,7 +159,7 @@
                 var lastHour = (int)Math.Floor(lastTime / 3600.0);
                 for (int x = firstHour; x <= lastHour; x++)
                 {
-                    var xpixel = (x * 3600 * graphWidth) / graphSeconds + GraphStartPixel;
+                    var xpixel = (((x * 3600) - firstTime) * graphWidth) / graphSeconds + GraphStartPixel;
                     graphicsObj.DrawLine(greypen, xpixel, 10, xpixel, height);
                 }
 
@@ -171,7 +174,7 @@
 
                     var title = timeLabels[index++];
                     title.Location = new Point(0, currentY);
-                    title.Text = (new DateTime(history.Year, history.Month, dayNumber).DayOfWeek) + " " + dayNumber + "/" + history.Month;
+                    title.Text = new DateTime(history.Year, history.Month, dayNumber).DayOfWeek + " " + dayNumber + "/" + history.Month;
 
                     var startTime = timeLabels[index++];
                     startTime.Location = new Point(0, currentY + 20);
@@ -185,21 +188,21 @@
                     totalTime.Text = "("+SecondToTime(todaysLastSecond - todaysFirstSecond)+")";
                     totalTime.Location = new Point(width - endTime.Width, currentY);
 
-                    var startpixel = (todaysFirstSecond * graphWidth) / graphSeconds;
-                    var endPixel = (todaysLastSecond * graphWidth) / graphSeconds;
-                    var graphbox = new Rectangle((int)startpixel + GraphStartPixel, currentY + Config.GraphHeight / 2 - daylineHeight / 2, (int)(endPixel - startpixel)+1, daylineHeight);
+                    var startpixel = ((todaysFirstSecond - firstTime) * graphWidth) / graphSeconds;
+                    var endPixel = ((todaysLastSecond - firstTime) * graphWidth) / graphSeconds;
+                    var graphbox = new Rectangle((int)startpixel + GraphStartPixel, currentY + Config.GraphHeight / 2 - daylineHeight / 2, (int)(endPixel - startpixel) + 1, daylineHeight);
 
                     graphicsObj.DrawRectangle(pen, graphbox);
 
                     foreach (var span in history.Days[dayNumber])
                     {
-                        startpixel = (span.StartSecond * graphWidth) / graphSeconds;
-                        endPixel = (span.EndSecond * graphWidth) / graphSeconds;
+                        startpixel = ((span.StartSecond - firstTime) * graphWidth) / graphSeconds;
+                        endPixel = ((span.EndSecond - firstTime) * graphWidth) / graphSeconds;
 
                         var top = currentY + (span.WasActive ? 0 : 15);
                         var boxheight = span.WasActive ? Config.GraphHeight - 1 : Config.GraphHeight - 31;
 
-                        graphbox = new Rectangle((int)startpixel + GraphStartPixel, top, (int)(endPixel - startpixel)+1, boxheight);
+                        graphbox = new Rectangle((int)startpixel + GraphStartPixel, top, (int)(endPixel - startpixel) + 1, boxheight);
 
                         //graphicsObj.DrawRectangle(pen, graphbox);
                         graphicsObj.FillRectangle(brush, graphbox);
@@ -267,7 +270,7 @@
                 monthDropDown.Items.Cast<Tuple<int, string>>()
                              .Select(x => x.Item1)
                              .Where(x => x < currentMonth)
-                             .OrderBy(x => x);
+                             .OrderByDescending(x => x);
             var previousMonth = earlierMonths.FirstOrDefault();
 
             monthDropDown.SelectedValue = previousMonth;
@@ -279,7 +282,7 @@
                 monthDropDown.Items.Cast<Tuple<int, string>>()
                              .Select(x => x.Item1)
                              .Where(x => x > currentMonth)
-                             .OrderByDescending(x => x);
+                             .OrderBy(x => x);
             var nextMonth = laterMonths.FirstOrDefault();
 
             monthDropDown.SelectedValue = nextMonth;

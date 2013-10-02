@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ATray", "ATray\ATray.csproj", "{096B868B-82CE-4E60-951D-E82102288EE3}"
 EndProject
 Global

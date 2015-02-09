@@ -44,21 +44,36 @@ namespace ATray
                 //// this.IDWindowLabel.Text = handle.ToString();
             }
 
-            uint processID = 0;
-            GetWindowThreadProcessId(handle, out processID);
-            Process p = Process.GetProcessById((int) processID);
-            var appName = p.ProcessName;
-
-            return appName;
+            try
+            {
+                uint processID = 0;
+                GetWindowThreadProcessId(handle, out processID);
+                Process p = Process.GetProcessById((int) processID);
+                var appName = p.ProcessName;
+                return appName;
+            }
+            catch (ArgumentException)
+            {
+                // The process probably died between the calls
+                return string.Empty;
+            }
         }
 
         public static string GetForegroundAppName()
         {
             var handle = GetForegroundWindow();
-            uint processId = 0;
-            GetWindowThreadProcessId(handle, out processId);
-            Process p = Process.GetProcessById((int)processId);
-            return p.ProcessName;
+            try
+            {
+                uint processId = 0;
+                GetWindowThreadProcessId(handle, out processId);
+                Process p = Process.GetProcessById((int)processId);
+                return p.ProcessName;
+            }
+            catch (ArgumentException)
+            {
+                // The process probably died between the calls
+                return string.Empty;
+            }
         }
     }
 }

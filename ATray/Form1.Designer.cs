@@ -32,13 +32,14 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.menuHistory = new System.Windows.Forms.ToolStripMenuItem();
             this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.lblInfo = new System.Windows.Forms.Label();
             this.lblSmall = new System.Windows.Forms.Label();
             this.lblWork = new System.Windows.Forms.Label();
             this.lblDebug = new System.Windows.Forms.Label();
-            this.menuHistory = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,10 +54,18 @@
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuSettings,
             this.menuHistory,
             this.menuExit});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 70);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 92);
+            // 
+            // menuHistory
+            // 
+            this.menuHistory.Name = "menuHistory";
+            this.menuHistory.Size = new System.Drawing.Size(152, 22);
+            this.menuHistory.Text = "Show &History";
+            this.menuHistory.Click += new System.EventHandler(this.menuHistory_Click);
             // 
             // menuExit
             // 
@@ -109,12 +118,12 @@
             this.lblDebug.Size = new System.Drawing.Size(0, 13);
             this.lblDebug.TabIndex = 4;
             // 
-            // menuHistory
+            // menuSettings
             // 
-            this.menuHistory.Name = "menuHistory";
-            this.menuHistory.Size = new System.Drawing.Size(152, 22);
-            this.menuHistory.Text = "Show &History";
-            this.menuHistory.Click += new System.EventHandler(this.menuHistory_Click);
+            this.menuSettings.Name = "menuSettings";
+            this.menuSettings.Size = new System.Drawing.Size(152, 22);
+            this.menuSettings.Text = "&Settings";
+            this.menuSettings.Click += new System.EventHandler(this.menuSettings_Click);
             // 
             // Form1
             // 
@@ -149,6 +158,7 @@
         private System.Windows.Forms.Label lblWork;
         private System.Windows.Forms.Label lblDebug;
         private System.Windows.Forms.ToolStripMenuItem menuHistory;
+        private System.Windows.Forms.ToolStripMenuItem menuSettings;
     }
 }
 

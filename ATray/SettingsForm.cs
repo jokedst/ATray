@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -25,14 +26,39 @@ namespace ATray
             tabControl.SelectedIndex = 1;
         }
 
-        private void repoList_MouseClick(object sender, MouseEventArgs e)
+        private void repoList_MouseDown(object sender, MouseEventArgs e)
         {
+            ListViewHitTestInfo HI = repoList.HitTest(e.Location);
             if (e.Button == MouseButtons.Right)
             {
-                if (repoList.FocusedItem.Bounds.Contains(e.Location) == true)
+                if (HI.Location == ListViewHitTestLocations.None)
                 {
                     repoListMenu.Show(Cursor.Position);
                 }
+                else
+                {
+                    editRepoMenu.Show(Cursor.Position);
+                }
+            }
+        }
+
+        private void addToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //var fbd = new FolderBrowserDialog();
+            //var newDir = fbd.ShowDialog();
+
+            // Prepare a dummy string, thos would appear in the dialog
+            string dummyFileName = "Save Here";
+
+            SaveFileDialog sf = new SaveFileDialog();
+            // Feed the dummy name to the save dialog
+            sf.FileName = dummyFileName;
+
+            if (sf.ShowDialog() == DialogResult.OK)
+            {
+                // Now here's our save folder
+                string savePath = Path.GetDirectoryName(sf.FileName);
+                // Do whatever
             }
         }
     }

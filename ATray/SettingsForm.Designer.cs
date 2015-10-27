@@ -39,9 +39,13 @@
             this.tabRepoMan = new System.Windows.Forms.TabPage();
             this.btnOk = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.editRepoMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.label1 = new System.Windows.Forms.Label();
             this.repoListMenu.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabRepoMan.SuspendLayout();
+            this.editRepoMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // repoList
@@ -52,13 +56,13 @@
             this.colName,
             this.colStatus});
             this.repoList.FullRowSelect = true;
-            this.repoList.Location = new System.Drawing.Point(6, 6);
+            this.repoList.Location = new System.Drawing.Point(6, 23);
             this.repoList.Name = "repoList";
-            this.repoList.Size = new System.Drawing.Size(410, 187);
+            this.repoList.Size = new System.Drawing.Size(410, 170);
             this.repoList.TabIndex = 0;
             this.repoList.UseCompatibleStateImageBehavior = false;
             this.repoList.View = System.Windows.Forms.View.Details;
-            this.repoList.MouseClick += new System.Windows.Forms.MouseEventHandler(this.repoList_MouseClick);
+            this.repoList.MouseDown += new System.Windows.Forms.MouseEventHandler(this.repoList_MouseDown);
             // 
             // colName
             // 
@@ -74,13 +78,14 @@
             this.repoListMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addToolStripMenuItem});
             this.repoListMenu.Name = "repoListMenu";
-            this.repoListMenu.Size = new System.Drawing.Size(97, 26);
+            this.repoListMenu.Size = new System.Drawing.Size(153, 48);
             // 
             // addToolStripMenuItem
             // 
             this.addToolStripMenuItem.Name = "addToolStripMenuItem";
-            this.addToolStripMenuItem.Size = new System.Drawing.Size(96, 22);
+            this.addToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.addToolStripMenuItem.Text = "&Add";
+            this.addToolStripMenuItem.Click += new System.EventHandler(this.addToolStripMenuItem_Click);
             // 
             // tabControl
             // 
@@ -107,6 +112,7 @@
             // 
             // tabRepoMan
             // 
+            this.tabRepoMan.Controls.Add(this.label1);
             this.tabRepoMan.Controls.Add(this.repoList);
             this.tabRepoMan.Location = new System.Drawing.Point(4, 22);
             this.tabRepoMan.Name = "tabRepoMan";
@@ -136,6 +142,28 @@
             this.btnCancel.Text = "&Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
+            // editRepoMenu
+            // 
+            this.editRepoMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.editToolStripMenuItem});
+            this.editRepoMenu.Name = "editRepoMenu";
+            this.editRepoMenu.Size = new System.Drawing.Size(95, 26);
+            // 
+            // editToolStripMenuItem
+            // 
+            this.editToolStripMenuItem.Name = "editToolStripMenuItem";
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(94, 22);
+            this.editToolStripMenuItem.Text = "&Edit";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(7, 7);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(65, 13);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "Repositories";
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -150,6 +178,8 @@
             this.repoListMenu.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
             this.tabRepoMan.ResumeLayout(false);
+            this.tabRepoMan.PerformLayout();
+            this.editRepoMenu.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -166,5 +196,8 @@
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.ContextMenuStrip repoListMenu;
         private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip editRepoMenu;
+        private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
+        private System.Windows.Forms.Label label1;
     }
 }

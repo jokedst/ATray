@@ -28,6 +28,8 @@
 
         private ActivityHistoryForm historyForm;
 
+        private SettingsForm settingsForm;
+
         public Form1()
         {
             InitializeComponent();
@@ -37,8 +39,9 @@
             this.Icon = new Icon(GetType(), "debug.ico");
             this.notifyIcon1.Icon = this.Icon;
 
-            // DEBUG! Show history on boot
-            menuHistory_Click(null, null);
+            // DEBUG! Show settings on boot
+            menuSettings_Click(null, null);
+            //menuHistory_Click(null, null);
 #endif
 
         }
@@ -163,6 +166,13 @@
             if (historyForm == null || historyForm.IsDisposed)
                 historyForm = new ActivityHistoryForm();
             historyForm.Show();
+        }
+
+        private void menuSettings_Click(object sender, EventArgs e)
+        {
+            if (settingsForm == null || settingsForm.IsDisposed)
+                settingsForm = new SettingsForm();
+            settingsForm.Show();
         }
     }
 }

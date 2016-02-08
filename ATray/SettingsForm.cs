@@ -15,6 +15,9 @@ namespace ATray
         public SettingsForm()
         {
             InitializeComponent();
+#if DEBUG
+            this.Icon = new Icon(GetType(), "debug.ico");
+#endif
         }
 
         private void SettingsForm_Load(object sender, EventArgs e)
@@ -69,6 +72,18 @@ namespace ATray
             //    string savePath = Path.GetDirectoryName(sf.FileName);
             //    // Do whatever
             //}
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            // TODO: Reset form or something
+            Hide();
+        }
+
+        private void btnOk_Click(object sender, EventArgs e)
+        {
+            // TODO: Commit changes or something
+            Hide();
         }
     }
 }

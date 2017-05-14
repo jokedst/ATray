@@ -5,16 +5,19 @@
     using System.Text;
     using System.Windows.Forms;
 
-    public partial class Form1 : Form
+    public partial class MainWindow : Form
     {
-        /// <summary>If user is away this long, a brake has been taken</summary>
-        private const uint MinBrake = 60000; // 1 minute
+        /// <summary> If user is away this long, a brake has been taken</summary>
+        private const uint MinBrake = 1 * Minutes;
 
-        /// <summary>How long the user may keep working without taking a break</summary>
-        private const uint MaxWorkTime = 20 * 60 * 1000; // 20 mins
+        /// <summary> How long the user may keep working without taking a break</summary>
+        private const uint MaxWorkTime = 20 * Minutes;
 
-        /// <summary>How long the user may keep working without taking a break</summary>
-        private const uint SaveInterval = 60; // every minute
+        /// <summary> How often we flush activity data to disk </summary>
+        private const uint SaveInterval = 1 * Minutes;
+
+
+        private const uint Minutes = 60 * 1000; // Just to make above readable
 
         private uint workingtime;
 
@@ -30,20 +33,19 @@
 
         private SettingsForm settingsForm;
 
-        public Form1()
+        public MainWindow()
         {
             InitializeComponent();
             WindowState = FormWindowState.Minimized;
             this.ShowInTaskbar = false;
+            this.Icon = this.notifyIcon1.Icon = Program.MainIcon;
 #if DEBUG
-            this.Icon = new Icon(GetType(), "debug.ico");
-            this.notifyIcon1.Icon = this.Icon;
+            //this.Icon = new Icon(GetType(), "debug.ico");
+            //this.notifyIcon1.Icon = this.Icon;
 
             // DEBUG! Show settings on boot
             menuSettings_Click(null, null);
-            //menuHistory_Click(null, null);
 #endif
-
         }
 
         private string MilisecondsToString(uint ms)
@@ -60,7 +62,7 @@
             return sb.ToString();
         }
 
-        private void Form1_Resize(object sender, EventArgs e)
+        private void OnResize(object sender, EventArgs e)
         {
             if (this.inWarnState) this.ShowMe();
             else if (FormWindowState.Minimized == WindowState) Hide();
@@ -135,18 +137,19 @@
             lblDebug.Text = foregroundApp + " : " + foregroundTitle;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void OnMainWindowLoad(object sender, EventArgs e)
         {
             timer1.Start();
+            notifyIcon1.ShowBalloonTip(500, "Started", "ATray has started", ToolTipIcon.Info);
         }
 
-        private void Form1_MouseMove(object sender, MouseEventArgs e)
+        private void OnMouseMove(object sender, MouseEventArgs e)
         {
             if (!this.inWarnState)
                 this.Hide();
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
             // Don't close the program, just minimize it (unless they used the menu)
             if (e.CloseReason == CloseReason.UserClosing && !this.reallyClose)

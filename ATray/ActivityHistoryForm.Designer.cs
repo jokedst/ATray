@@ -112,7 +112,8 @@
             this.Controls.Add(this.lastMonthButton);
             this.Controls.Add(this.historyPanel);
             this.Controls.Add(this.btnHistoryOk);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            //this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ATray.Properties.Resources.main_icon;
             this.Name = "ActivityHistoryForm";
             this.Text = "Activity History";
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.ActivityHistoryForm_Paint);

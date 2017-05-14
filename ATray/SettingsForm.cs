@@ -10,6 +10,8 @@ using System.Windows.Forms;
 
 namespace ATray
 {
+    using System.Diagnostics;
+
     public partial class SettingsForm : Form
     {
         public SettingsForm()
@@ -40,10 +42,13 @@ namespace ATray
                 }
                 else
                 {
+                    RepoToEdit = HI.Item;
                     editRepoMenu.Show(Cursor.Position);
                 }
             }
         }
+
+        private ListViewItem RepoToEdit = null;
 
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -84,6 +89,25 @@ namespace ATray
         {
             // TODO: Commit changes or something
             Hide();
+        }
+
+        private void buttonAddRepository_Click(object sender, EventArgs e)
+        {
+            var dialog = new AddRepositoryForm();
+            if (dialog.ShowDialog() != DialogResult.OK) return;
+
+            Trace.TraceInformation($"About to add repo {dialog.textboxPath.Text}");
+        }
+
+        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (RepoToEdit == null) return;
+
+            var dialog = new AddRepositoryForm();
+            dialog.textboxPath.Text = RepoToEdit.SubItems[2].Text;
+            if (dialog.ShowDialog() != DialogResult.OK) return;
+
+            Trace.TraceInformation($"About to edit repo {dialog.textboxPath.Text}");
         }
     }
 }

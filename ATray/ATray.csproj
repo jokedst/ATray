@@ -44,6 +44,9 @@
       <HintPath>..\packages\Ookii.Dialogs.WindowsForms.1.0\lib\net35\Ookii.Dialogs.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="RepositoryManager">
+      <HintPath>..\..\Gitest\RepositoryManager\bin\Debug\RepositoryManager.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -63,7 +66,14 @@
     <Compile Include="ActivityHistoryForm.Designer.cs">
       <DependentUpon>ActivityHistoryForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="AddRepositoryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddRepositoryForm.Designer.cs">
+      <DependentUpon>AddRepositoryForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Config.cs" />
+    <Compile Include="Dialogs\OpenFolderDialog.cs" />
     <Compile Include="FloatingLabel.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -85,6 +95,9 @@
     <Compile Include="UserInputChecker.cs" />
     <EmbeddedResource Include="ActivityHistoryForm.resx">
       <DependentUpon>ActivityHistoryForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddRepositoryForm.resx">
+      <DependentUpon>AddRepositoryForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>

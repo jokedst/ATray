@@ -30,9 +30,11 @@
         {
             this.components = new System.ComponentModel.Container();
             this.repoList = new System.Windows.Forms.ListView();
-            this.colName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnLastUpdated = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnSchedule = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.repoListMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl = new System.Windows.Forms.TabControl();
@@ -44,8 +46,6 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.editRepoMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.columnLastUpdated = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnSchedule = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.repoListMenu.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabRepoMan.SuspendLayout();
@@ -58,11 +58,11 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.repoList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.colName,
-            this.colStatus,
-            this.colPath,
+            this.columnName,
+            this.columnStatus,
             this.columnLastUpdated,
-            this.columnSchedule});
+            this.columnSchedule,
+            this.columnPath});
             this.repoList.FullRowSelect = true;
             this.repoList.Location = new System.Drawing.Point(6, 23);
             this.repoList.Name = "repoList";
@@ -72,18 +72,30 @@
             this.repoList.View = System.Windows.Forms.View.Details;
             this.repoList.MouseDown += new System.Windows.Forms.MouseEventHandler(this.repoList_MouseDown);
             // 
-            // colName
+            // columnName
             // 
-            this.colName.Text = "Name";
-            this.colName.Width = 127;
+            this.columnName.Text = "Name";
+            this.columnName.Width = 127;
             // 
-            // colStatus
+            // columnStatus
             // 
-            this.colStatus.Text = "Status";
+            this.columnStatus.Text = "Status";
             // 
-            // colPath
+            // columnLastUpdated
             // 
-            this.colPath.Text = "Path";
+            this.columnLastUpdated.DisplayIndex = 3;
+            this.columnLastUpdated.Text = "Last Updated";
+            this.columnLastUpdated.Width = 79;
+            // 
+            // columnSchedule
+            // 
+            this.columnSchedule.DisplayIndex = 4;
+            this.columnSchedule.Text = "Schedule";
+            // 
+            // columnPath
+            // 
+            this.columnPath.DisplayIndex = 2;
+            this.columnPath.Text = "Path";
             // 
             // repoListMenu
             // 
@@ -144,6 +156,7 @@
             this.buttonAddRepository.TabIndex = 2;
             this.buttonAddRepository.Text = "&Add";
             this.buttonAddRepository.UseVisualStyleBackColor = true;
+            this.buttonAddRepository.Click += new System.EventHandler(this.buttonAddRepository_Click);
             // 
             // label1
             // 
@@ -183,21 +196,14 @@
             this.editRepoMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.editToolStripMenuItem});
             this.editRepoMenu.Name = "editRepoMenu";
-            this.editRepoMenu.Size = new System.Drawing.Size(95, 26);
+            this.editRepoMenu.Size = new System.Drawing.Size(153, 48);
             // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(94, 22);
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.editToolStripMenuItem.Text = "&Edit";
-            // 
-            // columnLastUpdated
-            // 
-            this.columnLastUpdated.Text = "Last Updated";
-            // 
-            // columnSchedule
-            // 
-            this.columnSchedule.Text = "Schedule";
+            this.editToolStripMenuItem.Click += new System.EventHandler(this.editToolStripMenuItem_Click);
             // 
             // SettingsForm
             // 
@@ -226,8 +232,8 @@
         private System.Windows.Forms.TabControl tabControl;
         private System.Windows.Forms.TabPage tabGeneral;
         private System.Windows.Forms.TabPage tabRepoMan;
-        private System.Windows.Forms.ColumnHeader colName;
-        private System.Windows.Forms.ColumnHeader colStatus;
+        private System.Windows.Forms.ColumnHeader columnName;
+        private System.Windows.Forms.ColumnHeader columnStatus;
         private System.Windows.Forms.Button btnOk;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.ContextMenuStrip repoListMenu;
@@ -235,7 +241,7 @@
         private System.Windows.Forms.ContextMenuStrip editRepoMenu;
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ColumnHeader colPath;
+        private System.Windows.Forms.ColumnHeader columnPath;
         private System.Windows.Forms.Button buttonAddRepository;
         private System.Windows.Forms.ColumnHeader columnLastUpdated;
         private System.Windows.Forms.ColumnHeader columnSchedule;

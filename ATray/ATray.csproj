@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ATray</RootNamespace>
     <AssemblyName>ATray</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -40,12 +40,12 @@
     <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Ookii.Dialogs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c15020868fd6249, processorArchitecture=MSIL">
       <HintPath>..\packages\Ookii.Dialogs.WindowsForms.1.0\lib\net35\Ookii.Dialogs.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="RepositoryManager">
-      <HintPath>..\..\Gitest\RepositoryManager\bin\Debug\RepositoryManager.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -59,13 +59,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activity.cs" />
     <Compile Include="ActivityHistoryForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ActivityHistoryForm.Designer.cs">
       <DependentUpon>ActivityHistoryForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Activity\ActivityManager.cs" />
+    <Compile Include="Activity\ActivitySpan.cs" />
+    <Compile Include="Activity\MonthActivities.cs" />
     <Compile Include="AddRepositoryForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,6 +79,7 @@
     <Compile Include="FloatingLabel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Helpers.cs" />
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -130,6 +133,12 @@
   <ItemGroup>
     <EmbeddedResource Include="debug.ico" />
     <Content Include="favicon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RepositoryManager\RepositoryManager.csproj">
+      <Project>{88398646-f6e8-45a6-b2c0-0051cabddb37}</Project>
+      <Name>RepositoryManager</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

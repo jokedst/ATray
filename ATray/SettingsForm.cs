@@ -33,22 +33,20 @@ namespace ATray
 
         private void repoList_MouseDown(object sender, MouseEventArgs e)
         {
-            ListViewHitTestInfo HI = repoList.HitTest(e.Location);
-            if (e.Button == MouseButtons.Right)
+            var hit = repoList.HitTest(e.Location);
+            if (e.Button != MouseButtons.Right) return;
+            if (hit.Location == ListViewHitTestLocations.None)
             {
-                if (HI.Location == ListViewHitTestLocations.None)
-                {
-                    repoListMenu.Show(Cursor.Position);
-                }
-                else
-                {
-                    RepoToEdit = HI.Item;
-                    editRepoMenu.Show(Cursor.Position);
-                }
+                repoListMenu.Show(Cursor.Position);
+            }
+            else
+            {
+                _repoToEdit = hit.Item;
+                editRepoMenu.Show(Cursor.Position);
             }
         }
 
-        private ListViewItem RepoToEdit = null;
+        private ListViewItem _repoToEdit = null;
 
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -101,10 +99,10 @@ namespace ATray
 
         private void editToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (RepoToEdit == null) return;
+            if (_repoToEdit == null) return;
 
             var dialog = new AddRepositoryForm();
-            dialog.textboxPath.Text = RepoToEdit.SubItems[2].Text;
+            dialog.textboxPath.Text = _repoToEdit.SubItems[2].Text;
             if (dialog.ShowDialog() != DialogResult.OK) return;
 
             Trace.TraceInformation($"About to edit repo {dialog.textboxPath.Text}");

@@ -4,6 +4,7 @@
     using System.Drawing;
     using System.Text;
     using System.Windows.Forms;
+    using Activity;
 
     public partial class MainWindow : Form
     {
@@ -37,8 +38,8 @@
         {
             InitializeComponent();
             WindowState = FormWindowState.Minimized;
-            this.ShowInTaskbar = false;
-            this.Icon = this.notifyIcon1.Icon = Program.MainIcon;
+            ShowInTaskbar = false;
+            Icon = notifyIcon1.Icon = Program.MainIcon;
 #if DEBUG
             //this.Icon = new Icon(GetType(), "debug.ico");
             //this.notifyIcon1.Icon = this.Icon;
@@ -64,59 +65,58 @@
 
         private void OnResize(object sender, EventArgs e)
         {
-            if (this.inWarnState) this.ShowMe();
+            if (inWarnState) ShowMe();
             else if (FormWindowState.Minimized == WindowState) Hide();
         }
 
         private void notifyIcon1_DoubleClick(object sender, EventArgs e)
         {
-            this.ShowMe();
+            ShowMe();
         }
 
         private void ShowMe()
         {
             Show();
             WindowState = FormWindowState.Normal;
-            this.ShowInTaskbar = true;
+            ShowInTaskbar = true;
         }
 
         private void menuExit_Click(object sender, EventArgs e)
         {
-            this.reallyClose = true;
-            this.Close();
-            ////Application.Exit();
+            reallyClose = true;
+            Close();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
             var idle = UserInputChecker.GetIdleTime();
             ////lblSmall.Text = ((double)UserInputChecker.GetIdleTime() / 1000d).ToString("0");
-            lblSmall.Text = this.MilisecondsToString(idle);
+            lblSmall.Text = MilisecondsToString(idle);
 
             // Only call Now once to avoid annoying bugs
             var now = DateTime.Now;
 
             if (idle > MinBrake)
             {
-                this.BackColor = Color.Green;
+                BackColor = Color.Green;
                 lblInfo.Text = "You can start working now";
-                this.workingtime = 0;
-                this.startTime = now;
-                this.TopMost = false;
-                this.inWarnState = false;
+                workingtime = 0;
+                startTime = now;
+                TopMost = false;
+                inWarnState = false;
             }
             else
             {
-                this.workingtime += (uint)now.Subtract(this.startTime).TotalMilliseconds;
-                this.startTime = now;
+                workingtime += (uint)now.Subtract(startTime).TotalMilliseconds;
+                startTime = now;
 
-                if (this.workingtime > MaxWorkTime && !this.inWarnState)
+                if (workingtime > MaxWorkTime && !inWarnState)
                 {
-                    this.BackColor = Color.Red;
+                    BackColor = Color.Red;
                     lblInfo.Text = "Take a break!";
-                    this.ShowMe();
-                    this.TopMost = true;
-                    this.inWarnState = true;
+                    ShowMe();
+                    TopMost = true;
+                    inWarnState = true;
                     ////this.BringToFront();
                 }
             }
@@ -133,7 +133,7 @@
             }
 
             ////lblWork.Text = (workingtime / 1000d).ToString("0");
-            this.lblWork.Text = this.MilisecondsToString(this.workingtime);
+            lblWork.Text = MilisecondsToString(workingtime);
             lblDebug.Text = foregroundApp + " : " + foregroundTitle;
         }
 
@@ -145,17 +145,18 @@
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
-            if (!this.inWarnState)
-                this.Hide();
+            // If the window is not showing a warning, minimize when moving the mouse over it
+            if (!inWarnState)
+                Hide();
         }
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
             // Don't close the program, just minimize it (unless they used the menu)
-            if (e.CloseReason == CloseReason.UserClosing && !this.reallyClose)
+            if (e.CloseReason == CloseReason.UserClosing && !reallyClose)
             {
                 e.Cancel = true;
-                this.WindowState = FormWindowState.Minimized;
+                WindowState = FormWindowState.Minimized;
             }
             else
             {

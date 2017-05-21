@@ -46,6 +46,7 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.editRepoMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.updateNowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.repoListMenu.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabRepoMan.SuspendLayout();
@@ -194,9 +195,10 @@
             // editRepoMenu
             // 
             this.editRepoMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.updateNowToolStripMenuItem,
             this.editToolStripMenuItem});
             this.editRepoMenu.Name = "editRepoMenu";
-            this.editRepoMenu.Size = new System.Drawing.Size(153, 48);
+            this.editRepoMenu.Size = new System.Drawing.Size(153, 70);
             // 
             // editToolStripMenuItem
             // 
@@ -204,6 +206,12 @@
             this.editToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.editToolStripMenuItem.Text = "&Edit";
             this.editToolStripMenuItem.Click += new System.EventHandler(this.editToolStripMenuItem_Click);
+            // 
+            // updateNowToolStripMenuItem
+            // 
+            this.updateNowToolStripMenuItem.Name = "updateNowToolStripMenuItem";
+            this.updateNowToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.updateNowToolStripMenuItem.Text = "&Update now";
             // 
             // SettingsForm
             // 
@@ -245,5 +253,6 @@
         private System.Windows.Forms.Button buttonAddRepository;
         private System.Windows.Forms.ColumnHeader columnLastUpdated;
         private System.Windows.Forms.ColumnHeader columnSchedule;
+        private System.Windows.Forms.ToolStripMenuItem updateNowToolStripMenuItem;
     }
 }

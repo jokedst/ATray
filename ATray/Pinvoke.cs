@@ -66,10 +66,15 @@ namespace ATray
             {
                 uint processId = 0;
                 GetWindowThreadProcessId(handle, out processId);
-                Process p = Process.GetProcessById((int)processId);
+                Process p = Process.GetProcessById((int) processId);
                 return p.ProcessName;
             }
             catch (ArgumentException)
+            {
+                // The process probably died between the calls
+                return string.Empty;
+            }
+            catch (InvalidOperationException)
             {
                 // The process probably died between the calls
                 return string.Empty;

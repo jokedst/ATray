@@ -15,9 +15,9 @@ namespace RepositoryManager
     public class SvnRepository : ISourceRepository
     {
         /// <inheritdoc />
-        public string Name { get; }
+        public string Name { get; set; }
         /// <inheritdoc />
-        public string Location { get; }
+        public string Location { get; set; }
         /// <inheritdoc />
         public RepoStatus LastStatus { get; }
         /// <inheritdoc />
@@ -27,23 +27,37 @@ namespace RepositoryManager
         /// <inheritdoc />
         public AutoAction AutomaticAction { get; set; }
 
+        /// <inheritdoc />
+        public bool Valid()
+        {
+            throw new NotImplementedException();
+        }
+
         private static readonly TraceSource Log = new TraceSource(nameof(SvnRepository));
 
-        public SvnRepository(string path)
+        /// <summary>
+        /// Create new SVN tracker for given location
+        /// </summary>
+        public SvnRepository(string location, string name = null, DateTime lastStatusAt = default(DateTime), Schedule updateSchedule = Schedule.Never, AutoAction automaticAction = AutoAction.Fetch, RepoStatus lastStatus = RepoStatus.Unknown)
         {
             // We assume the path is a directory
-            if (path.EndsWith(Path.DirectorySeparatorChar.ToString()))
-                path = path.Substring(0, path.Length - 1);
-            var pathParts = path.Split(Path.DirectorySeparatorChar);
-            this.Name = pathParts[pathParts.Length - 1];
-            if (this.Name == ".svn")
+            if (location.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                location = location.Substring(0, location.Length - 1);
+            var pathParts = location.Split(Path.DirectorySeparatorChar);
+            Name = pathParts[pathParts.Length - 1];
+            if (Name == ".svn")
             {
-                this.Name = pathParts[pathParts.Length - 2];
-                path = path.Substring(0, path.Length - 5);
+                Name = pathParts[pathParts.Length - 2];
+                location = location.Substring(0, location.Length - 5);
             }
 
-            this.Location = path;
-            this.LastStatus = RepoStatus.Unknown;
+            Location = location;
+            LastStatus = lastStatus;
+
+            Name = name ?? Name;
+            LastStatusAt = lastStatusAt;
+            UpdateSchedule = updateSchedule;
+            AutomaticAction = automaticAction;
         }
 
         public RepoStatus UpdateStatus()
@@ -82,7 +96,7 @@ namespace RepositoryManager
         /// <summary> NOT IMPLEMENTED </summary>
         public bool Update(bool onlyIfNoMerge)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

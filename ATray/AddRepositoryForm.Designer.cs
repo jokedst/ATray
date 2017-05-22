@@ -39,6 +39,8 @@
             this.scheduleTrackBar = new System.Windows.Forms.TrackBar();
             this.scheduleLabel = new System.Windows.Forms.Label();
             this.validationResultLabel = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.NameTextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.scheduleTrackBar)).BeginInit();
             this.SuspendLayout();
             // 
@@ -80,7 +82,7 @@
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button1.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button1.Location = new System.Drawing.Point(197, 180);
+            this.button1.Location = new System.Drawing.Point(197, 199);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 3;
@@ -91,7 +93,7 @@
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button2.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.button2.Location = new System.Drawing.Point(116, 180);
+            this.button2.Location = new System.Drawing.Point(116, 199);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 4;
@@ -102,13 +104,13 @@
             // 
             this.buttonTest.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.buttonTest.Enabled = false;
-            this.buttonTest.Location = new System.Drawing.Point(13, 180);
+            this.buttonTest.Location = new System.Drawing.Point(13, 199);
             this.buttonTest.Name = "buttonTest";
             this.buttonTest.Size = new System.Drawing.Size(75, 23);
             this.buttonTest.TabIndex = 5;
             this.buttonTest.Text = "&Validate...";
             this.buttonTest.UseVisualStyleBackColor = true;
-            this.buttonTest.Click += new System.EventHandler(this.buttonTest_Click);
+            this.buttonTest.Click += new System.EventHandler(this.OnClickValidate);
             // 
             // label2
             // 
@@ -139,22 +141,43 @@
             this.scheduleLabel.Name = "scheduleLabel";
             this.scheduleLabel.Size = new System.Drawing.Size(260, 23);
             this.scheduleLabel.TabIndex = 8;
-            this.scheduleLabel.Text = "Every minute";
+            this.scheduleLabel.Text = "Never";
             this.scheduleLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // validationResultLabel
             // 
+            this.validationResultLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.validationResultLabel.AutoSize = true;
-            this.validationResultLabel.Location = new System.Drawing.Point(13, 161);
+            this.validationResultLabel.Location = new System.Drawing.Point(13, 180);
             this.validationResultLabel.Name = "validationResultLabel";
             this.validationResultLabel.Size = new System.Drawing.Size(0, 13);
             this.validationResultLabel.TabIndex = 9;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(13, 126);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(35, 13);
+            this.label3.TabIndex = 10;
+            this.label3.Text = "Name";
+            // 
+            // NameTextBox
+            // 
+            this.NameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.NameTextBox.Location = new System.Drawing.Point(12, 143);
+            this.NameTextBox.Name = "NameTextBox";
+            this.NameTextBox.Size = new System.Drawing.Size(260, 20);
+            this.NameTextBox.TabIndex = 11;
             // 
             // AddRepositoryForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 215);
+            this.ClientSize = new System.Drawing.Size(284, 234);
+            this.Controls.Add(this.NameTextBox);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.validationResultLabel);
             this.Controls.Add(this.scheduleLabel);
             this.Controls.Add(this.scheduleTrackBar);
@@ -185,5 +208,7 @@
         public System.Windows.Forms.TrackBar scheduleTrackBar;
         private System.Windows.Forms.Label scheduleLabel;
         private System.Windows.Forms.Label validationResultLabel;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox NameTextBox;
     }
 }

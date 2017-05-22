@@ -7,11 +7,11 @@ namespace RepositoryManager
     /// </summary>
     public interface ISourceRepository
     {
-        /// <summary> Repositoru Name </summary>
-        string Name { get; }
+        /// <summary> Repository Name </summary>
+        string Name { get; set; }
 
         /// <summary> Directory path </summary>
-        string Location { get; }
+        string Location { get; set; }
 
         /// <summary> Last known status </summary>
         RepoStatus LastStatus { get; }
@@ -37,6 +37,11 @@ namespace RepositoryManager
         /// What automatic actions to perform when remote changes are detected
         /// </summary>
         AutoAction AutomaticAction { get; set; }
+
+        /// <summary>
+        /// Checks if this is a valid repository
+        /// </summary>
+        bool Valid();
     }
 
     /// <summary>
@@ -52,7 +57,7 @@ namespace RepositoryManager
     }
 
     /// <summary>
-    /// 
+    /// Automatic actions to perform on detected change
     /// </summary>
     [Flags]
     public enum AutoAction

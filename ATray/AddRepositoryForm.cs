@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace ATray
+﻿namespace ATray
 {
-    using System.IO;
+    using System;
+    using System.Windows.Forms;
     using Dialogs;
+    using RepositoryManager;
 
     public partial class AddRepositoryForm : Form
     {
@@ -48,9 +40,37 @@ namespace ATray
             }
         }
 
-        private void buttonTest_Click(object sender, EventArgs e)
+        public void SetSchedule(int minutes)
         {
-            validationResultLabel.Text = "I dunno";
+            if (minutes <= 0) scheduleTrackBar.Value = 0;
+            else if (minutes < 5) scheduleTrackBar.Value = 4;
+            else if (minutes < 60) scheduleTrackBar.Value = 3;
+            else if (minutes < 24*60) scheduleTrackBar.Value = 2;
+            else scheduleTrackBar.Value = 1;
+
+            scheduleTrackBar_Scroll(null, null);
+        }
+
+        public Schedule ChosenSchedule
+        {
+            get
+            {
+                switch (scheduleTrackBar.Value)
+                {
+                    case 0: return Schedule.Never; 
+                    case 4: return Schedule.EveryMinute;
+                    case 3: return Schedule.FifthMinute;
+                    case 2: return Schedule.EveryHour;
+                    case 1: return Schedule.EveryDay;
+                    default: return Schedule.Never;
+                }
+            }
+        }
+
+        private void OnClickValidate(object sender, EventArgs e)
+        {
+            var repo = new GitRepository(textboxPath.Text);
+            validationResultLabel.Text = repo.Valid() ? "Valid!" : "Directory is not a valid repository!";
         }
     }
 }

@@ -15,9 +15,9 @@ namespace RepositoryManager
         private RepoStatus _lastStatus;
 
         /// <inheritdoc />
-        public string Name { get; }
+        public string Name { get; set; }
         /// <inheritdoc />
-        public string Location { get; }
+        public string Location { get; set; }
         /// <inheritdoc />
         public RepoStatus LastStatus
         {
@@ -36,24 +36,27 @@ namespace RepositoryManager
         public AutoAction AutomaticAction { get; set; }
 
         /// <summary>
-        /// Create new git tracker for given path
+        /// Create new git tracker for given location
         /// </summary>
-        /// <param name="path"></param>
-        public GitRepository(string path)
+        public GitRepository(string location, string name=null, DateTime lastStatusAt=default(DateTime), Schedule updateSchedule=Schedule.Never, AutoAction automaticAction=AutoAction.Fetch, RepoStatus lastStatus=RepoStatus.Unknown)
         {
             // We assume the path is a directory
-            if (path.EndsWith(Path.DirectorySeparatorChar.ToString()))
-                path = path.Substring(0, path.Length - 1);
-            var pathParts = path.Split(Path.DirectorySeparatorChar);
+            if (location.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                location = location.Substring(0, location.Length - 1);
+            var pathParts = location.Split(Path.DirectorySeparatorChar);
             Name = pathParts[pathParts.Length - 1];
             if (Name == ".git")
             {
                 Name = pathParts[pathParts.Length - 2];
-                path = path.Substring(0, path.Length - 5);
+                location = location.Substring(0, location.Length - 5);
             }
 
-            Location = path;
-            LastStatus = RepoStatus.Unknown;
+            Name = name ?? Name;
+            Location = location;
+            _lastStatus = lastStatus;
+            LastStatusAt = lastStatusAt;
+            UpdateSchedule = updateSchedule;
+            AutomaticAction = automaticAction;
         }
 
         /// <inheritdoc />
@@ -136,6 +139,24 @@ namespace RepositoryManager
         public bool Update(bool onlyIfNoMerge)
         {
             throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public bool Valid() 
+        {
+            try
+            {
+                using (var repo = new Repository(Location))
+                {
+                    if (repo.Info.WorkingDirectory != null)
+                        return true;
+                }
+            }
+            catch (Exception)
+            {
+                // Ignore exceptions, regardless this is invalid
+            }
+            return false;
         }
 
         /// <summary>

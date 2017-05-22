@@ -11,9 +11,12 @@ using System.Windows.Forms;
 namespace ATray
 {
     using System.Diagnostics;
+    using RepositoryManager;
 
     public partial class SettingsForm : Form
     {
+        //private List<ISourceRepository> _updatedRepoList = Program.Repositories;
+
         public SettingsForm()
         {
             InitializeComponent();
@@ -24,10 +27,7 @@ namespace ATray
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
-            //repoList.Columns.
-            repoList.Items.Add("hej");
-            repoList.Items.Add("Column1Text").SubItems.AddRange(new [] { "s1", "s2", "s3" });
-
+            UpdateRepoList();
             tabControl.SelectedIndex = 1;
         }
 
@@ -50,13 +50,15 @@ namespace ATray
 
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var dialog = new Ookii.Dialogs.VistaFolderBrowserDialog();
-            var result = dialog.ShowDialog();
+            ShowAddDialog();
 
-            if (result == DialogResult.OK)
-            {
-                repoList.Items.Add(dialog.SelectedPath).SubItems.AddRange(new[] { "s1", "s2", "s3" });
-            }
+            //var dialog = new Ookii.Dialogs.VistaFolderBrowserDialog();
+            //var result = dialog.ShowDialog();
+
+            //if (result == DialogResult.OK)
+            //{
+            //    repoList.Items.Add(dialog.SelectedPath).SubItems.AddRange(new[] { "s1", "s2", "s3" });
+            //}
             
 
             //var fbd = new FolderBrowserDialog();
@@ -79,33 +81,82 @@ namespace ATray
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            // TODO: Reset form or something
-            Hide();
+            // Since the repo list actually modifies the live list, on cancel we simply restore the last list
+            Program.repositories.ReloadFromFile();
+            Close();
         }
 
         private void btnOk_Click(object sender, EventArgs e)
         {
-            // TODO: Commit changes or something
-            Hide();
+            // TODO: Save settings if I ever get any?
+            
+            // Save new repo list
+            //Program.Repositories = _updatedRepoList;
+            //Program.SaveRepoList();
+            Program.repositories.Save();
+            Close();
         }
 
         private void buttonAddRepository_Click(object sender, EventArgs e)
         {
-            var dialog = new AddRepositoryForm();
-            if (dialog.ShowDialog() != DialogResult.OK) return;
-
-            Trace.TraceInformation($"About to add repo {dialog.textboxPath.Text}");
+            ShowAddDialog();
         }
 
-        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ShowAddDialog()
+        {
+            var dialog = new AddRepositoryForm();
+            if (dialog.ShowDialog() != DialogResult.OK) return;
+            Trace.TraceInformation($"About to add repo {dialog.textboxPath.Text}");
+
+            var repo = new GitRepository(dialog.textboxPath.Text);
+            if (!repo.Valid())
+            {
+                MessageBox.Show("Invalid directory! This is not a supported repository path.", "Invalid repository path");
+                return;
+            }
+
+            repo.UpdateSchedule = dialog.ChosenSchedule;
+            //_updatedRepoList.Add(repo);
+            Program.repositories.Add(repo);
+            UpdateRepoList();
+        }
+
+        private void UpdateRepoList()
+        {
+            repoList.Items.Clear();
+
+            foreach (var repository in Program.repositories)
+            {
+                repoList.Items.Add(RepoToRow(repository));
+            }
+        }
+
+        private ListViewItem RepoToRow(ISourceRepository repo)
+        {
+            var ret = new ListViewItem(new string[5]);
+            ret.SubItems[columnName.Index].Text = repo.Name;
+            ret.SubItems[columnStatus.Index].Text = repo.LastStatus.ToString();
+            ret.SubItems[columnPath.Index].Text = repo.Location;
+            ret.SubItems[columnLastUpdated.Index].Text = repo.LastStatusAt.ToString();
+            ret.SubItems[columnSchedule.Index].Text = repo.UpdateSchedule.ToString();
+            return ret;
+        }
+
+        private void OnClickEdit(object sender, EventArgs e)
         {
             if (_repoToEdit == null) return;
+            var location = _repoToEdit.SubItems[columnPath.Index].Text;
+            var repo = Program.repositories.Single(x => x.Location == location);
 
             var dialog = new AddRepositoryForm();
-            dialog.textboxPath.Text = _repoToEdit.SubItems[2].Text;
+            dialog.Text = "Edit Repository";
+            dialog.textboxPath.Text = location;
+            dialog.SetSchedule((int)repo.UpdateSchedule);
             if (dialog.ShowDialog() != DialogResult.OK) return;
 
             Trace.TraceInformation($"About to edit repo {dialog.textboxPath.Text}");
+            repo.Location = dialog.textboxPath.Text;
+            repo.UpdateSchedule = dialog.ChosenSchedule;
         }
     }
 }

@@ -67,12 +67,15 @@ namespace RepositoryManager
             {
                 using (var repo = new Repository(Location))
                 {
+                    if (!repo.Head.IsTracking) return LastStatus = RepoStatus.Disconnected;
                     var credentialHelper = repo.Config.Get<string>("credential.helper");
-                    var origin = repo.Network.Remotes["origin"];
+                    var origin = repo.Network.Remotes[repo.Head.RemoteName];
                     if (origin == null) return RepoStatus.Error;
                     var fetchOptions = new FetchOptions();
-                    if (credentialHelper != null && credentialHelper.Value == "wincred")
+                    if (credentialHelper?.Value == "wincred")
                         fetchOptions.CredentialsProvider = CredentialsProvider.WinCred;
+                    else
+                        fetchOptions.CredentialsProvider = CredentialsProvider.MicrosoftAlm;
 
                     //repo.Network.Fetch(origin, fetchOptions);
                     Commands.Fetch(repo, origin.Name, Enumerable.Empty<string>(), fetchOptions, null);

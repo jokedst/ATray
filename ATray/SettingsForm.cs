@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-
-namespace ATray
+﻿namespace ATray
 {
+    using System;
+    using System.Drawing;
+    using System.Linq;
+    using System.Windows.Forms;
     using System.Diagnostics;
     using RepositoryManager;
 
@@ -21,8 +15,29 @@ namespace ATray
         {
             InitializeComponent();
 #if DEBUG
-            this.Icon = new Icon(GetType(), "debug.ico");
+            Icon = new Icon(GetType(), "debug.ico");
 #endif
+            Program.repositories.RepositoryUpdated += OnRepositoryUpdated;
+        }
+
+        private void OnRepositoryUpdated(object sender, RepositoryEventArgs repositoryEventArgs)
+        {
+            if(Visible)
+                this.UIThread(UpdateRepoList);
+        }
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                components?.Dispose();
+                Program.repositories.RepositoryUpdated -= OnRepositoryUpdated;
+            }
+            base.Dispose(disposing);
         }
 
         private void SettingsForm_Load(object sender, EventArgs e)
@@ -41,43 +56,12 @@ namespace ATray
             }
             else
             {
-                _repoToEdit = hit.Item;
+                _clickedRepository = hit.Item;
                 editRepoMenu.Show(Cursor.Position);
             }
         }
 
-        private ListViewItem _repoToEdit = null;
-
-        private void addToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ShowAddDialog();
-
-            //var dialog = new Ookii.Dialogs.VistaFolderBrowserDialog();
-            //var result = dialog.ShowDialog();
-
-            //if (result == DialogResult.OK)
-            //{
-            //    repoList.Items.Add(dialog.SelectedPath).SubItems.AddRange(new[] { "s1", "s2", "s3" });
-            //}
-            
-
-            //var fbd = new FolderBrowserDialog();
-            //var newDir = fbd.ShowDialog();
-
-            //// Prepare a dummy string, thos would appear in the dialog
-            //string dummyFileName = "Save Here";
-
-            //SaveFileDialog sf = new SaveFileDialog();
-            //// Feed the dummy name to the save dialog
-            //sf.FileName = dummyFileName;
-
-            //if (sf.ShowDialog() == DialogResult.OK)
-            //{
-            //    // Now here's our save folder
-            //    string savePath = Path.GetDirectoryName(sf.FileName);
-            //    // Do whatever
-            //}
-        }
+        private ListViewItem _clickedRepository;
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
@@ -91,18 +75,11 @@ namespace ATray
             // TODO: Save settings if I ever get any?
             
             // Save new repo list
-            //Program.Repositories = _updatedRepoList;
-            //Program.SaveRepoList();
             Program.repositories.Save();
             Close();
         }
 
-        private void buttonAddRepository_Click(object sender, EventArgs e)
-        {
-            ShowAddDialog();
-        }
-
-        private void ShowAddDialog()
+        private void ClickAddRepository(object sender, EventArgs e)
         {
             var dialog = new AddRepositoryForm();
             if (dialog.ShowDialog() != DialogResult.OK) return;
@@ -116,7 +93,8 @@ namespace ATray
             }
 
             repo.UpdateSchedule = dialog.ChosenSchedule;
-            //_updatedRepoList.Add(repo);
+            if (!string.IsNullOrWhiteSpace(dialog.RepoName))
+                repo.Name = dialog.RepoName;
             Program.repositories.Add(repo);
             UpdateRepoList();
         }
@@ -129,6 +107,7 @@ namespace ATray
             {
                 repoList.Items.Add(RepoToRow(repository));
             }
+            repoList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
         }
 
         private ListViewItem RepoToRow(ISourceRepository repo)
@@ -144,19 +123,29 @@ namespace ATray
 
         private void OnClickEdit(object sender, EventArgs e)
         {
-            if (_repoToEdit == null) return;
-            var location = _repoToEdit.SubItems[columnPath.Index].Text;
+            if (_clickedRepository == null) return;
+            var location = _clickedRepository.SubItems[columnPath.Index].Text;
             var repo = Program.repositories.Single(x => x.Location == location);
 
             var dialog = new AddRepositoryForm();
             dialog.Text = "Edit Repository";
             dialog.textboxPath.Text = location;
             dialog.SetSchedule((int)repo.UpdateSchedule);
+            dialog.RepoName = repo.Name;
             if (dialog.ShowDialog() != DialogResult.OK) return;
 
             Trace.TraceInformation($"About to edit repo {dialog.textboxPath.Text}");
             repo.Location = dialog.textboxPath.Text;
             repo.UpdateSchedule = dialog.ChosenSchedule;
+        }
+
+        private void OnClickUpdateRepo(object sender, EventArgs e)
+        {
+            if (_clickedRepository == null) return;
+            var location = _clickedRepository.SubItems[columnPath.Index].Text;
+            var repo = Program.repositories.Single(x => x.Location == location);
+
+            repo.UpdateStatus();
         }
     }
 }

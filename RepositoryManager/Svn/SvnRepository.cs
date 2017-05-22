@@ -30,7 +30,10 @@ namespace RepositoryManager
         /// <inheritdoc />
         public bool Valid()
         {
-            throw new NotImplementedException();
+            using (var client = new SvnClient())
+            {
+                return client.TryGetRepository(Location, out Uri uri, out Guid id);
+            }
         }
 
         private static readonly TraceSource Log = new TraceSource(nameof(SvnRepository));

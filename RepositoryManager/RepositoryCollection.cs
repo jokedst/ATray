@@ -94,6 +94,22 @@
         }
 
         /// <summary>
+        /// Finds repositorys under the given root path
+        /// </summary>
+        /// <param name="rootPath"></param>
+        /// <param name="types"> Which types of repositories to search for </param>
+        /// <returns></returns>
+        public static List<ISourceRepository> FindRepositories(string rootPath, RepositoryType types = RepositoryType.Git|RepositoryType.Svn)
+        {
+            return Directory.EnumerateDirectories(rootPath, ".???", SearchOption.AllDirectories)
+                .Where(x => types.HasFlag(RepositoryType.Git) && x.EndsWith(".git") ||
+                            types.HasFlag(RepositoryType.Svn) && x.EndsWith(".svn"))
+                .Select(x => x.EndsWith(".git") ? (ISourceRepository) new GitRepository(x) : new SvnRepository(x))
+                .Where(r => r.Valid())
+                .ToList();
+        }
+
+        /// <summary>
         /// Starts the scheduler
         /// </summary>
         public void StartScheduler()
@@ -133,6 +149,7 @@
             RepositoryUpdated?.Invoke(this, e);
         }
 
+        /// <inheritdoc />
         public IEnumerator<ISourceRepository> GetEnumerator()
         {
             // TODO: Thread safety?

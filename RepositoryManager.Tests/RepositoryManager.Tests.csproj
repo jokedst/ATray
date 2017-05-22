@@ -37,6 +37,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -47,6 +48,7 @@
   <ItemGroup>
     <Compile Include="The_GitRepository_constructor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="The_RepositoryCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -16,9 +16,12 @@
         {
             using (var frm = new OpenFolderDialog())
             {
-                if (frm.ShowDialog(this) == DialogResult.OK)
+                if (frm.ShowDialog(this) != DialogResult.OK) return;
+                textboxPath.Text = frm.Folder;
+                if (string.IsNullOrWhiteSpace(NameTextBox.Text))
                 {
-                    textboxPath.Text = frm.Folder;
+                    var repo = new GitRepository(textboxPath.Text);
+                    NameTextBox.Text = repo.Name;
                 }
             }
         }
@@ -65,6 +68,12 @@
                     default: return Schedule.Never;
                 }
             }
+        }
+
+        public string RepoName
+        {
+            get => NameTextBox.Text;
+            set => NameTextBox.Text = value;
         }
 
         private void OnClickValidate(object sender, EventArgs e)

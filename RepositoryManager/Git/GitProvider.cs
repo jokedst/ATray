@@ -1,11 +1,14 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using CredentialManagement;
-using LibGit2Sharp;
-
-namespace RepositoryManager
+namespace RepositoryManager.Git
 {
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using CredentialManagement;
+    using LibGit2Sharp;
+
+    /// <summary>
+    /// 
+    /// </summary>
     public class GitProvider : ISourceControlProvider
     {
         public IEnumerable<string> FindRepositories(string rootPath)

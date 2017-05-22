@@ -69,4 +69,16 @@ namespace RepositoryManager
         /// <summary> If local repo is unmodified, pull remote changes </summary>
         PullWhenUnmodified = 2,
     }
+
+    /// <summary>
+    /// Type of repository
+    /// </summary>
+    [Flags]
+    public enum RepositoryType
+    {
+        /// <summary> git repository </summary>
+        Git = 1,
+        /// <summary> Subversion (SVN) repository </summary>
+        Svn = 2
+    }
 }

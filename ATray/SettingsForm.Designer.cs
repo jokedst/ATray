@@ -7,19 +7,6 @@
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -45,8 +32,8 @@
             this.btnOk = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.editRepoMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.updateNowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.repoListMenu.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabRepoMan.SuspendLayout();
@@ -110,7 +97,7 @@
             this.addToolStripMenuItem.Name = "addToolStripMenuItem";
             this.addToolStripMenuItem.Size = new System.Drawing.Size(96, 22);
             this.addToolStripMenuItem.Text = "&Add";
-            this.addToolStripMenuItem.Click += new System.EventHandler(this.addToolStripMenuItem_Click);
+            this.addToolStripMenuItem.Click += new System.EventHandler(this.ClickAddRepository);
             // 
             // tabControl
             // 
@@ -157,7 +144,7 @@
             this.buttonAddRepository.TabIndex = 2;
             this.buttonAddRepository.Text = "&Add";
             this.buttonAddRepository.UseVisualStyleBackColor = true;
-            this.buttonAddRepository.Click += new System.EventHandler(this.buttonAddRepository_Click);
+            this.buttonAddRepository.Click += new System.EventHandler(this.ClickAddRepository);
             // 
             // label1
             // 
@@ -200,18 +187,19 @@
             this.editRepoMenu.Name = "editRepoMenu";
             this.editRepoMenu.Size = new System.Drawing.Size(153, 70);
             // 
+            // updateNowToolStripMenuItem
+            // 
+            this.updateNowToolStripMenuItem.Name = "updateNowToolStripMenuItem";
+            this.updateNowToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.updateNowToolStripMenuItem.Text = "&Update now";
+            this.updateNowToolStripMenuItem.Click += new System.EventHandler(this.OnClickUpdateRepo);
+            // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.editToolStripMenuItem.Text = "&Edit";
             this.editToolStripMenuItem.Click += new System.EventHandler(this.OnClickEdit);
-            // 
-            // updateNowToolStripMenuItem
-            // 
-            this.updateNowToolStripMenuItem.Name = "updateNowToolStripMenuItem";
-            this.updateNowToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.updateNowToolStripMenuItem.Text = "&Update now";
             // 
             // SettingsForm
             // 

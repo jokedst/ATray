@@ -23,7 +23,6 @@
         internal static System.Drawing.Icon MainIcon = ATray.Properties.Resources.main_icon;
 #endif
 
-        internal static List<ISourceRepository> Repositories;
         internal static RepositoryCollection repositories;
 
         internal static JsonSerializerSettings JsonSettings = new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Auto};

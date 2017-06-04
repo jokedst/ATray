@@ -9,13 +9,13 @@
     public partial class MainWindow : Form
     {
         /// <summary> If user is away this long, a brake has been taken</summary>
-        private const uint MinBrake = 1 * Minutes;
+        //private const uint MinBrake = 1 * Minutes;
 
-        /// <summary> How long the user may keep working without taking a break</summary>
-        private const uint MaxWorkTime = 20 * Minutes;
+        ///// <summary> How long the user may keep working without taking a break</summary>
+        //private const uint MaxWorkTime = 20 * Minutes;
 
-        /// <summary> How often we flush activity data to disk </summary>
-        private const uint SaveInterval = 1 * Minutes;
+        ///// <summary> How often we flush activity data to disk </summary>
+        //private const uint SaveInterval = 1 * Minutes;
 
 
         private const uint Minutes = 60 * 1000; // Just to make above readable
@@ -96,7 +96,7 @@
             // Only call Now once to avoid annoying bugs
             var now = DateTime.Now;
 
-            if (idle > MinBrake)
+            if (idle > Program.Configuration.MinimumBrakeLength * 1000)
             {
                 BackColor = Color.Green;
                 lblInfo.Text = "You can start working now";
@@ -110,7 +110,7 @@
                 workingtime += (uint)now.Subtract(startTime).TotalMilliseconds;
                 startTime = now;
 
-                if (workingtime > MaxWorkTime && !inWarnState)
+                if (workingtime > Program.Configuration.MaximumWorkTime * 1000 && !inWarnState)
                 {
                     BackColor = Color.Red;
                     lblInfo.Text = "Take a break!";
@@ -124,11 +124,11 @@
             var foregroundApp = Pinvoke.GetForegroundAppName();
             var foregroundTitle = Pinvoke.GetForegroundWindowText();
 
-            if (now.Subtract(lastSave).TotalSeconds > SaveInterval)
+            if (now.Subtract(lastSave).TotalSeconds > Program.Configuration.SaveInterval)
             {
                 // Time to save
-                var wasActive = idle < SaveInterval * 1000;
-                ActivityManager.SaveActivity(now, SaveInterval, wasActive, foregroundApp, foregroundTitle);
+                var wasActive = idle < Program.Configuration.SaveInterval * 1000;
+                ActivityManager.SaveActivity(now, (uint) Program.Configuration.SaveInterval, wasActive, foregroundApp, foregroundTitle);
                 lastSave = now;
             }
 

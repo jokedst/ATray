@@ -173,8 +173,10 @@
             // 
             // AddRepositoryForm
             // 
+            this.AcceptButton = this.button2;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.button1;
             this.ClientSize = new System.Drawing.Size(284, 234);
             this.Controls.Add(this.NameTextBox);
             this.Controls.Add(this.label3);

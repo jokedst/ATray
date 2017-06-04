@@ -11,6 +11,8 @@
     {
         // 40 pixels margins
         private const int GraphStartPixel = 40;
+        private const int GraphHeight = 50;
+        private const int GraphSpacing = 20;
 
         private readonly List<Label> timeLabels = new List<Label>();
         private readonly FloatingLabel tipLabel = new FloatingLabel();
@@ -106,14 +108,14 @@
             var hour = second / (60 * 60);
             var rest = second % (60 * 60);
             var minute = rest / 60;
-            return string.Format("{0}:{1:00}", hour, minute);
+            return $"{hour}:{minute:00}";
         }
 
         private void ActivityHistoryForm_Paint(object sender, PaintEventArgs e)
         {
             if (this.historyGraph != null 
                 && this.ClientRectangle.Width == this.lastWindowWidth
-                && !(DateTime.Now.Subtract(this.lastHistoryRedraw).TotalMinutes > Config.HistoryRedrawTimeout)
+                && !(DateTime.Now.Subtract(this.lastHistoryRedraw).TotalMinutes > Program.Configuration.HistoryRedrawTimeout)
                 && !this.forceRedraw)
             {
                 return;
@@ -137,9 +139,9 @@
 
             // Create a new bitmap that is as wide as the windows and as high as it needs to be to fit all days
             var width = this.ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth;
-            var height = history.Days.Count * (Config.GraphHeight + Config.GraphSpacing);
+            var height = history.Days.Count * (GraphHeight + GraphSpacing);
             this.historyGraph = new Bitmap(width: width,
-                height: history.Days.Count * (Config.GraphHeight + Config.GraphSpacing),
+                height: history.Days.Count * (GraphHeight + GraphSpacing),
                 format: System.Drawing.Imaging.PixelFormat.Format24bppRgb);
             this.historyGraph.MakeTransparent();
 
@@ -155,7 +157,7 @@
             }
 
             var graphicsObj = Graphics.FromImage(this.historyGraph);
-            Pen pen = new Pen(Color.Olive, 1);
+            var pen = new Pen(Color.Olive, 1);
             var brush = new SolidBrush(Color.Olive);
 
             this.graphWidth = (uint) width - 80;
@@ -175,7 +177,7 @@
 
             // Put labels
             int index = 0;
-            int currentY = Config.GraphSpacing;
+            int currentY = GraphSpacing;
             foreach (var dayNumber in history.Days.Keys.OrderBy(x => x))
             {
                 var todaysFirstSecond = 0u;
@@ -204,7 +206,7 @@
 
                 var startpixel = ((todaysFirstSecond - firstTime) * this.graphWidth) / this.graphSeconds;
                 var endPixel = ((todaysLastSecond - firstTime) * this.graphWidth) / this.graphSeconds;
-                var graphbox = new Rectangle((int)startpixel + GraphStartPixel, currentY + Config.GraphHeight / 2 - daylineHeight / 2, (int)(endPixel - startpixel) + 1, daylineHeight);
+                var graphbox = new Rectangle((int)startpixel + GraphStartPixel, currentY + GraphHeight / 2 - daylineHeight / 2, (int)(endPixel - startpixel) + 1, daylineHeight);
 
                 graphicsObj.DrawRectangle(pen, graphbox);
 
@@ -214,7 +216,7 @@
                     endPixel = ((span.EndSecond - firstTime) * this.graphWidth) / this.graphSeconds;
 
                     var top = currentY + (span.WasActive ? 0 : 15);
-                    var boxheight = span.WasActive ? Config.GraphHeight - 1 : Config.GraphHeight - 31;
+                    var boxheight = span.WasActive ? GraphHeight - 1 : GraphHeight - 31;
 
                     graphbox = new Rectangle((int)startpixel + GraphStartPixel, top, (int)(endPixel - startpixel) + 1, boxheight);
 
@@ -222,7 +224,7 @@
                     graphicsObj.FillRectangle(brush, graphbox);
                 }
 
-                currentY += Config.GraphSpacing + Config.GraphHeight;
+                currentY += GraphSpacing + GraphHeight;
             }
 
             graphicsObj.Dispose();

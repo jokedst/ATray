@@ -1,10 +1,8 @@
 ﻿namespace ATray
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Reflection;
-    using System.Text;
     using System.Windows.Forms;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
@@ -13,9 +11,10 @@
     public static class Program
     {
         /// <summary> Directory for storing application data </summary>
-        public static string SettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Application.ProductName);
-
+        internal static string SettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Application.ProductName);
         internal static string RepoListFilePath = Path.Combine(SettingsDirectory, "repositories.json");
+        internal static string ConfigurationFilePath = Path.Combine(SettingsDirectory, "atray.ini");
+
 
 #if DEBUG
         internal static System.Drawing.Icon MainIcon = ATray.Properties.Resources.debug_icon;
@@ -23,9 +22,8 @@
         internal static System.Drawing.Icon MainIcon = ATray.Properties.Resources.main_icon;
 #endif
 
-        internal static RepositoryCollection repositories;
-
-        internal static JsonSerializerSettings JsonSettings = new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.Auto};
+        internal static RepositoryCollection Repositories;
+        internal static Configuration Configuration;
 
         /// <summary>
         /// The main entry point for the application.
@@ -36,23 +34,13 @@
             if (!Directory.Exists(SettingsDirectory))
                 Directory.CreateDirectory(SettingsDirectory);
 
-            // Load repos if any
-            repositories = new RepositoryCollection(RepoListFilePath);
-            //if (File.Exists(RepoListFilePath))
-            //{
-            //    Repositories = JsonConvert.DeserializeObject<List<ISourceRepository>>(File.ReadAllText(RepoListFilePath), JsonSettings);
-            //}
-            //Repositories = Repositories ?? new List<ISourceRepository>();
+            // Load repos and config
+            Repositories = new RepositoryCollection(RepoListFilePath);
+            Configuration = new Configuration(ConfigurationFilePath);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainWindow());
-        }
-
-        public static void SaveRepoList()
-        {
-            //File.WriteAllText(RepoListFilePath, JsonConvert.SerializeObject(Repositories, JsonSettings), Encoding.UTF8);
-            repositories.Save();
         }
     }
 

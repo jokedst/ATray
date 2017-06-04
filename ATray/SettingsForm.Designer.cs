@@ -34,8 +34,10 @@
             this.editRepoMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.updateNowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.propertyGrid = new System.Windows.Forms.PropertyGrid();
             this.repoListMenu.SuspendLayout();
             this.tabControl.SuspendLayout();
+            this.tabGeneral.SuspendLayout();
             this.tabRepoMan.SuspendLayout();
             this.editRepoMenu.SuspendLayout();
             this.SuspendLayout();
@@ -114,6 +116,7 @@
             // 
             // tabGeneral
             // 
+            this.tabGeneral.Controls.Add(this.propertyGrid);
             this.tabGeneral.Location = new System.Drawing.Point(4, 22);
             this.tabGeneral.Name = "tabGeneral";
             this.tabGeneral.Padding = new System.Windows.Forms.Padding(3);
@@ -185,21 +188,29 @@
             this.updateNowToolStripMenuItem,
             this.editToolStripMenuItem});
             this.editRepoMenu.Name = "editRepoMenu";
-            this.editRepoMenu.Size = new System.Drawing.Size(153, 70);
+            this.editRepoMenu.Size = new System.Drawing.Size(139, 48);
             // 
             // updateNowToolStripMenuItem
             // 
             this.updateNowToolStripMenuItem.Name = "updateNowToolStripMenuItem";
-            this.updateNowToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.updateNowToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.updateNowToolStripMenuItem.Text = "&Update now";
             this.updateNowToolStripMenuItem.Click += new System.EventHandler(this.OnClickUpdateRepo);
             // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.editToolStripMenuItem.Text = "&Edit";
             this.editToolStripMenuItem.Click += new System.EventHandler(this.OnClickEdit);
+            // 
+            // propertyGrid
+            // 
+            this.propertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.propertyGrid.Location = new System.Drawing.Point(3, 3);
+            this.propertyGrid.Name = "propertyGrid";
+            this.propertyGrid.Size = new System.Drawing.Size(416, 279);
+            this.propertyGrid.TabIndex = 0;
             // 
             // SettingsForm
             // 
@@ -215,6 +226,7 @@
             this.Load += new System.EventHandler(this.SettingsForm_Load);
             this.repoListMenu.ResumeLayout(false);
             this.tabControl.ResumeLayout(false);
+            this.tabGeneral.ResumeLayout(false);
             this.tabRepoMan.ResumeLayout(false);
             this.tabRepoMan.PerformLayout();
             this.editRepoMenu.ResumeLayout(false);
@@ -242,5 +254,6 @@
         private System.Windows.Forms.ColumnHeader columnLastUpdated;
         private System.Windows.Forms.ColumnHeader columnSchedule;
         private System.Windows.Forms.ToolStripMenuItem updateNowToolStripMenuItem;
+        private System.Windows.Forms.PropertyGrid propertyGrid;
     }
 }

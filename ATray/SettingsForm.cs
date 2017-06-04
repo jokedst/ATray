@@ -17,7 +17,8 @@
 #if DEBUG
             Icon = new Icon(GetType(), "debug.ico");
 #endif
-            Program.repositories.RepositoryUpdated += OnRepositoryUpdated;
+            propertyGrid.SelectedObject = Program.Configuration.Clone();
+            Program.Repositories.RepositoryUpdated += OnRepositoryUpdated;
         }
 
         private void OnRepositoryUpdated(object sender, RepositoryEventArgs repositoryEventArgs)
@@ -35,7 +36,7 @@
             if (disposing)
             {
                 components?.Dispose();
-                Program.repositories.RepositoryUpdated -= OnRepositoryUpdated;
+                Program.Repositories.RepositoryUpdated -= OnRepositoryUpdated;
             }
             base.Dispose(disposing);
         }
@@ -66,16 +67,18 @@
         private void btnCancel_Click(object sender, EventArgs e)
         {
             // Since the repo list actually modifies the live list, on cancel we simply restore the last list
-            Program.repositories.ReloadFromFile();
+            Program.Repositories.ReloadFromFile();
             Close();
         }
 
         private void btnOk_Click(object sender, EventArgs e)
         {
-            // TODO: Save settings if I ever get any?
+            // Save settings 
+            Program.Configuration = (Configuration) propertyGrid.SelectedObject;
+            Program.Configuration.SaveToIniFile();
             
             // Save new repo list
-            Program.repositories.Save();
+            Program.Repositories.Save();
             Close();
         }
 
@@ -95,7 +98,7 @@
             repo.UpdateSchedule = dialog.ChosenSchedule;
             if (!string.IsNullOrWhiteSpace(dialog.RepoName))
                 repo.Name = dialog.RepoName;
-            Program.repositories.Add(repo);
+            Program.Repositories.Add(repo);
             UpdateRepoList();
         }
 
@@ -103,7 +106,7 @@
         {
             repoList.Items.Clear();
 
-            foreach (var repository in Program.repositories)
+            foreach (var repository in Program.Repositories)
             {
                 repoList.Items.Add(RepoToRow(repository));
             }
@@ -125,10 +128,11 @@
         {
             if (_clickedRepository == null) return;
             var location = _clickedRepository.SubItems[columnPath.Index].Text;
-            var repo = Program.repositories.Single(x => x.Location == location);
+            var repo = Program.Repositories.Single(x => x.Location == location);
 
             var dialog = new AddRepositoryForm();
             dialog.Text = "Edit Repository";
+            dialog.OkButtonText = "&Save";
             dialog.textboxPath.Text = location;
             dialog.SetSchedule((int)repo.UpdateSchedule);
             dialog.RepoName = repo.Name;
@@ -137,15 +141,18 @@
             Trace.TraceInformation($"About to edit repo {dialog.textboxPath.Text}");
             repo.Location = dialog.textboxPath.Text;
             repo.UpdateSchedule = dialog.ChosenSchedule;
+            repo.Name = dialog.RepoName;
+            UpdateRepoList();
         }
 
         private void OnClickUpdateRepo(object sender, EventArgs e)
         {
             if (_clickedRepository == null) return;
             var location = _clickedRepository.SubItems[columnPath.Index].Text;
-            var repo = Program.repositories.Single(x => x.Location == location);
+            var repo = Program.Repositories.Single(x => x.Location == location);
 
             repo.UpdateStatus();
+            UpdateRepoList();
         }
     }
 }

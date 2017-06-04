@@ -10,6 +10,7 @@
         public AddRepositoryForm()
         {
             InitializeComponent();
+            this.Icon = Program.MainIcon;
         }
 
         private void buttonSelectPath_Click(object sender, EventArgs e)
@@ -74,6 +75,11 @@
         {
             get => NameTextBox.Text;
             set => NameTextBox.Text = value;
+        }
+
+        public string OkButtonText
+        {
+            set => button2.Text = value;
         }
 
         private void OnClickValidate(object sender, EventArgs e)

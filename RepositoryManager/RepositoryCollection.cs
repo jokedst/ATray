@@ -4,6 +4,7 @@
     using System.Collections;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Text;
@@ -55,7 +56,6 @@
                     _repositories = new List<ISourceRepository>();
             }
         }
-  
 
         private void TimerTick(object tick)
         {
@@ -67,6 +67,13 @@
                     {
                         if (!task.IsCompleted) continue;
                     }
+
+                    // Check if it's time to update
+                    if (repository.LastStatusAt.AddMinutes((int)repository.UpdateSchedule) >= DateTime.Now)
+                        continue;
+
+                    Trace.TraceInformation("About to update repo " + repository.Name);
+
                     var repoUnclousure = repository;
                     var newTask = Task.Factory.StartNew(() => CheckRepo(repoUnclousure));
                     runningUpdates.AddOrUpdate(repository.Location, newTask, (loc, oldTask) => newTask);
@@ -134,7 +141,7 @@
                 return;
             var previousStatus = repo.LastStatus;
             repo.UpdateStatus();
-            OnRepositoryUpdated(new RepositoryEventArgs(repo.Location,previousStatus,repo.LastStatus));
+            OnRepositoryUpdated(new RepositoryEventArgs(repo.Location, previousStatus, repo.LastStatus));
         }
 
         /// <summary> Delegate for repo update events </summary>

@@ -79,7 +79,7 @@
             return newMonth;
         }
 
-        static Regex fileNameParser = new Regex(string.Format(SavefilePattern, @"(\d*)"), RegexOptions.Compiled);
+        private static readonly Regex FileNameParser = new Regex(string.Format(SavefilePattern, @"(\d*)"), RegexOptions.Compiled);
 
         public static SortedDictionary<int, string> ListAvailableMonths()
         {
@@ -87,7 +87,7 @@
             var fileFilter = string.Format(SavefilePattern, "*");
             foreach (var file in Directory.EnumerateFiles(SavePath, fileFilter, SearchOption.TopDirectoryOnly))
             {
-                var match = fileNameParser.Match(file);
+                var match = FileNameParser.Match(file);
                 result.Add(int.Parse(match.Groups[1].Value), file);
             }
 

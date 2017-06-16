@@ -8,30 +8,12 @@
 
     public partial class MainWindow : Form
     {
-        /// <summary> If user is away this long, a brake has been taken</summary>
-        //private const uint MinBrake = 1 * Minutes;
-
-        ///// <summary> How long the user may keep working without taking a break</summary>
-        //private const uint MaxWorkTime = 20 * Minutes;
-
-        ///// <summary> How often we flush activity data to disk </summary>
-        //private const uint SaveInterval = 1 * Minutes;
-
-
-        private const uint Minutes = 60 * 1000; // Just to make above readable
-
         private uint workingtime;
-
         private DateTime startTime = DateTime.Now;
-
         private bool inWarnState;
-
         private bool reallyClose;
-
         private DateTime lastSave = DateTime.MinValue;
-
         private ActivityHistoryForm historyForm;
-
         private SettingsForm settingsForm;
 
         public MainWindow()
@@ -41,10 +23,7 @@
             ShowInTaskbar = false;
             Icon = notifyIcon1.Icon = Program.MainIcon;
 #if DEBUG
-            //this.Icon = new Icon(GetType(), "debug.ico");
-            //this.notifyIcon1.Icon = this.Icon;
-
-            // DEBUG! Show settings on boot
+            // DEBUG! Show settings dialog on boot for convinience
             menuSettings_Click(null, null);
 #endif
         }
@@ -160,8 +139,7 @@
             }
             else
             {
-                if (historyForm != null)
-                    historyForm.Close();
+                historyForm?.Close();
             }
         }
 

@@ -20,7 +20,6 @@
         public int MaximumWorkTime { get; set; }
         [Description("How often we flush activity data to disk (in seconds)"), Category("General"), DefaultValue(5 * 60)]
         public int SaveInterval { get; set; }
-
         [Description("How often we should redraw the history graph (in minutes)"), Category("History"), DefaultValue(10)]
         public int HistoryRedrawTimeout { get; set; }
 

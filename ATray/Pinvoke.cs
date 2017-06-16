@@ -1,13 +1,9 @@
-﻿using System.Diagnostics;
-
-namespace ATray
+﻿namespace ATray
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
+    using System.Diagnostics;
     using System.Runtime.InteropServices;
     using System.Text;
-    using System.Windows.Forms;
 
     /// <summary>
     /// WinAPI functions
@@ -31,26 +27,17 @@ namespace ATray
 
         public static string GetForegroundWindowText()
         {
-            const int NChars = 256;
-            
-            var buff = new StringBuilder(NChars);
-
+            const int nChars = 256;
+            var buff = new StringBuilder(nChars);
             var handle = GetForegroundWindow();
 
-
-            if (GetWindowText(handle, buff, NChars) > 0)
-            {
+            if (GetWindowText(handle, buff, nChars) > 0)
                 return buff.ToString();
-                //// this.IDWindowLabel.Text = handle.ToString();
-            }
 
             try
             {
-                uint processID = 0;
-                GetWindowThreadProcessId(handle, out processID);
-                Process p = Process.GetProcessById((int) processID);
-                var appName = p.ProcessName;
-                return appName;
+                GetWindowThreadProcessId(handle, out uint processId);
+                return Process.GetProcessById((int)processId).ProcessName;
             }
             catch (ArgumentException)
             {
@@ -64,10 +51,8 @@ namespace ATray
             var handle = GetForegroundWindow();
             try
             {
-                uint processId = 0;
-                GetWindowThreadProcessId(handle, out processId);
-                Process p = Process.GetProcessById((int) processId);
-                return p.ProcessName;
+                GetWindowThreadProcessId(handle, out uint processId);
+                return Process.GetProcessById((int)processId).ProcessName;
             }
             catch (ArgumentException)
             {

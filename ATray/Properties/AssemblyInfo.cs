@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
@@ -8,9 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("ATray")]
 [assembly: AssemblyDescription("A tray app that tells you to get up and move arount every 20 minutes")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Neovici")]
+[assembly: AssemblyCompany("Jokedst")]
 [assembly: AssemblyProduct("ATray")]
-[assembly: AssemblyCopyright("Copyright © Neovici 2011")]
+[assembly: AssemblyCopyright("Copyright © Jokedst 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

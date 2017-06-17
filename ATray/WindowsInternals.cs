@@ -8,7 +8,7 @@
     /// <summary>
     /// WinAPI functions
     /// </summary>
-    internal static class Pinvoke
+    internal static class WindowsInternals
     {
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
@@ -24,6 +24,9 @@
 
         [DllImport("coredll.dll", SetLastError = true)]
         static extern int GetModuleFileNameEx(IntPtr hProcess, IntPtr hModule, StringBuilder lpFilename, int nSize);
+
+        [DllImport("user32.dll")]
+        static extern bool GetLastInputInfo(ref LASTINPUTINFO plii);
 
         public static string GetForegroundWindowText()
         {
@@ -64,6 +67,20 @@
                 // The process probably died between the calls
                 return string.Empty;
             }
+        }
+
+
+        /// <summary>
+        /// Returns time since last user action, i.e. how long they've been idle
+        /// </summary>
+        /// <returns>User idle time in miliseconds</returns>
+        public static uint GetIdleTime()
+        {
+            var lastInPut = new LASTINPUTINFO();
+            lastInPut.cbSize = (uint)Marshal.SizeOf(lastInPut);
+            GetLastInputInfo(ref lastInPut);
+
+            return (uint)Environment.TickCount - lastInPut.dwTime;
         }
     }
 }

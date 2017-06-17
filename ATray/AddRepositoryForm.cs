@@ -10,7 +10,7 @@
         public AddRepositoryForm()
         {
             InitializeComponent();
-            this.Icon = Program.MainIcon;
+            Icon = Program.MainIcon;
         }
 
         private void buttonSelectPath_Click(object sender, EventArgs e)

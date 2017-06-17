@@ -21,14 +21,14 @@
             InitializeComponent();
             WindowState = FormWindowState.Minimized;
             ShowInTaskbar = false;
-            Icon = notifyIcon1.Icon = Program.MainIcon;
+            Icon = trayIcon.Icon = Program.MainIcon;
 #if DEBUG
             // DEBUG! Show settings dialog on boot for convinience
-            menuSettings_Click(null, null);
+            OnMenuClickSettings(null, null);
 #endif
         }
 
-        private string MilisecondsToString(uint ms)
+        private static string MillisecondsToString(uint ms)
         {
             var totsec = (uint)Math.Round(ms / 1000d);
             var totmin = totsec / 60;
@@ -48,7 +48,7 @@
             else if (FormWindowState.Minimized == WindowState) Hide();
         }
 
-        private void notifyIcon1_DoubleClick(object sender, EventArgs e)
+        private void OnTrayIconDoubleClick(object sender, EventArgs e)
         {
             ShowMe();
         }
@@ -66,13 +66,12 @@
             Close();
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void OnMainTimerTick(object sender, EventArgs e)
         {
-            var idle = UserInputChecker.GetIdleTime();
-            ////lblSmall.Text = ((double)UserInputChecker.GetIdleTime() / 1000d).ToString("0");
-            lblSmall.Text = MilisecondsToString(idle);
+            var idle = WindowsInternals.GetIdleTime();
+            lblSmall.Text = MillisecondsToString(idle);
 
-            // Only call Now once to avoid annoying bugs
+            // Only call "Now" once to avoid annoying bugs
             var now = DateTime.Now;
 
             if (idle > Program.Configuration.MinimumBrakeLength * 1000)
@@ -96,12 +95,11 @@
                     ShowMe();
                     TopMost = true;
                     inWarnState = true;
-                    ////this.BringToFront();
                 }
             }
 
-            var foregroundApp = Pinvoke.GetForegroundAppName();
-            var foregroundTitle = Pinvoke.GetForegroundWindowText();
+            var foregroundApp = WindowsInternals.GetForegroundAppName();
+            var foregroundTitle = WindowsInternals.GetForegroundWindowText();
 
             if (now.Subtract(lastSave).TotalSeconds > Program.Configuration.SaveInterval)
             {
@@ -110,16 +108,15 @@
                 ActivityManager.SaveActivity(now, (uint) Program.Configuration.SaveInterval, wasActive, foregroundApp, foregroundTitle);
                 lastSave = now;
             }
-
-            ////lblWork.Text = (workingtime / 1000d).ToString("0");
-            lblWork.Text = MilisecondsToString(workingtime);
+            
+            lblWork.Text = MillisecondsToString(workingtime);
             lblDebug.Text = foregroundApp + " : " + foregroundTitle;
         }
 
         private void OnMainWindowLoad(object sender, EventArgs e)
         {
-            timer1.Start();
-            notifyIcon1.ShowBalloonTip(500, "Started", "ATray has started", ToolTipIcon.Info);
+            mainTimer.Start();
+            trayIcon.ShowBalloonTip(500, "Started", "ATray has started", ToolTipIcon.Info);
         }
 
         private void OnMouseMove(object sender, MouseEventArgs e)
@@ -143,14 +140,14 @@
             }
         }
 
-        private void menuHistory_Click(object sender, EventArgs e)
+        private void OnMenuClickHistory(object sender, EventArgs e)
         {
             if (historyForm == null || historyForm.IsDisposed)
                 historyForm = new ActivityHistoryForm();
             historyForm.Show();
         }
 
-        private void menuSettings_Click(object sender, EventArgs e)
+        private void OnMenuClickSettings(object sender, EventArgs e)
         {
             if (settingsForm == null || settingsForm.IsDisposed)
                 settingsForm = new SettingsForm();

@@ -6,10 +6,11 @@
     using System.Text;
 
     /// <summary>
-    /// All activities for a month
+    /// A collection of all activity during a month. 
+    /// This is the level we save at, each month gets its own file
     /// </summary>
     /// <remarks>
-    /// Activities are stored in a file. The file format is pretty simple:
+    /// The file format is pretty simple:
     /// First 12 bytes is a header (first 10 is ATRAY_ACTV, then version number in ascii, space padded)
     /// Next 2 bytes is year
     /// Next byte is month

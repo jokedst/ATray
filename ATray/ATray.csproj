@@ -80,13 +80,14 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Helpers.cs" />
+    <Compile Include="LASTINPUTINFO.cs" />
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="Pinvoke.cs" />
+    <Compile Include="WindowsInternals.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SettingsForm.cs">
@@ -95,7 +96,6 @@
     <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UserInputChecker.cs" />
     <EmbeddedResource Include="ActivityHistoryForm.resx">
       <DependentUpon>ActivityHistoryForm.cs</DependentUpon>
     </EmbeddedResource>

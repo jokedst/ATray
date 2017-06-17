@@ -5,14 +5,26 @@
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Windows.Forms;
 
     internal class ActivityManager
     {
-        private const string SavePath = ".";
-
         private const string SavefilePattern = "Acts{0}.bin";
-
         private static readonly Dictionary<int, MonthActivities> ActivityCache = new Dictionary<int, MonthActivities>();
+
+        static ActivityManager()
+        {
+            // LEGACY: Initially the activities were saved in the same dir as the .exe, but that's bad Windows citizenship so now it saves in AppData\Local
+            // However, old files in the bin dir should be moved if there are any
+
+            var thisDir = Directory.GetCurrentDirectory();
+            var fileFilter = string.Format(SavefilePattern, "*");
+            var legacyFiles = Directory.EnumerateFiles(".", fileFilter, SearchOption.TopDirectoryOnly).Count();
+            if (legacyFiles > 0)
+            {
+                MessageBox.Show($"There are {legacyFiles} old activity files ('Acts*.bin') in the Atray program directory (located at\"{thisDir}\").\n\nPlease move these to \"{Program.SettingsDirectory}\"");
+            }
+        }
 
         public static void SaveActivity(DateTime now, uint intervalLength, bool wasActive, string appName, string appTitle)
         {
@@ -33,7 +45,6 @@
             var day = (byte) now.Day;
             if (!activities.Days.ContainsKey(day))
                 activities.Days.Add(day, new List<ActivitySpan>());
-
 
             if (activities.Days[day].Any())
             {
@@ -64,7 +75,7 @@
         {
             var key = (year * 100) + month;
 
-            var filepath = Path.Combine(SavePath, "Acts" + key + ".bin");
+            var filepath = Path.Combine(Program.SettingsDirectory, "Acts" + key + ".bin");
             if (File.Exists(filepath))
             {
                 return new MonthActivities(filepath);
@@ -85,7 +96,7 @@
         {
             var result = new SortedDictionary<int, string>();
             var fileFilter = string.Format(SavefilePattern, "*");
-            foreach (var file in Directory.EnumerateFiles(SavePath, fileFilter, SearchOption.TopDirectoryOnly))
+            foreach (var file in Directory.EnumerateFiles(Program.SettingsDirectory, fileFilter, SearchOption.TopDirectoryOnly))
             {
                 var match = FileNameParser.Match(file);
                 result.Add(int.Parse(match.Groups[1].Value), file);
@@ -98,7 +109,7 @@
         {
             var key = (activities.Year * 100) + activities.Month;
 
-            activities.WriteToFile(Path.Combine(SavePath, "Acts" + key + ".bin"));
+            activities.WriteToFile(Path.Combine(Program.SettingsDirectory, "Acts" + key + ".bin"));
         }
     }
 }

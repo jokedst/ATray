@@ -24,7 +24,6 @@
         /// </summary>
         public string Folder { get; private set; }
 
-
         internal DialogResult ShowDialog(IWin32Window owner)
         {
             if (Environment.OSVersion.Version.Major >= 6)

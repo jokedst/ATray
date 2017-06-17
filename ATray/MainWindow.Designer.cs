@@ -30,11 +30,11 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
-            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.trayIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuHistory = new System.Windows.Forms.ToolStripMenuItem();
             this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.mainTimer = new System.Windows.Forms.Timer(this.components);
             this.lblInfo = new System.Windows.Forms.Label();
             this.lblSmall = new System.Windows.Forms.Label();
             this.lblWork = new System.Windows.Forms.Label();
@@ -45,11 +45,11 @@
             // 
             // notifyIcon1
             // 
-            this.notifyIcon1.ContextMenuStrip = this.contextMenuStrip1;
-            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
-            this.notifyIcon1.Text = "Jocke tray";
-            this.notifyIcon1.Visible = true;
-            this.notifyIcon1.DoubleClick += new System.EventHandler(this.notifyIcon1_DoubleClick);
+            this.trayIcon.ContextMenuStrip = this.contextMenuStrip1;
+            this.trayIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
+            this.trayIcon.Text = "Jocke tray";
+            this.trayIcon.Visible = true;
+            this.trayIcon.DoubleClick += new System.EventHandler(this.OnTrayIconDoubleClick);
             // 
             // contextMenuStrip1
             // 
@@ -65,7 +65,7 @@
             this.menuHistory.Name = "menuHistory";
             this.menuHistory.Size = new System.Drawing.Size(152, 22);
             this.menuHistory.Text = "Show &History";
-            this.menuHistory.Click += new System.EventHandler(this.menuHistory_Click);
+            this.menuHistory.Click += new System.EventHandler(this.OnMenuClickHistory);
             // 
             // menuExit
             // 
@@ -76,8 +76,8 @@
             // 
             // timer1
             // 
-            this.timer1.Interval = 1000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.mainTimer.Interval = 1000;
+            this.mainTimer.Tick += new System.EventHandler(this.OnMainTimerTick);
             // 
             // lblInfo
             // 
@@ -123,7 +123,7 @@
             this.menuSettings.Name = "menuSettings";
             this.menuSettings.Size = new System.Drawing.Size(152, 22);
             this.menuSettings.Text = "&Settings";
-            this.menuSettings.Click += new System.EventHandler(this.menuSettings_Click);
+            this.menuSettings.Click += new System.EventHandler(this.OnMenuClickSettings);
             // 
             // MainWindow
             // 
@@ -147,10 +147,10 @@
 
         #endregion
 
-        private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.NotifyIcon trayIcon;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem menuExit;
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer mainTimer;
         private System.Windows.Forms.Label lblInfo;
         private System.Windows.Forms.Label lblSmall;
         private System.Windows.Forms.Label lblWork;

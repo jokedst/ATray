@@ -1,10 +1,13 @@
 ﻿namespace ATray
 {
     using System;
+    using System.Diagnostics;
     using System.Drawing;
+    using System.Linq;
     using System.Text;
     using System.Windows.Forms;
     using Activity;
+    using RepositoryManager;
 
     public partial class MainWindow : Form
     {
@@ -22,10 +25,33 @@
             WindowState = FormWindowState.Minimized;
             ShowInTaskbar = false;
             Icon = trayIcon.Icon = Program.MainIcon;
+            Program.Repositories.RepositoryStatusChanged += OnRepositoryStatusChanged;
 #if DEBUG
             // DEBUG! Show settings dialog on boot for convinience
             OnMenuClickSettings(null, null);
 #endif
+            var first = true;
+            foreach (var repo in Program.Repositories)
+            {
+                if (first)
+                {
+                    trayMenu.Items.Insert(0, new ToolStripSeparator());
+                    first = false;
+                }
+                trayMenu.Items.Insert(0, new ToolStripLabel(repo.Name + ": \n" + repo.LastStatus, null, false, null, repo.Location));
+            }
+        }
+
+        private void OnRepositoryStatusChanged(object sender, RepositoryEventArgs e)
+        {
+            // Notify
+            trayIcon.ShowBalloonTip(500, "Repo changed", $"Repository {e.Name} has changed from status {e.OldStatus} to {e.NewStatus}", ToolTipIcon.Info);
+
+            // Update menu
+            foreach (var menuRow in trayMenu.Items.Find(e.Location, false))
+            {
+                menuRow.Text = e.Name + ": \n" + e.NewStatus;
+            }
         }
 
         private static string MillisecondsToString(uint ms)
@@ -98,8 +124,8 @@
                 }
             }
 
-            var foregroundApp = WindowsInternals.GetForegroundAppName();
-            var foregroundTitle = WindowsInternals.GetForegroundWindowText();
+            var foregroundApp = WindowsInternals.GetForegroundAppName() ?? string.Empty;
+            var foregroundTitle = WindowsInternals.GetForegroundWindowText() ?? string.Empty;
 
             if (now.Subtract(lastSave).TotalSeconds > Program.Configuration.SaveInterval)
             {
@@ -116,7 +142,6 @@
         private void OnMainWindowLoad(object sender, EventArgs e)
         {
             mainTimer.Start();
-            trayIcon.ShowBalloonTip(500, "Started", "ATray has started", ToolTipIcon.Info);
         }
 
         private void OnMouseMove(object sender, MouseEventArgs e)

@@ -24,6 +24,16 @@
                 yield return binaryReader.ReadString();
             }
         }
+
+        public static int IndexOfOrAdd<T>(this IList<T> list, T item)
+        {
+            if (item == null) return -1;
+            var index = list.IndexOf(item);
+            if (index != -1) return index;
+
+            list.Add(item);
+            return list.Count - 1;
+        }
     }
 
     internal static class ControlExtensions

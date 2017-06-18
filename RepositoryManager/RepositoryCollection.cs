@@ -141,7 +141,29 @@
                 return;
             var previousStatus = repo.LastStatus;
             repo.UpdateStatus();
-            OnRepositoryUpdated(new RepositoryEventArgs(repo.Location, previousStatus, repo.LastStatus));
+            var eventArgs = new RepositoryEventArgs(repo.Location, previousStatus, repo.LastStatus, repo.Name);
+            OnRepositoryUpdated(eventArgs);
+
+            if(previousStatus != repo.LastStatus)
+                OnRepositoryStatusChanged(eventArgs);
+        }
+
+        /// <summary>
+        /// Trigger an update of a repo
+        /// </summary>
+        /// <param name="location"></param>
+        public void UpdateRepo(string location)
+        {
+            lock (_repositories)
+            {
+                foreach (var repository in _repositories.Where(repo => repo.Location == location))
+                {
+                    // This does NOT let running updates finish - if something broke this might fix it
+                    var repoUnclousure = repository;
+                    var newTask = Task.Factory.StartNew(() => CheckRepo(repoUnclousure));
+                    runningUpdates.AddOrUpdate(repository.Location, newTask, (loc, oldTask) => newTask);
+                }
+            }
         }
 
         /// <summary> Delegate for repo update events </summary>
@@ -149,11 +171,19 @@
 
         /// <summary> Raised when a repo has been updated </summary>
         public event RepositoryEventHandler RepositoryUpdated;
+        /// <summary> Raised when status has changed on a repo </summary>
+        public event RepositoryEventHandler RepositoryStatusChanged;
 
         /// <summary> Overridable event logic </summary>
         protected virtual void OnRepositoryUpdated(RepositoryEventArgs e)
         {
             RepositoryUpdated?.Invoke(this, e);
+        }
+
+        /// <summary> Overridable event logic </summary>
+        protected virtual void OnRepositoryStatusChanged(RepositoryEventArgs e)
+        {
+            RepositoryStatusChanged?.Invoke(this, e);
         }
 
         /// <inheritdoc />
@@ -179,11 +209,12 @@
         /// <param name="repoLocation">Repo location</param>
         /// <param name="oldStatus">Status before event</param>
         /// <param name="newStatus">Status after event</param>
-        public RepositoryEventArgs(string repoLocation, RepoStatus oldStatus, RepoStatus newStatus)
+        public RepositoryEventArgs(string repoLocation, RepoStatus oldStatus, RepoStatus newStatus, string name)
         {
             Location = repoLocation;
             OldStatus = oldStatus;
             NewStatus = newStatus;
+            Name = name;
         }
 
         /// <summary> Location of repository </summary>
@@ -192,5 +223,7 @@
         public RepoStatus OldStatus { get; }
         /// <summary> Status after event </summary>
         public RepoStatus NewStatus { get; }
+
+        public string Name { get; }
     }
 }

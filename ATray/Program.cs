@@ -1,7 +1,9 @@
 ﻿namespace ATray
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
+    using System.Threading;
     using System.Windows.Forms;
     using RepositoryManager;
 
@@ -18,10 +20,11 @@
         internal static string RepoListFilePath = Path.Combine(SettingsDirectory, "repositories.json");
         internal static string ConfigurationFilePath = Path.Combine(SettingsDirectory, "atray.ini");
 
-
-
         internal static RepositoryCollection Repositories;
         internal static Configuration Configuration;
+        internal static MainWindow MainWindowInstance;
+
+
 
         /// <summary>
         /// The main entry point for the application.
@@ -29,6 +32,16 @@
         [STAThread]
         public static void Main()
         {
+            // Due to the constant reading/writing to the activities files, running two instances of ATray (for the same config) is a really bad idea. So quit.
+            var mutexName = "Jokedst.Atray.single-exe-mutex." + SettingsDirectory.Replace('\\','¤');
+            Mutex mutex = new Mutex(false, mutexName);
+            if (!mutex.WaitOne(0, false))
+            {
+                MessageBox.Show("An instance of the application is already running.");
+                return;
+            }
+
+
             if (!Directory.Exists(SettingsDirectory))
                 Directory.CreateDirectory(SettingsDirectory);
 
@@ -38,7 +51,8 @@
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainWindow());
+            MainWindowInstance = new MainWindow();
+            Application.Run(MainWindowInstance);
         }
     }
 }

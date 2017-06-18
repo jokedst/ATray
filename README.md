@@ -8,3 +8,9 @@ Also shows a popup if the users works continously for 20 minutes telling him to 
 This is mainly since I have a back problem I need to move around every 20 minutes :)
 
 
+Planned features
+----------------
+
+Notifications when repo updated
+
+Menu shows each repo with status, inc. when last push was (global scope).

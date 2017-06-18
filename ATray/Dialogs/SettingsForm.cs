@@ -149,10 +149,7 @@
         {
             if (_clickedRepository == null) return;
             var location = _clickedRepository.SubItems[columnPath.Index].Text;
-            var repo = Program.Repositories.Single(x => x.Location == location);
-
-            repo.UpdateStatus();
-            UpdateRepoList();
+            Program.Repositories.UpdateRepo(location);
         }
     }
 }

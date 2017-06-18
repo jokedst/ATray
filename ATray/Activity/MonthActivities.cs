@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
+    using System.Windows.Forms;
 
     /// <summary>
     /// A collection of all activity during a month. 
@@ -23,14 +24,17 @@
         public short Year;
         public byte Month;
         public readonly Dictionary<byte, List<ActivitySpan>> Days = new Dictionary<byte, List<ActivitySpan>>();
-        public List<string> ApplicationNames;
-        public List<string> WindowTitles;
+        public List<string> ApplicationNames = new List<string>();
+        public List<string> WindowTitles = new List<string>();
 
         public MonthActivities(short year, byte month)
         {
             Year = year;
             Month = month;
         }
+
+        public int GetApplicationNameIndex(string appName) => ApplicationNames.IndexOfOrAdd(appName);
+        public int GetWindowTitleIndex(string appName) => WindowTitles.IndexOfOrAdd(appName);
 
         private void LoadFileV1(BinaryReader br, string filepath)
         {
@@ -107,23 +111,23 @@
         public MonthActivities(string filepath)
         {
             using (Stream filestream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.None))
+            using (var br = new BinaryReader(filestream, Encoding.UTF8))
             {
-                using (var br = new BinaryReader(filestream, Encoding.UTF8))
-                {
-                    // Read the header, always 12 bytes
-                    var buffer = new byte[12];
-                    br.Read(buffer, 0, 12);
-                    var header = Encoding.ASCII.GetString(buffer);
+                // Read the header, always 12 bytes
+                var buffer = new byte[12];
+                br.Read(buffer, 0, 12);
+                var header = Encoding.ASCII.GetString(buffer);
 
-                    switch (header)
-                    {
-                        case "ATRAY_ACTV1 ": LoadFileV1(br, filepath);
-                            break;
-                        case "ATRAY_ACTV2 ": LoadFileV2(br, filepath);
-                            break;
-                        default:
-                            throw new Exception("Could not read file " + filepath + ", incorrect header");
-                    }
+                switch (header)
+                {
+                    case "ATRAY_ACTV1 ":
+                        LoadFileV1(br, filepath);
+                        break;
+                    case "ATRAY_ACTV2 ":
+                        LoadFileV2(br, filepath);
+                        break;
+                    default:
+                        throw new Exception("Could not read file " + filepath + ", incorrect header");
                 }
             }
         }
@@ -134,28 +138,28 @@
         /// <param name="filepath"></param>
         public void WriteToFile(string filepath)
         {
-            Stream filestream = new FileStream(filepath, FileMode.Create, FileAccess.Write, FileShare.None);
-            var bw = new BinaryWriter(filestream, Encoding.UTF8);
-            // Header, including version number ("V1")
-            bw.Write(Encoding.ASCII.GetBytes("ATRAY_ACTV1 "));
-            bw.Write(Year);
-            bw.Write(Month);
-            bw.Write(Days.Count);
-            foreach (var day in Days)
+            
+            using (Stream filestream = new FileStream(filepath, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var bw = new BinaryWriter(filestream, Encoding.UTF8))
             {
-                bw.Write(day.Key);
-                bw.Write(day.Value.Count);
-                foreach (var act in day.Value)
+                bw.Write(Encoding.ASCII.GetBytes("ATRAY_ACTV1 "));
+                bw.Write(Year);
+                bw.Write(Month);
+                bw.Write(Days.Count);
+                foreach (var day in Days)
                 {
-                    bw.Write(act.StartSecond);
-                    bw.Write(act.EndSecond);
-                    bw.Write(act.WasActive);
+                    bw.Write(day.Key);
+                    bw.Write(day.Value.Count);
+                    foreach (var act in day.Value)
+                    {
+                        bw.Write(act.StartSecond);
+                        bw.Write(act.EndSecond);
+                        bw.Write(act.WasActive);
+                    }
                 }
+                // Footer. Should perhaps have some crc or something?
+                bw.Write("KTHXBYE");
             }
-            // Footer. Should perhaps have some crc or something?
-            bw.Write("KTHXBYE");
-            bw.Close();
-            filestream.Close();
         }
 
         /// <summary>
@@ -164,37 +168,42 @@
         /// <param name="filepath"></param>
         public void WriteToFileV2(string filepath)
         {
-            Stream filestream = new FileStream(filepath, FileMode.Create, FileAccess.Write, FileShare.None);
-            var bw = new BinaryWriter(filestream, Encoding.UTF8);
-            // Header, including version number ("V2")
-            bw.Write(Encoding.ASCII.GetBytes("ATRAY_ACTV2 "));
-            bw.Write(Year);
-            bw.Write(Month);
-            bw.Write(Days.Count);
-            foreach (var day in Days)
+            // To minimize the risk of data loss due to crash while writing, write to RAM first
+            using (var memoryStream = new MemoryStream())
             {
-                bw.Write(day.Key);
-                bw.Write(day.Value.Count);
-                foreach (var act in day.Value)
+                using (var bw = new BinaryWriter(memoryStream, Encoding.UTF8))
                 {
-                    bw.Write(act.StartSecond);
-                    bw.Write(act.EndSecond);
-                    bw.Write(act.WasActive);
-                    if (act.WasActive)
+                    // Header, including version number ("V2")
+                    bw.Write(Encoding.ASCII.GetBytes("ATRAY_ACTV2 "));
+                    bw.Write(Year);
+                    bw.Write(Month);
+                    bw.Write(Days.Count);
+                    foreach (var day in Days)
                     {
-                        bw.Write(act.ApplicationNameIndex);
-                        bw.Write(act.WindowTitleIndex);
+                        bw.Write(day.Key);
+                        bw.Write(day.Value.Count);
+                        foreach (var act in day.Value)
+                        {
+                            bw.Write(act.StartSecond);
+                            bw.Write(act.EndSecond);
+                            bw.Write(act.WasActive);
+                            if (act.WasActive)
+                            {
+                                bw.Write(act.ApplicationNameIndex);
+                                bw.Write(act.WindowTitleIndex);
+                            }
+                        }
                     }
+
+                    bw.Write(ApplicationNames);
+                    bw.Write(WindowTitles);
+
+                    // Footer. Should perhaps have some crc or something?
+                    bw.Write("KTHXBYE");
                 }
+
+                File.WriteAllBytes(filepath, memoryStream.ToArray());
             }
-
-            bw.Write(ApplicationNames);
-            bw.Write(WindowTitles);
-
-            // Footer. Should perhaps have some crc or something?
-            bw.Write("KTHXBYE");
-            bw.Close();
-            filestream.Close();
         }
     }
 }

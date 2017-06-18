@@ -69,6 +69,32 @@
             }
         }
 
+        public static void GetForegroundProcessInfo(out string name, out string title)
+        {
+            var proc = GetForegroundProcess();
+            name = proc?.ProcessName;
+            title = proc?.MainWindowTitle;
+        }
+
+        public static Process GetForegroundProcess()
+        {
+            var handle = GetForegroundWindow();
+            try
+            {
+                GetWindowThreadProcessId(handle, out uint processId);
+                return Process.GetProcessById((int)processId);
+            }
+            catch (ArgumentException)
+            {
+                // The process probably died between the calls
+                return null;
+            }
+            catch (InvalidOperationException)
+            {
+                // The process probably died between the calls
+                return null;
+            }
+        }
 
         /// <summary>
         /// Returns time since last user action, i.e. how long they've been idle

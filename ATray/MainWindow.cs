@@ -124,8 +124,7 @@
                 }
             }
 
-            var foregroundApp = WindowsInternals.GetForegroundAppName() ?? string.Empty;
-            var foregroundTitle = WindowsInternals.GetForegroundWindowText() ?? string.Empty;
+            WindowsInternals.GetForegroundProcessInfo(out string foregroundApp, out string foregroundTitle);
 
             if (now.Subtract(lastSave).TotalSeconds > Program.Configuration.SaveInterval)
             {

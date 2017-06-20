@@ -1,4 +1,6 @@
-﻿namespace ATray
+﻿using Microsoft.Win32;
+
+namespace ATray
 {
     using System;
     using System.Collections.Generic;
@@ -130,5 +132,18 @@
         [DllImport("kernel32.dll")]
         private static extern int GetPrivateProfileSection(string lpAppName, byte[] lpszReturnBuffer, int nSize, string lpFileName);
 
+        /// <summary>
+        /// Set application to start at user login to windows
+        /// </summary>
+        /// <param name="startAtWindowsLogin"></param>
+        private void SetStartup(bool startAtWindowsLogin)
+        {
+            var runKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+
+            if (startAtWindowsLogin)
+                runKey.SetValue(Application.ProductName, Application.ExecutablePath);
+            else
+                runKey.DeleteValue(Application.ProductName, false);
+        }
     }
 }

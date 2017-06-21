@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Windows.Forms;
     using Activity;
+    using System.Diagnostics;
 
     public partial class ActivityHistoryForm : Form
     {
@@ -140,6 +141,7 @@
             // Create a new bitmap that is as wide as the windows and as high as it needs to be to fit all days
             var width = this.ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth;
             var height = history.Days.Count * (GraphHeight + GraphSpacing);
+            var lastHistoryGraph = this.historyGraph;
             this.historyGraph = new Bitmap(width: width,
                 height: history.Days.Count * (GraphHeight + GraphSpacing),
                 format: System.Drawing.Imaging.PixelFormat.Format24bppRgb);
@@ -229,6 +231,7 @@
 
             graphicsObj.Dispose();
             this.historyPicture.Image = this.historyGraph;
+            lastHistoryGraph?.Dispose();
 
             //if (timeLabels.Any())
             //{

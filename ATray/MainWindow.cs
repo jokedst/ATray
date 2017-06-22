@@ -7,6 +7,7 @@
     using System.Text;
     using System.Windows.Forms;
     using Activity;
+    using Microsoft.Win32;
     using RepositoryManager;
 
     public partial class MainWindow : Form
@@ -26,6 +27,7 @@
             ShowInTaskbar = false;
             Icon = trayIcon.Icon = Program.MainIcon;
             Program.Repositories.RepositoryStatusChanged += OnRepositoryStatusChanged;
+            SystemEvents.SessionSwitch += SystemEventsOnSessionSwitch;
 #if DEBUG
             // DEBUG! Show settings dialog on boot for convinience
             OnMenuClickSettings(null, null);
@@ -40,6 +42,18 @@
                 }
                 trayMenu.Items.Insert(0, new ToolStripLabel(repo.Name + ": \n" + repo.LastStatus, null, false, null, repo.Location));
             }
+        }
+
+        private void SystemEventsOnSessionSwitch(object sender, SessionSwitchEventArgs sessionSwitchEventArgs)
+        {
+            switch (sessionSwitchEventArgs.Reason)
+            {
+                    case SessionSwitchReason.SessionLogon:
+                    case SessionSwitchReason.SessionUnlock:
+                        Program.Repositories.UpdateRepo();
+            }
+
+            Trace.TraceInformation("Session changed? ({0})", sessionSwitchEventArgs.Reason);
         }
 
         private void OnRepositoryStatusChanged(object sender, RepositoryEventArgs e)

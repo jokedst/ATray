@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
+  <asmv1:assemblyIdentity name="ATray.exe" version="1.0.0.3" publicKeyToken="904aa58094471ba2" language="neutral" processorArchitecture="x86" type="win32" />
+  <description asmv2:iconFile="favicon.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
+  <application />
+  <entryPoint>
+    <assemblyIdentity name="ATray" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
+    <commandLine file="ATray.exe" parameters="" />
+  </entryPoint>
+  <trustInfo>
+    <security>
+      <applicationRequestMinimum>
+        <PermissionSet Unrestricted="true" ID="Custom" SameSite="site" />
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!--
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the 
+          requestedExecutionLevel node with one of the following.
+
+        <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
+        <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
+        <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
+
+         If you want to utilize File and Registry Virtualization for backward 
+         compatibility then delete the requestedExecutionLevel node.
+    -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <dependency>
+    <dependentOS>
+      <osVersionInfo>
+        <os majorVersion="5" minorVersion="1" buildNumber="2600" servicePackMajor="0" />
+      </osVersionInfo>
+    </dependentOS>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="Microsoft.Windows.CommonLanguageRuntime" version="4.0.30319.0" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="ATray.exe" size="100336">
+      <assemblyIdentity name="ATray" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>K0aFPfWeSoTvv0RzwTs8n0+GenvIJBqxpUSFgOx+JS0=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="CredentialManagement.dll" size="28672">
+      <assemblyIdentity name="CredentialManagement" version="1.0.2.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>dImVFXL5aOuOKuhjaV9yzqf1y0g0hs45HN6NiLGiIn4=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="LibGit2Sharp.dll" size="428032">
+      <assemblyIdentity name="LibGit2Sharp" version="0.23.1.0" publicKeyToken="7CBDE695407F0333" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>RZU7WnbvelpmLRAZjKVBtXF4NIy5+YfXxxoypvxSujk=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Microsoft.Alm.Authentication.dll" size="41040">
+      <assemblyIdentity name="Microsoft.Alm.Authentication" version="4.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>fMB7BDm0Xt5C+W5b7/h3RjQ+qcTOCedTk1BPNfwLOkw=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Microsoft.Alm.Git.dll" size="33872">
+      <assemblyIdentity name="Microsoft.Alm.Git" version="1.2.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>Vo7IrqRtXmFIlYvmVInXkXzpVqdcdEY9xBy+qDWkeRs=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Newtonsoft.Json.dll" size="652288">
+      <assemblyIdentity name="Newtonsoft.Json" version="10.0.0.0" publicKeyToken="30AD4FE6B2A6AEED" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>bMDLzVxHCcahyX9VgcNH2T5YbnzA1kv/tNMsbnU0dqQ=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Ookii.Dialogs.dll" size="133296">
+      <assemblyIdentity name="Ookii.Dialogs" version="1.0.0.0" publicKeyToken="0C15020868FD6249" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>xStxkzRub222+YAzZ0IuMhwmjTPg/ZVvyvxDdQwnbNc=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="RepositoryManager.dll" size="25088">
+      <assemblyIdentity name="RepositoryManager" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>97rPxgjzFikq2MI5ixKm1MtglitsF3rsU7k9z3f8Feo=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SharpSvn.dll" size="8104960">
+      <assemblyIdentity name="SharpSvn" version="1.9005.3940.224" publicKeyToken="D729672594885A28" language="neutral" processorArchitecture="amd64" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>3cUgDrZoGbcRUMCn5lhMXJE8gwZxUiXZLTxeJvuV3Ac=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <file name="ATray.exe.config" size="266">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>K6tn2wIO4K8Q7TjM1+uGRmlssNLowemWjAdfuN+WtVo=</dsig:DigestValue>
+    </hash>
+  </file>
+  <file name="favicon.ico" size="4606">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>0l2FhbAcxQ+y7zv/yKYqXpNhGvLRiqRuGWoOiWOWxX4=</dsig:DigestValue>
+    </hash>
+  </file>
+<publisherIdentity name="CN=AzureAD\JoakimWennergren" issuerKeyHash="b9c8b97085ae2ad0bb391d0a32ec496236184f60" /><Signature Id="StrongNameSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>XKwSbjJFzOPSe3wmr1h+gFBTNF1rU89FH53OSzvf7+E=</DigestValue></Reference></SignedInfo><SignatureValue>ePfq3dVvOgFi3RRicNaFtFDpwugS0LUjLZ3AMqytR8tjRaO7tExkY/bMNHIE5jG0AWCIB7X4oiU6IBD9ZgnX9FpdRS7HzmCnX+9YSv+KBPsHBcPk4sFIv33PSrG24md3BVtYMJos4agWNWNtlkLqT96jjIRCcQPmsGc1SIf1pMI=</SignatureValue><KeyInfo Id="StrongNameKeyInfo"><KeyValue><RSAKeyValue><Modulus>0OpWeMSG73BE3dHmDWsxvDtusyV10+jLvA5vjGb2/EcVT9e563PXg97Llgsb8ePY3Bm6k2k72zkpIowxBRJkb2N+W6Ew8b63hdumV6/kf5VCxM9bb4TkZYzEWqGB28rgWTzuwSBJ7yfBI3fdTNJAs+GSZr7AspNfnjHFyOnlV60=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><msrel:RelData xmlns:msrel="http://schemas.microsoft.com/windows/rel/2005/reldata"><r:license xmlns:r="urn:mpeg:mpeg21:2003:01-REL-R-NS" xmlns:as="http://schemas.microsoft.com/windows/pki/2005/Authenticode"><r:grant><as:ManifestInformation Hash="e1efdf3b4bce9d1f45cf536b5d345350807e58af267c7bd2e3cc45326e12ac5c" Description="" Url=""><as:assemblyIdentity name="ATray.exe" version="1.0.0.3" publicKeyToken="904aa58094471ba2" language="neutral" processorArchitecture="x86" type="win32" /></as:ManifestInformation><as:SignedBy /><as:AuthenticodePublisher><as:X509SubjectName>CN=AzureAD\JoakimWennergren</as:X509SubjectName></as:AuthenticodePublisher></r:grant><r:issuer><Signature Id="AuthenticodeSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>e0e7gucWJIJ5JbNZTGnbDTi1eN63rnDHGBpNfAHlFSw=</DigestValue></Reference></SignedInfo><SignatureValue>RZW0bNe6OksKpGTK7p9YFUNtkhba8xvXEmvaKyZ+tvplNdQJyHq8VGot8A+OtJLIdz7WDjHgsdDUFmTQEHgDzJL19cUNZlMamOyftznqEs2nIBD82GfwmJ+AzfuAFfxRUSavC807Kcv6TlBBXYJfOJLs4Fu09eRxWJABekE1D3k=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>0OpWeMSG73BE3dHmDWsxvDtusyV10+jLvA5vjGb2/EcVT9e563PXg97Llgsb8ePY3Bm6k2k72zkpIowxBRJkb2N+W6Ew8b63hdumV6/kf5VCxM9bb4TkZYzEWqGB28rgWTzuwSBJ7yfBI3fdTNJAs+GSZr7AspNfnjHFyOnlV60=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIB+TCCAWKgAwIBAgIQGeF0Qcl+049KNbPGpRdQHjANBgkqhkiG9w0BAQsFADA7MTkwNwYDVQQDHjAAQQB6AHUAcgBlAEEARABcAEoAbwBhAGsAaQBtAFcAZQBuAG4AZQByAGcAcgBlAG4wHhcNMTcwNjMwMTkxMzMwWhcNMTgwNzAxMDExMzMwWjA7MTkwNwYDVQQDHjAAQQB6AHUAcgBlAEEARABcAEoAbwBhAGsAaQBtAFcAZQBuAG4AZQByAGcAcgBlAG4wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBANDqVnjEhu9wRN3R5g1rMbw7brMlddPoy7wOb4xm9vxHFU/Xuetz14Pey5YLG/Hj2NwZupNpO9s5KSKMMQUSZG9jfluhMPG+t4Xbplev5H+VQsTPW2+E5GWMxFqhgdvK4Fk87sEgSe8nwSN33UzSQLPhkma+wLKTX54xxcjp5VetAgMBAAEwDQYJKoZIhvcNAQELBQADgYEAN1tZ2p676jlWlsynjmdRe4FlLNuKc7huigKOOANKcVTcTjnbOB9w1TC/RUpxsag214OP/hfboJNw8vYbscuCG+yFtDGYdSoA/eZCrpgaWMZy3EMae3ZELcXlKhn4h4uFF1T4a1sOIKvbB477iCh4M6j7GKef8ZDb+rmRi20q+h8=</X509Certificate></X509Data></KeyInfo></Signature></r:issuer></r:license></msrel:RelData></KeyInfo></Signature></asmv1:assembly>

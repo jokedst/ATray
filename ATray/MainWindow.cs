@@ -46,11 +46,13 @@
 
         private void SystemEventsOnSessionSwitch(object sender, SessionSwitchEventArgs sessionSwitchEventArgs)
         {
+            // When logging in, unlocking and a few other events we want to update immediatly
             switch (sessionSwitchEventArgs.Reason)
             {
                     case SessionSwitchReason.SessionLogon:
                     case SessionSwitchReason.SessionUnlock:
-                        Program.Repositories.UpdateRepo();
+                        Program.Repositories.TriggerUpdate(r=>r.UpdateSchedule != Schedule.Never);
+                        break;
             }
 
             Trace.TraceInformation("Session changed? ({0})", sessionSwitchEventArgs.Reason);

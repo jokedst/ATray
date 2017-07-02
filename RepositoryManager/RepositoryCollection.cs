@@ -59,18 +59,34 @@
 
         private void TimerTick(object tick)
         {
+            TriggerScheduledUpdates();
+        }
+
+        /// <summary>
+        /// Trigger update of repos that should be according to their schedule
+        /// </summary>
+        public void TriggerScheduledUpdates()
+        {
+            // Only repos with  schedule, and where lastupdate was long enough ago
+            TriggerUpdate(repo => repo.UpdateSchedule != Schedule.Never
+                && repo.LastStatusAt.AddMinutes((int)repo.UpdateSchedule) >= DateTime.Now);
+        }
+
+        /// <summary>
+        /// Trigger repo updates. All updates are done in separate threads
+        /// </summary>
+        /// <param name="where"></param>
+        /// <param name="ignoreRunningUpdates"> If true starts an update even if one is running </param>     
+        public void TriggerUpdate(Func<ISourceRepository, bool> where, bool ignoreRunningUpdates=false)
+        {
             lock (_repositories)
             {
-                foreach (var repository in _repositories.Where(repo=>repo.UpdateSchedule != Schedule.Never))
+                foreach (var repository in _repositories.Where(where))
                 {
                     if (runningUpdates.TryGetValue(repository.Location, out Task task))
                     {
                         if (!task.IsCompleted) continue;
                     }
-
-                    // Check if it's time to update
-                    if (repository.LastStatusAt.AddMinutes((int)repository.UpdateSchedule) >= DateTime.Now)
-                        continue;
 
                     Trace.TraceInformation("About to update repo " + repository.Name);
 

@@ -114,6 +114,30 @@
         {
             lock (_repositories)
                 _repositories.Add(repo);
+
+            // Raise event
+            OnRepositoryListChanged(new RepositoryEventArgs(repo.Location, RepoStatus.Unknown, repo.LastStatus, repo.Name, RepositoryEventType.Added));
+        }
+
+        /// <summary> Remove a repository from the collection </summary>
+        /// <param name="repositoryLocation"> repo location </param>
+        public bool Remove(string repositoryLocation)
+        {
+            var result = false;
+            ISourceRepository repo = null;
+            lock (_repositories)
+            {
+                repo = _repositories.FirstOrDefault(x => x.Location == repositoryLocation);
+                if(repo != null)
+                {
+                    result = _repositories.Remove(repo);
+                }
+            }
+
+            if(result)
+                // Raise event
+                OnRepositoryListChanged(new RepositoryEventArgs(repo.Location, repo.LastStatus, repo.LastStatus, repo.Name, RepositoryEventType.Removed));
+            return result;
         }
 
         /// <summary>
@@ -157,7 +181,7 @@
                 return;
             var previousStatus = repo.LastStatus;
             repo.UpdateStatus();
-            var eventArgs = new RepositoryEventArgs(repo.Location, previousStatus, repo.LastStatus, repo.Name);
+            var eventArgs = new RepositoryEventArgs(repo.Location, previousStatus, repo.LastStatus, repo.Name, RepositoryEventType.Updated);
             OnRepositoryUpdated(eventArgs);
 
             if(previousStatus != repo.LastStatus)
@@ -189,6 +213,8 @@
         public event RepositoryEventHandler RepositoryUpdated;
         /// <summary> Raised when status has changed on a repo </summary>
         public event RepositoryEventHandler RepositoryStatusChanged;
+        /// <summary> Raised when a repository is added or removed from the list </summary>
+        public event RepositoryEventHandler RepositoryListChanged;
 
         /// <summary> Overridable event logic </summary>
         protected virtual void OnRepositoryUpdated(RepositoryEventArgs e)
@@ -200,6 +226,12 @@
         protected virtual void OnRepositoryStatusChanged(RepositoryEventArgs e)
         {
             RepositoryStatusChanged?.Invoke(this, e);
+        }
+
+        /// <summary> Overridable event logic </summary>
+        protected virtual void OnRepositoryListChanged(RepositoryEventArgs e)
+        {
+            RepositoryListChanged?.Invoke(this, e);
         }
 
         /// <inheritdoc />
@@ -225,12 +257,15 @@
         /// <param name="repoLocation">Repo location</param>
         /// <param name="oldStatus">Status before event</param>
         /// <param name="newStatus">Status after event</param>
-        public RepositoryEventArgs(string repoLocation, RepoStatus oldStatus, RepoStatus newStatus, string name)
+        /// <param name="name">Name of repo</param>
+        /// <param name="eventType"> Type of event </param>
+        public RepositoryEventArgs(string repoLocation, RepoStatus oldStatus, RepoStatus newStatus, string name, RepositoryEventType eventType)
         {
             Location = repoLocation;
             OldStatus = oldStatus;
             NewStatus = newStatus;
             Name = name;
+            EventType = eventType;
         }
 
         /// <summary> Location of repository </summary>
@@ -239,7 +274,20 @@
         public RepoStatus OldStatus { get; }
         /// <summary> Status after event </summary>
         public RepoStatus NewStatus { get; }
-
+        /// <summary> Name of repository </summary>
         public string Name { get; }
+        /// <summary> Type of event </summary>
+        public RepositoryEventType EventType { get; }
+
     }
+        /// <summary> Available types of events </summary>
+        public enum RepositoryEventType
+        {
+            /// <summary> Repository updated </summary>
+            Updated,
+            /// <summary> Repository added to list </summary>
+            Added,
+            /// <summary> Repository removed from list </summary>
+            Removed
+        }
 }

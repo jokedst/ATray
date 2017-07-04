@@ -5,6 +5,7 @@ namespace RepositoryManager
     /// </summary>
     public enum RepoStatus
     {
+        /// <summary> Update has never run  </summary>
         Unknown,
         /// <summary> No origin set </summary>
         Disconnected,

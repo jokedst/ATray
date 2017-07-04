@@ -24,8 +24,6 @@
         internal static Configuration Configuration;
         internal static MainWindow MainWindowInstance;
 
-
-
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -40,7 +38,6 @@
                 MessageBox.Show("An instance of the application is already running.");
                 return;
             }
-
 
             if (!Directory.Exists(SettingsDirectory))
                 Directory.CreateDirectory(SettingsDirectory);

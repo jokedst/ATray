@@ -40,7 +40,12 @@
                     trayMenu.Items.Insert(0, new ToolStripSeparator());
                     first = false;
                 }
-                trayMenu.Items.Insert(0, new ToolStripLabel(repo.Name + ": \n" + repo.LastStatus, null, false, null, repo.Location));
+                var repoLocation = repo.Location; // for clojures
+                var submenu = new ToolStripMenuItem($"{repo.Name}: {Environment.NewLine}   {repo.LastStatus}");
+                submenu.Name = repoLocation;
+                submenu.DropDownItems.Add(new ToolStripMenuItem("Open in explorer", null, (sender, args) => Process.Start(repoLocation)));
+                submenu.DropDownItems.Add(new ToolStripMenuItem("Update", null, (sender, args) => Program.Repositories.UpdateRepo(repoLocation)));
+                trayMenu.Items.Insert(0, submenu);
             }
         }
 

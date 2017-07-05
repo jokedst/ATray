@@ -45,6 +45,10 @@
                 submenu.Name = repoLocation;
                 submenu.DropDownItems.Add(new ToolStripMenuItem("Open in explorer", null, (sender, args) => Process.Start(repoLocation)));
                 submenu.DropDownItems.Add(new ToolStripMenuItem("Update", null, (sender, args) => Program.Repositories.UpdateRepo(repoLocation)));
+                var pullOption = new ToolStripMenuItem("Pull Changes", null,
+                    (sender, args) => Program.Repositories.UpdateRepo(repoLocation));
+                if (repo.LastStatus != RepoStatus.Behind) pullOption.Visible = false;
+                submenu.DropDownItems.Add(pullOption);
                 trayMenu.Items.Insert(0, submenu);
             }
         }

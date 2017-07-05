@@ -43,7 +43,7 @@ namespace RepositoryManager
         /// </summary>
         bool Valid();
     }
-
+    
     /// <summary>
     /// How often the repo should be checked for updates
     /// </summary>

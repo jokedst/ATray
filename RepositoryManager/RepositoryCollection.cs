@@ -69,7 +69,7 @@
         {
             // Only repos with  schedule, and where lastupdate was long enough ago
             TriggerUpdate(repo => repo.UpdateSchedule != Schedule.Never
-                && repo.LastStatusAt.AddMinutes((int)repo.UpdateSchedule) >= DateTime.Now);
+                && repo.LastStatusAt.AddMinutes((int)repo.UpdateSchedule) <= DateTime.Now);
         }
 
         /// <summary>
@@ -204,6 +204,44 @@
                     runningUpdates.AddOrUpdate(repository.Location, newTask, (loc, oldTask) => newTask);
                 }
             }
+        }
+
+        /// <summary>
+        /// Trigger a pull of a repo
+        /// </summary>
+        /// <param name="location"></param>
+        public void PullRepo(string location)
+        {
+            lock (_repositories)
+            {
+                foreach (var repository in _repositories.Where(repo => repo.Location == location))
+                {
+                    var repoUnclousure = repository;
+                    // If another task is running on this repo, schedule the pull to be done after
+                    if (runningUpdates.TryGetValue(repository.Location, out Task task))
+                    {
+                        if (!task.IsCompleted)
+                        {
+                            task.ContinueWith(t=> PullRepoTask(repoUnclousure));
+                            return;
+                        }
+                    }
+
+                    var newTask = Task.Factory.StartNew(() => PullRepoTask(repoUnclousure));
+                    runningUpdates.AddOrUpdate(repository.Location, newTask, (loc, oldTask) => newTask);
+                }
+            }
+        }
+
+        protected void PullRepoTask(ISourceRepository repo)
+        {
+            var previousStatus = repo.LastStatus;
+            repo.Update(true);
+            var eventArgs = new RepositoryEventArgs(repo.Location, previousStatus, repo.LastStatus, repo.Name, RepositoryEventType.Updated);
+            OnRepositoryUpdated(eventArgs);
+
+            if (previousStatus != repo.LastStatus)
+                OnRepositoryStatusChanged(eventArgs);
         }
 
         /// <summary> Delegate for repo update events </summary>

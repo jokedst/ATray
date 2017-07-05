@@ -79,7 +79,28 @@ namespace RepositoryManager
 
                     //repo.Network.Fetch(origin, fetchOptions);
                     Commands.Fetch(repo, origin.Name, Enumerable.Empty<string>(), fetchOptions, null);
-                    
+
+                    RefreshLocalStatus();
+                }
+            }
+            catch (RepositoryNotFoundException)
+            {
+                LastStatus = RepoStatus.Error;
+            }
+            
+            Trace.TraceInformation($"GLOBAL: Git update took {stopwatch.ElapsedMilliseconds / 1000.0} seconds");
+            return LastStatus;
+        }
+
+        /// <summary>
+        /// Refreshes the status without talking to remote servers
+        /// </summary>
+        private void RefreshLocalStatus()
+        {
+            try
+            {
+                using (var repo = new Repository(Location))
+                {
                     var status = repo.RetrieveStatus(new StatusOptions());
 
                     var dirty = status.IsDirty;
@@ -120,28 +141,44 @@ namespace RepositoryManager
                     }
 
                     // TODO: If conflict, check if auto-mergable (and if so set status "Mergable"
-					// This can be done in git with merge-tree - 
-					// - first fetch
-					// - get base commit with merge-base (latest common ancestor)
-					// - run merge-tree to see changes. Any "<<" indicates a conflict
-					// -- theoretically the output from merge-tree can be used to update the index (but fuck me if I knew how)
-					// fetch + "git merge-tree `git merge-base master 9-branch ` master 9-branch | grep ‘changed in both’"
-					// which might not work on local changes...
+                    // This can be done in git with merge-tree - 
+                    // - first fetch
+                    // - get base commit with merge-base (latest common ancestor)
+                    // - run merge-tree to see changes. Any "<<" indicates a conflict
+                    // -- theoretically the output from merge-tree can be used to update the index (but fuck me if I know how)
+                    // fetch + "git merge-tree `git merge-base master 9-branch ` master 9-branch | grep ‘changed in both’"
+                    // which might not work on local changes...
                 }
             }
             catch (RepositoryNotFoundException)
             {
                 LastStatus = RepoStatus.Error;
             }
-            
-            Trace.TraceInformation($"GLOBAL: Git update took {stopwatch.ElapsedMilliseconds / 1000.0} seconds");
-            return LastStatus;
         }
 
         /// <inheritdoc />
         public bool Update(bool onlyIfNoMerge)
         {
-            throw new NotImplementedException();
+            var stopwatch = Stopwatch.StartNew();
+            var wasUppdated = false;
+            try
+            {
+                using (var repo = new Repository(Location))
+                {
+                    var options = new MergeOptions();
+                    options.FastForwardStrategy = onlyIfNoMerge ? FastForwardStrategy.FastForwardOnly : FastForwardStrategy.Default;
+                    var results = repo.MergeFetchedRefs(null, options);
+                    Trace.TraceInformation($"GLOBAL: Git merge (status:{results.Status}) took {stopwatch.ElapsedMilliseconds / 1000.0} seconds");
+                    wasUppdated = results.Status == MergeStatus.FastForward;
+                }
+                RefreshLocalStatus();
+            }
+            catch (Exception e)
+            {
+                Trace.TraceInformation($"ERROR: Git merge threw exception and took {stopwatch.ElapsedMilliseconds / 1000.0} seconds: {e.Message}");
+            }
+
+            return wasUppdated;
         }
 
         /// <inheritdoc />

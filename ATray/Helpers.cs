@@ -1,4 +1,7 @@
-﻿namespace ATray
+﻿using System.Linq;
+using System.Text.RegularExpressions;
+
+namespace ATray
 {
     using System;
     using System.Collections.Generic;
@@ -33,6 +36,26 @@
 
             list.Add(item);
             return list.Count - 1;
+        }
+
+        /// <summary>
+        /// Checks if a given program (e.g. hej.exe) exists, using the PATH env. variable
+        /// </summary>
+        /// <param name="programName"></param>
+        /// <returns></returns>
+        public static bool ProgramExists(string programName)
+        {
+            if (programName.IndexOf('.') == -1) programName += ".*";
+            var paths = Environment.GetEnvironmentVariable("PATH")?.Split(';');
+            if (paths == null) return false;
+
+            var reSearchPattern = new Regex(@"\.exe$|\.com$|\.bat$", RegexOptions.IgnoreCase);
+            return paths
+                .Where(Directory.Exists)
+                .SelectMany(apath => Directory
+                    .EnumerateFiles(apath, programName)
+                    .Where(file => reSearchPattern.IsMatch(file)))
+                .Any();
         }
     }
 

@@ -50,10 +50,9 @@
         {
             lock (_repositories)
             {
-                if (File.Exists(RepoListFilePath))
-                    _repositories = JsonConvert.DeserializeObject<List<ISourceRepository>>(File.ReadAllText(RepoListFilePath), JsonSettings);
-                else
-                    _repositories = new List<ISourceRepository>();
+                _repositories = File.Exists(RepoListFilePath) 
+                    ? JsonConvert.DeserializeObject<List<ISourceRepository>>(File.ReadAllText(RepoListFilePath), JsonSettings) 
+                    : new List<ISourceRepository>();
             }
         }
 

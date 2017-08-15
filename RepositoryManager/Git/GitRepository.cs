@@ -1,9 +1,13 @@
+using System.ComponentModel;
+using System.Threading.Tasks;
+
 namespace RepositoryManager
 {
     using System;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Threading;
     using LibGit2Sharp;
     using LibGit2Sharp.Handlers;
 
@@ -57,6 +61,10 @@ namespace RepositoryManager
             LastStatusAt = lastStatusAt;
             UpdateSchedule = updateSchedule;
             AutomaticAction = automaticAction;
+
+            _fileEventTimer = new Timer(FileEventCallback, null, Timeout.Infinite, Timeout.Infinite);
+            _fileEventTimerCreated = DateTime.Now;
+            ActivateFileListener();
         }
 
         /// <inheritdoc />
@@ -90,6 +98,20 @@ namespace RepositoryManager
             
             Trace.TraceInformation($"GLOBAL: Git update took {stopwatch.ElapsedMilliseconds / 1000.0} seconds");
             return LastStatus;
+        }
+
+        private Timer _fileEventTimer;
+        private DateTime _fileEventTimerCreated;
+
+        private  void FileEventCallback(object state)
+        {
+            RefreshLocalStatus();
+        }
+
+        private void ActivateFileListener()
+        {
+            var fsw = new FileSystemWatcher(Path.Combine(Location, ".git")) {EnableRaisingEvents = true};
+            fsw.Changed += (s, e) => _fileEventTimer.Change(DateTime.Now.AddSeconds(2).Subtract(_fileEventTimerCreated), TimeSpan.FromMilliseconds(-1));
         }
 
         /// <summary>
@@ -249,5 +271,25 @@ namespace RepositoryManager
             }
             Trace.TraceInformation($"GLOBAL: Git ls-remote took {stopwatch.ElapsedMilliseconds / 1000.0} seconds");
         }
+    }
+
+    public class TimerEvents : ISynchronizeInvoke
+    {
+        public IAsyncResult BeginInvoke(Delegate method, object[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object EndInvoke(IAsyncResult result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object Invoke(Delegate method, object[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool InvokeRequired => false;
     }
 }

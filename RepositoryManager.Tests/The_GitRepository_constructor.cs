@@ -1,5 +1,6 @@
 ﻿namespace RepositoryManager.Tests
 {
+    using Git;
     using NUnit.Framework;
     using RepositoryManager;
 

@@ -4,6 +4,7 @@
     using System.Windows.Forms;
     using Dialogs;
     using RepositoryManager;
+    using RepositoryManager.Git;
 
     public partial class AddRepositoryForm : Form
     {

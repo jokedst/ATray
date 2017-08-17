@@ -1,7 +1,4 @@
-using System.ComponentModel;
-using System.Threading.Tasks;
-
-namespace RepositoryManager
+namespace RepositoryManager.Git
 {
     using System;
     using System.Diagnostics;
@@ -100,18 +97,28 @@ namespace RepositoryManager
             return LastStatus;
         }
 
-        private Timer _fileEventTimer;
-        private DateTime _fileEventTimerCreated;
+        private readonly Timer _fileEventTimer;
+        private readonly DateTime _fileEventTimerCreated;
+        private int _fileEventCount = 0;
 
         private  void FileEventCallback(object state)
         {
+            Trace.TraceInformation($"Updating git repo due to file changes ({_fileEventCount} events logged)");
             RefreshLocalStatus();
+            _fileEventCount = 0;
         }
 
         private void ActivateFileListener()
         {
+            var postponedEvent = new PostponedEvent(2000, () => { Trace.TraceInformation("PostponedEvent fired"); });
             var fsw = new FileSystemWatcher(Path.Combine(Location, ".git")) {EnableRaisingEvents = true};
-            fsw.Changed += (s, e) => _fileEventTimer.Change(DateTime.Now.AddSeconds(2).Subtract(_fileEventTimerCreated), TimeSpan.FromMilliseconds(-1));
+            fsw.Changed += (s, e) =>
+            {
+                Trace.TraceInformation($"Git repo modified {++_fileEventCount} times");
+                _fileEventTimer.Change(DateTime.Now.AddSeconds(2).Subtract(_fileEventTimerCreated),
+                    TimeSpan.FromMilliseconds(-1));
+                postponedEvent.StartOrUpdate();
+            };
         }
 
         /// <summary>
@@ -271,25 +278,5 @@ namespace RepositoryManager
             }
             Trace.TraceInformation($"GLOBAL: Git ls-remote took {stopwatch.ElapsedMilliseconds / 1000.0} seconds");
         }
-    }
-
-    public class TimerEvents : ISynchronizeInvoke
-    {
-        public IAsyncResult BeginInvoke(Delegate method, object[] args)
-        {
-            throw new NotImplementedException();
-        }
-
-        public object EndInvoke(IAsyncResult result)
-        {
-            throw new NotImplementedException();
-        }
-
-        public object Invoke(Delegate method, object[] args)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool InvokeRequired => false;
     }
 }

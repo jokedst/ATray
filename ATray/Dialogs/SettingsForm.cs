@@ -6,6 +6,7 @@
     using System.Windows.Forms;
     using System.Diagnostics;
     using RepositoryManager;
+    using RepositoryManager.Git;
 
     public partial class SettingsForm : Form
     {

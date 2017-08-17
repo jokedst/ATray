@@ -1,10 +1,13 @@
-namespace RepositoryManager
+namespace RepositoryManager.Git
 {
     using System;
     using System.Diagnostics;
     using System.Text;
     using System.Threading;
 
+    /// <summary>
+    /// A collection of git helper tools
+    /// </summary>
     public class GitTools
     {
         /// <summary>
@@ -15,6 +18,9 @@ namespace RepositoryManager
             return RunShit("git.exe", command, workingDir, timeout);
         }
 
+        /// <summary>
+        /// Runs a command as an external process
+        /// </summary>
         protected static string RunShit(string program, string arguments, string workingDir=null, int timeout = 60000)
         {
             using (var process = new Process())

@@ -10,6 +10,7 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Git;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -24,8 +25,9 @@
         /// <summary> Internal list of repos </summary>
         private List<ISourceRepository> _repositories;
         private string RepoListFilePath { get; set; }
-        private Timer _timer;
-        private ConcurrentDictionary<string, Task> runningUpdates = new ConcurrentDictionary<string, Task>();
+        private readonly Timer _timer;
+        private readonly ConcurrentDictionary<string, Task> runningUpdates = new ConcurrentDictionary<string, Task>();
+        private readonly object _lockObject = new object();
         
         /// <summary>
         /// Load a reposet from a file
@@ -34,12 +36,12 @@
         public RepositoryCollection(string filepath)
         {
             RepoListFilePath = filepath;
-            if (File.Exists(RepoListFilePath))
-            {
-                _repositories = JsonConvert.DeserializeObject<List<ISourceRepository>>(File.ReadAllText(RepoListFilePath), JsonSettings);
-            }
-            _repositories = _repositories ?? new List<ISourceRepository>();
-
+            //if (File.Exists(RepoListFilePath))
+            //{
+            //    _repositories = JsonConvert.DeserializeObject<List<ISourceRepository>>(File.ReadAllText(RepoListFilePath), JsonSettings);
+            //}
+            //_repositories = _repositories ?? new List<ISourceRepository>();
+            ReloadFromFile();
             _timer = new Timer(TimerTick, null, SampleFrequency, SampleFrequency);
         }
 
@@ -48,11 +50,16 @@
         /// </summary>
         public void ReloadFromFile()
         {
-            lock (_repositories)
+            lock (_lockObject)
             {
-                _repositories = File.Exists(RepoListFilePath) 
-                    ? JsonConvert.DeserializeObject<List<ISourceRepository>>(File.ReadAllText(RepoListFilePath), JsonSettings) 
-                    : new List<ISourceRepository>();
+                if (File.Exists(RepoListFilePath))
+                {
+                    var json = File.ReadAllText(RepoListFilePath);
+                    // Legacy fix for a moved class
+                    json = json.Replace("RepositoryManager.GitRepository, RepositoryManager", "RepositoryManager.Git.GitRepository, RepositoryManager");
+                    _repositories = JsonConvert.DeserializeObject<List<ISourceRepository>>(json, JsonSettings);
+                }
+                else _repositories = new List<ISourceRepository>();
             }
         }
 
@@ -78,7 +85,7 @@
         /// <param name="ignoreRunningUpdates"> If true starts an update even if one is running </param>     
         public void TriggerUpdate(Func<ISourceRepository, bool> where, bool ignoreRunningUpdates=false)
         {
-            lock (_repositories)
+            lock (_lockObject)
             {
                 foreach (var repository in _repositories.Where(where))
                 {
@@ -104,14 +111,14 @@
         {
             if (filepath != null) RepoListFilePath = filepath;
             if (RepoListFilePath == null) throw new ArgumentNullException(nameof(filepath), "Can not save file - no path specified");
-            lock (_repositories)
+            lock (_lockObject)
                 File.WriteAllText(RepoListFilePath, JsonConvert.SerializeObject(_repositories, JsonSettings), Encoding.UTF8);
         }
 
         /// <summary> Add a repository to the collection </summary>
         public void Add(ISourceRepository repo)
         {
-            lock (_repositories)
+            lock (_lockObject)
                 _repositories.Add(repo);
 
             // Raise event
@@ -124,7 +131,7 @@
         {
             var result = false;
             ISourceRepository repo = null;
-            lock (_repositories)
+            lock (_lockObject)
             {
                 repo = _repositories.FirstOrDefault(x => x.Location == repositoryLocation);
                 if(repo != null)
@@ -193,7 +200,7 @@
         /// <param name="location"></param>
         public void UpdateRepo(string location)
         {
-            lock (_repositories)
+            lock (_lockObject)
             {
                 foreach (var repository in _repositories.Where(repo => repo.Location == location))
                 {
@@ -211,7 +218,7 @@
         /// <param name="location"></param>
         public void PullRepo(string location)
         {
-            lock (_repositories)
+            lock (_lockObject)
             {
                 foreach (var repository in _repositories.Where(repo => repo.Location == location))
                 {

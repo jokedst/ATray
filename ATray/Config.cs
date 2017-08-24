@@ -1,15 +1,16 @@
-﻿using Microsoft.Win32;
-
-namespace ATray
+﻿namespace ATray
 {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Drawing.Design;
     using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices;
     using System.Text;
     using System.Windows.Forms;
+    using System.Windows.Forms.Design;
+    using Microsoft.Win32;
 
     /// <summary>
     /// All configurable values should go here
@@ -24,6 +25,8 @@ namespace ATray
         public int SaveInterval { get; set; }
         [Description("How often we should redraw the history graph (in minutes)"), Category("History"), DefaultValue(10)]
         public int HistoryRedrawTimeout { get; set; }
+        [Description("A shared directory (e.g. dropbox) to share activity between computers"), Category("History"), Editor(typeof(FolderNameEditor), typeof(UITypeEditor))]
+        public string SharedActivityStorage { get; set; }
 
         public Configuration(string filename = null)
         {

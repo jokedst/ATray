@@ -1,4 +1,6 @@
-﻿namespace ATray
+﻿using System.Collections.Generic;
+
+namespace ATray
 {
     using System;
     using System.Diagnostics;

@@ -45,12 +45,12 @@
         /// </summary>
         public void ShowFloating()
         {
-            if (this.Handle == IntPtr.Zero)
+            if (Handle == IntPtr.Zero)
             {
-                base.CreateControl();
+                CreateControl();
             }
-            SetParent(base.Handle, IntPtr.Zero);
-            ShowWindow(base.Handle, 1);
+            SetParent(Handle, IntPtr.Zero);
+            ShowWindow(Handle, 1);
         }
 
         private const int WM_NCHITTEST = 0x0084;

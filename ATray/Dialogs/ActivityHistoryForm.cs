@@ -6,7 +6,6 @@
     using System.Linq;
     using System.Windows.Forms;
     using Activity;
-    using System.Diagnostics;
 
     public partial class ActivityHistoryForm : Form
     {
@@ -14,23 +13,24 @@
         private const int GraphStartPixel = 40;
         private const int GraphHeight = 50;
         private const int GraphSpacing = 20;
+        private const int TimeLabelWidth = 40;
 
-        private readonly List<Label> timeLabels = new List<Label>();
-        private readonly FloatingLabel tipLabel = new FloatingLabel();
-        private Bitmap historyGraph = null;
-        private int lastWindowWidth = 0;
-        private DateTime lastHistoryRedraw = DateTime.MinValue;
+        private readonly List<Label> _timeLabels = new List<Label>();
+        private readonly FloatingLabel _tipLabel = new FloatingLabel();
+        private Bitmap _historyGraph;
+        private int _lastWindowWidth;
+        private DateTime _lastHistoryRedraw = DateTime.MinValue;
 
-        private Point lastPosition;
-        private int lastScrollPositionY;
+        private Point _lastPosition;
+        private int _lastScrollPositionY;
 
-        private int currentMonth = (DateTime.Now.Year * 100) + DateTime.Now.Month;
+        private int _currentMonth = (DateTime.Now.Year * 100) + DateTime.Now.Month;
 
-        private bool forceRedraw = false;
+        private bool _forceRedraw;
 
-        private uint graphWidth;
-        private uint graphSeconds;
-        private uint graphFirstSecond;
+        private uint _graphWidth;
+        private uint _graphSeconds;
+        private uint _graphFirstSecond;
         
         public ActivityHistoryForm()
         {
@@ -39,13 +39,12 @@
             historyPicture.MouseMove += HistoryPictureOnMouseMove;
             historyPicture.MouseLeave += HistoryPictureOnMouseLeave;
             
-            tipLabel.Text = "hello";
-            tipLabel.AutoSize = true;
-            tipLabel.Hide();
+            _tipLabel.Text = "hello";
+            _tipLabel.AutoSize = true;
+            _tipLabel.Hide();
 #if DEBUG
             Icon = new Icon(GetType(), "debug.ico");
 #endif
-
             InitHistoryDropDown();
         }
 
@@ -53,16 +52,11 @@
         {
             // Check what files exists
             var rawMonths = ActivityManager.ListAvailableMonths();
-            ////var months = rawMonths.Select(x => new { Id = x.Key, Name = new DateTime(x.Key / 100, x.Key % 100, 1).ToString("MMMM yyyy") }).ToList();
 
-            ////monthDropDown.ValueMember = "Id";
-            ////monthDropDown.DisplayMember = "Name";
             var months = rawMonths.Select(x => Tuple.Create(x.Key, new DateTime(x.Key / 100, x.Key % 100, 1).ToString("MMMM yyyy"))).ToList();
-
             monthDropDown.ValueMember = "item1";
             monthDropDown.DisplayMember = "item2";
             monthDropDown.DataSource = months;
-
             monthDropDown.SelectedValue = rawMonths.Keys.Last();
 
             nextMonthButton.Enabled = false;
@@ -71,7 +65,7 @@
 
         private void HistoryPictureOnMouseLeave(object sender, EventArgs eventArgs)
         {
-            if (tipLabel.Visible) tipLabel.Hide();
+            if (_tipLabel.Visible) _tipLabel.Hide();
         }
 
         private void HistoryPictureOnMouseMove(object sender, MouseEventArgs e)
@@ -81,21 +75,23 @@
             var x = p.X;
             var y = p.Y + 20;
 
-            if (lastPosition.X != x || lastPosition.Y != y || lastScrollPositionY != e.Y)
+            if (_lastPosition.X != x || _lastPosition.Y != y || _lastScrollPositionY != e.Y)
             {
-                lastPosition = new Point(x, y);
+                _lastPosition = new Point(x, y);
 
                 if (e.X >= GraphStartPixel)
                 {
-                    tipLabel.Text = SecondToTime((((uint)e.X - GraphStartPixel) * graphSeconds / graphWidth) + graphFirstSecond);
+                    var second = (((uint)e.X - GraphStartPixel) * _graphSeconds / _graphWidth) + _graphFirstSecond;
+                    // TODO: Look up activity item
+                    _tipLabel.Text = SecondToTime(second);
                 }
                 else return;
                 
-                tipLabel.Location = lastPosition;
-                lastScrollPositionY = e.Y;
+                _tipLabel.Location = _lastPosition;
+                _lastScrollPositionY = e.Y;
 
-                if(!tipLabel.Visible)
-                    tipLabel.ShowFloating();
+                if(!_tipLabel.Visible)
+                    _tipLabel.ShowFloating();
             }
         }
 
@@ -112,20 +108,8 @@
             return $"{hour}:{minute:00}";
         }
 
-        private void ActivityHistoryForm_Paint(object sender, PaintEventArgs e)
+        private void DrawHistory(Bitmap target, MonthActivities history)
         {
-            if (this.historyGraph != null 
-                && this.ClientRectangle.Width == this.lastWindowWidth
-                && !(DateTime.Now.Subtract(this.lastHistoryRedraw).TotalMinutes > Program.Configuration.HistoryRedrawTimeout)
-                && !this.forceRedraw)
-            {
-                return;
-            }
-
-            var oldScroll = historyPanel.VerticalScroll.Value;
-
-            // Allow user to select year/month
-            var history = ActivityManager.GetMonthActivity((short)(this.currentMonth / 100), (byte)(this.currentMonth % 100));
 
             // Figure out when first activity started and when last activity ended (for the whole month)
             var firstTime = (uint)60 * 60 * 24;
@@ -136,34 +120,16 @@
                 lastTime = lastTime > activities.Last().EndSecond ? lastTime : activities.Last().EndSecond;
             }
 
-            this.graphFirstSecond = firstTime;
 
-            // Create a new bitmap that is as wide as the windows and as high as it needs to be to fit all days
-            var width = this.ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth;
-            var height = history.Days.Count * (GraphHeight + GraphSpacing);
-            var lastHistoryGraph = this.historyGraph;
-            this.historyGraph = new Bitmap(width: width,
-                height: history.Days.Count * (GraphHeight + GraphSpacing),
-                format: System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            this.historyGraph.MakeTransparent();
+            _graphFirstSecond = firstTime;
 
-            // Make sure we have as many labels as we need
-            for (int i = this.timeLabels.Count; i < history.Days.Count * 4; i++)
-            {
-                var label = new Label();
-                label.AutoSize = true;
-                label.BackColor = Color.Transparent;
-                label.BringToFront();
-                this.historyPicture.Controls.Add(label);
-                this.timeLabels.Add(label);
-            }
 
-            var graphicsObj = Graphics.FromImage(this.historyGraph);
+            var graphicsObj = Graphics.FromImage(_historyGraph);
             var pen = new Pen(Color.Olive, 1);
             var brush = new SolidBrush(Color.Olive);
 
-            this.graphWidth = (uint) width - 80;
-            this.graphSeconds = lastTime - firstTime;
+            _graphWidth = (uint) (target.Width - 80);
+            _graphSeconds = lastTime - firstTime;
             var daylineHeight = 2;
 
             // Draw hour lines
@@ -172,16 +138,16 @@
             var lastHour = (int)Math.Floor(lastTime / 3600.0);
             for (int x = firstHour; x <= lastHour; x++)
             {
-                var xpixel = (((x * 3600) - firstTime) * this.graphWidth) / this.graphSeconds + GraphStartPixel;
-                graphicsObj.DrawLine(greypen, xpixel, 10, xpixel, height);
+                var xpixel = (((x * 3600) - firstTime) * _graphWidth) / _graphSeconds + GraphStartPixel;
+                graphicsObj.DrawLine(greypen, xpixel, 10, xpixel,target.Height);
             }
 
-
-            // Put labels
+            // Draw each day
             int index = 0;
             int currentY = GraphSpacing;
             foreach (var dayNumber in history.Days.Keys.OrderBy(x => x))
             {
+                // at what pixel is this day first and last activities?
                 var todaysFirstSecond = 0u;
                 var todaysLastSecond = 0u;
                 if (history.Days[dayNumber].Any(x => x.WasActive))
@@ -190,32 +156,17 @@
                     todaysLastSecond = history.Days[dayNumber].Last(x => x.WasActive).EndSecond;
                 }
 
-                var title = this.timeLabels[index++];
-                title.Location = new Point(0, currentY);
-                title.Text = new DateTime(history.Year, history.Month, dayNumber).DayOfWeek + " " + dayNumber + "/" + history.Month;
+                var startpixel = ((todaysFirstSecond - firstTime) * _graphWidth) / _graphSeconds;
+                var endPixel = ((todaysLastSecond - firstTime) * _graphWidth) / _graphSeconds;
 
-                var startTime = this.timeLabels[index++];
-                startTime.Location = new Point(0, currentY + 20);
-                startTime.Text = this.SecondToTime(todaysFirstSecond);
-
-                var endTime = this.timeLabels[index++];
-                endTime.Text = this.SecondToTime(todaysLastSecond);
-                endTime.Location = new Point(width - endTime.Width, currentY + 20);
-
-                var totalTime = this.timeLabels[index++];
-                totalTime.Text = "("+this.SecondToTime(todaysLastSecond - todaysFirstSecond)+")";
-                totalTime.Location = new Point(width - endTime.Width, currentY);
-
-                var startpixel = ((todaysFirstSecond - firstTime) * this.graphWidth) / this.graphSeconds;
-                var endPixel = ((todaysLastSecond - firstTime) * this.graphWidth) / this.graphSeconds;
+                // Draw a small line representing the whole day
                 var graphbox = new Rectangle((int)startpixel + GraphStartPixel, currentY + GraphHeight / 2 - daylineHeight / 2, (int)(endPixel - startpixel) + 1, daylineHeight);
-
                 graphicsObj.DrawRectangle(pen, graphbox);
 
                 foreach (var span in history.Days[dayNumber])
                 {
-                    startpixel = ((span.StartSecond - firstTime) * this.graphWidth) / this.graphSeconds;
-                    endPixel = ((span.EndSecond - firstTime) * this.graphWidth) / this.graphSeconds;
+                    startpixel = ((span.StartSecond - firstTime) * _graphWidth) / _graphSeconds;
+                    endPixel = ((span.EndSecond - firstTime) * _graphWidth) / _graphSeconds;
 
                     var top = currentY + (span.WasActive ? 0 : 15);
                     var boxheight = span.WasActive ? GraphHeight - 1 : GraphHeight - 31;
@@ -225,43 +176,82 @@
                     //graphicsObj.DrawRectangle(pen, graphbox);
                     graphicsObj.FillRectangle(brush, graphbox);
                 }
-
                 currentY += GraphSpacing + GraphHeight;
             }
-
             graphicsObj.Dispose();
-            this.historyPicture.Image = this.historyGraph;
-            lastHistoryGraph?.Dispose();
+        }
 
-            //if (timeLabels.Any())
-            //{
-            //    foreach (var timeLabel in timeLabels)
-            //    {
-            //        historyPanel.Controls.Remove(timeLabel);
-            //    }
-            //    timeLabels.Clear();
-            //}
-            //{
-            //    var label = new Label();
-            //    label.Name = "label1";
-            //    label.Text = "HEJ 13:4" + new Random().Next(10);
-            //    label.AutoSize = true;
-            //    label.Location = new Point(10, 15);
-            //    label.BackColor = Color.Transparent;
-            //    label.BringToFront();
-            //    //label.Parent = historyPanel;
-            //    historyPicture.Controls.Add(label);
-            //    timeLabels.Add(label);
-            //}
-            this.lastWindowWidth = this.ClientRectangle.Width;
-            this.lastHistoryRedraw = DateTime.Now;
-            this.forceRedraw = false;
+        private void ActivityHistoryForm_Paint(object sender, PaintEventArgs e)
+        {
+            if (_historyGraph != null 
+                && ClientRectangle.Width == _lastWindowWidth
+                && !(DateTime.Now.Subtract(_lastHistoryRedraw).TotalMinutes > Program.Configuration.HistoryRedrawTimeout)
+                && !_forceRedraw)
+            {
+                return;
+            }
+
+            // get activity for selected year/month
+            var history = ActivityManager.GetMonthActivity((short)(_currentMonth / 100), (byte)(_currentMonth % 100));
+
+            // Create a new bitmap that is as wide as the windows and as high as it needs to be to fit all days
+            var width = ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth;
+            var height = history.Days.Count * (GraphHeight + GraphSpacing);
+
+            // Only create a new Bitmap if needed
+            Bitmap lastHistoryGraph = null;
+            if (_historyGraph == null || width != _historyGraph.Width || height != _historyGraph.Height)
+            {
+                lastHistoryGraph = _historyGraph;
+                _historyGraph = new Bitmap( width,height,System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                _historyGraph.MakeTransparent();
+            }
+
+            // Make sure we have as many labels as we need
+            for (int i = _timeLabels.Count; i < history.Days.Count * 4; i++)
+            {
+                var label = new Label();
+                label.AutoSize = true;
+                label.BackColor = Color.Transparent;
+                label.BringToFront();
+                historyPicture.Controls.Add(label);
+                var pos = i % 4;
+                int y = GraphSpacing + (i/4)*(GraphSpacing + GraphHeight);
+                label.Location = new Point(pos<2?0: width - TimeLabelWidth, y+( pos ==0||pos==3?0:20));
+                _timeLabels.Add(label);
+            }
+
+            // Put correct text on labels
+            int index = 0;
+            foreach (var dayNumber in history.Days.Keys.OrderBy(x => x))
+            {
+                var todaysFirstSecond = history.Days[dayNumber].FirstOrDefault(x => x.WasActive)?.StartSecond??0;
+                var todaysLastSecond = history.Days[dayNumber].LastOrDefault(x => x.WasActive)?.EndSecond??0;
+
+                _timeLabels[index++].Text = new DateTime(history.Year, history.Month, dayNumber).DayOfWeek + " " + dayNumber + "/" + history.Month;
+                _timeLabels[index++].Text = SecondToTime(todaysFirstSecond);
+                _timeLabels[index++].Text = SecondToTime(todaysLastSecond);
+                _timeLabels[index++].Text = "("+ SecondToTime(todaysLastSecond - todaysFirstSecond)+")";
+            }
+
+            DrawHistory(_historyGraph,history);
+
+            // Replace old Bitmap if we had to create a new
+            if (lastHistoryGraph != null || historyPicture.Image == null)
+            {
+                historyPicture.Image = _historyGraph;
+                lastHistoryGraph?.Dispose();
+            }
+
+            _lastWindowWidth = ClientRectangle.Width;
+            _lastHistoryRedraw = DateTime.Now;
+            _forceRedraw = false;
         }
 
         private void ActivityHistoryForm_Resize(object sender, EventArgs e)
         {
-            if (this.ClientRectangle.Width != lastWindowWidth)
-                this.Refresh();
+            if (ClientRectangle.Width != _lastWindowWidth)
+                Refresh();
         }
 
         private void historyPicture_MouseEnter(object sender, EventArgs e)
@@ -272,14 +262,14 @@
 
         private void monthDropDown_SelectedIndexChanged(object sender, EventArgs e)
         {
-            currentMonth = (int)monthDropDown.SelectedValue;
+            _currentMonth = (int)monthDropDown.SelectedValue;
 
             var availableMonths = monthDropDown.Items.Cast<Tuple<int, string>>().Select(x => x.Item1);
-            lastMonthButton.Enabled = availableMonths.Any(x => x < currentMonth);
-            nextMonthButton.Enabled = availableMonths.Any(x => x > currentMonth);
+            lastMonthButton.Enabled = availableMonths.Any(x => x < _currentMonth);
+            nextMonthButton.Enabled = availableMonths.Any(x => x > _currentMonth);
 
-            forceRedraw = true;
-            this.Refresh();
+            _forceRedraw = true;
+            Refresh();
         }
 
         private void lastMonthButton_Click(object sender, EventArgs e)
@@ -287,7 +277,7 @@
             var earlierMonths =
                 monthDropDown.Items.Cast<Tuple<int, string>>()
                              .Select(x => x.Item1)
-                             .Where(x => x < currentMonth)
+                             .Where(x => x < _currentMonth)
                              .OrderByDescending(x => x);
             var previousMonth = earlierMonths.FirstOrDefault();
 
@@ -299,7 +289,7 @@
             var laterMonths =
                 monthDropDown.Items.Cast<Tuple<int, string>>()
                              .Select(x => x.Item1)
-                             .Where(x => x > currentMonth)
+                             .Where(x => x > _currentMonth)
                              .OrderBy(x => x);
             var nextMonth = laterMonths.FirstOrDefault();
 

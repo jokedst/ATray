@@ -83,8 +83,14 @@ namespace RepositoryManager.Git
                         fetchOptions.CredentialsProvider = CredentialsProvider.MicrosoftAlm;
 
                     //repo.Network.Fetch(origin, fetchOptions);
-                    Commands.Fetch(repo, origin.Name, Enumerable.Empty<string>(), fetchOptions, null);
-
+                    try
+                    {
+                        Commands.Fetch(repo, origin.Name, Enumerable.Empty<string>(), fetchOptions, null);
+                    }
+                    catch (LibGit2SharpException e)
+                    {
+                        Trace.TraceInformation($"Fetch remote failed (probably offline): {e.Message}");
+                    }
                     RefreshLocalStatus();
                 }
             }

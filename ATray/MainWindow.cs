@@ -3,7 +3,6 @@
     using System;
     using System.Diagnostics;
     using System.Drawing;
-    using System.Linq;
     using System.Text;
     using System.Windows.Forms;
     using Activity;
@@ -28,9 +27,12 @@
             Icon = trayIcon.Icon = Program.MainIcon;
             Program.Repositories.RepositoryStatusChanged += OnRepositoryStatusChanged;
             SystemEvents.SessionSwitch += SystemEventsOnSessionSwitch;
+
+            var animTray = new SysTray("Developer Little Helper", Icon, trayMenu.ContextMenu);
 #if DEBUG
-            // DEBUG! Show settings dialog on boot for convinience
-            OnMenuClickSettings(null, null);
+            // DEBUG! Show dialog on boot for convinience
+            //OnMenuClickSettings(null, null);
+            OnMenuClickHistory(null,null);
 #endif
             var first = true;
             foreach (var repo in Program.Repositories)
@@ -51,6 +53,9 @@
                 submenu.DropDownItems.Add(pullOption);
                 trayMenu.Items.Insert(0, submenu);
             }
+            //Properties.Resources.anim.MakeTransparent(Properties.Resources.anim.GetPixel(1,1));
+            animTray.SetAnimationClip(Properties.Resources.anim1);
+            animTray.StartAnimation(100, 3);
         }
 
         private void SystemEventsOnSessionSwitch(object sender, SessionSwitchEventArgs sessionSwitchEventArgs)
@@ -58,10 +63,10 @@
             // When logging in, unlocking and a few other events we want to update immediatly
             switch (sessionSwitchEventArgs.Reason)
             {
-                    case SessionSwitchReason.SessionLogon:
-                    case SessionSwitchReason.SessionUnlock:
-                        Program.Repositories.TriggerUpdate(r=>r.UpdateSchedule != Schedule.Never);
-                        break;
+                case SessionSwitchReason.SessionLogon:
+                case SessionSwitchReason.SessionUnlock:
+                    Program.Repositories.TriggerUpdate(r => r.UpdateSchedule != Schedule.Never);
+                    break;
             }
 
             Trace.TraceInformation("Session changed? ({0})", sessionSwitchEventArgs.Reason);

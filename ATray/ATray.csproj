@@ -101,6 +101,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -139,6 +140,7 @@
     <Compile Include="MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="SysTray.cs" />
     <Compile Include="WindowsInternals.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -184,6 +186,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\anim.png" />
+    <None Include="Resources\anim.jpg" />
+    <None Include="Resources\Animation.bmp" />
+    <None Include="Resources\IconAnimation.ico" />
     <EmbeddedResource Include="debug.ico" />
     <Content Include="favicon.ico" />
   </ItemGroup>

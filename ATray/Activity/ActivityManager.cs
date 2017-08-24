@@ -1,4 +1,6 @@
-﻿namespace ATray.Activity
+﻿using System.Diagnostics;
+
+namespace ATray.Activity
 {
     using System;
     using System.Collections.Generic;
@@ -13,7 +15,6 @@
         private const string SavefilePattern = "Acts{0}.bin";
         private static readonly Dictionary<int, MonthActivities> ActivityCache = new Dictionary<int, MonthActivities>();
         private static readonly int ActivityFileFormatVersion = int.Parse(ConfigurationManager.AppSettings["ActivityFileFormatVersion"] ?? "1");
-
 
         static ActivityManager()
         {
@@ -130,6 +131,25 @@
                 case 2: activities.WriteToFileV2(filename); break;
                 default:
                     throw new ConfigurationErrorsException($"Unknown file format version '{ActivityFileFormatVersion}'");
+            }
+            //ActivityCache[key] = activities;
+
+            var sharedFolder = Program.Configuration.SharedActivityStorage;
+            if (!Directory.Exists(sharedFolder)) return;
+            try
+            {
+#if DEBUG
+                // Debugging must not overwrite prod files
+                sharedFolder = Path.Combine(sharedFolder, "DEBUG");
+                if (!Directory.Exists(sharedFolder))
+                    Directory.CreateDirectory(sharedFolder);
+#endif
+                File.Copy(filename, Path.Combine(sharedFolder, $"{Environment.MachineName}_Acts{key}.bin"));
+            }
+            catch (Exception e)
+            {
+                // Non-critical exception
+                Trace.TraceWarning($"Could not copy activities file to shared directory: {e}");
             }
         }
     }

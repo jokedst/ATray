@@ -83,6 +83,8 @@
   <ItemGroup>
     <Compile Include="PostponedEvent.cs" />
     <Compile Include="RepositoryCollection.cs" />
+    <Compile Include="RepositoryEventArgs.cs" />
+    <Compile Include="RepositoryEventType.cs" />
     <Compile Include="Svn\AuthFileParser.cs" />
     <Compile Include="Svn\AuthParseException.cs" />
     <Compile Include="CredentialsProvider.cs" />

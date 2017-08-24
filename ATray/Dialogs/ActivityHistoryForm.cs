@@ -1,4 +1,6 @@
-﻿namespace ATray
+﻿using System.Diagnostics;
+
+namespace ATray
 {
     using System;
     using System.Collections.Generic;
@@ -31,7 +33,9 @@
         private uint _graphWidth;
         private uint _graphSeconds;
         private uint _graphFirstSecond;
-        
+        private MonthActivities _shownHistory;
+        private byte[] _indexToDaynumber;
+
         public ActivityHistoryForm()
         {
             InitializeComponent();
@@ -71,28 +75,44 @@
         private void HistoryPictureOnMouseMove(object sender, MouseEventArgs e)
         {
             var p = Cursor.Position;
-
             var x = p.X;
             var y = p.Y + 20;
 
-            if (_lastPosition.X != x || _lastPosition.Y != y || _lastScrollPositionY != e.Y)
+            if (_lastPosition.X == x && _lastPosition.Y == y && _lastScrollPositionY == e.Y) return;
+            if (e.X < GraphStartPixel) return;
+
+            _lastPosition = new Point(x, y);
+            var second = (((uint)e.X - GraphStartPixel) * _graphSeconds / _graphWidth) + _graphFirstSecond;
+
+            var absoluteY = y - historyPicture.Location.Y - Location.Y;
+            var dayIndex = (e.Y - GraphSpacing / 2) / (GraphHeight + GraphSpacing);
+            if (dayIndex < 0) dayIndex = 0;
+            if (dayIndex >= _indexToDaynumber.Length) dayIndex = _indexToDaynumber.Length - 1;
+            var dayNumber = _indexToDaynumber[dayIndex];
+            var activity = _shownHistory.Days[dayNumber].FirstOrDefault(a => a.EndSecond >= second);
+            if (activity?.StartSecond > second) activity = null;
+
+            if (activity == null)
             {
-                _lastPosition = new Point(x, y);
-
-                if (e.X >= GraphStartPixel)
-                {
-                    var second = (((uint)e.X - GraphStartPixel) * _graphSeconds / _graphWidth) + _graphFirstSecond;
-                    // TODO: Look up activity item
-                    _tipLabel.Text = SecondToTime(second);
-                }
-                else return;
-                
-                _tipLabel.Location = _lastPosition;
-                _lastScrollPositionY = e.Y;
-
-                if(!_tipLabel.Visible)
-                    _tipLabel.ShowFloating();
+                _tipLabel.Text = SecondToTime(second) + " (no activity)";
             }
+            else
+            {
+                _tipLabel.Text = $"Act:{_shownHistory.WindowTitles[activity.WindowTitleIndex]}";
+            }
+            //var astr = $"Act: {activity?.WasActive.ToString() ?? "unknown"}";
+            //var astr = new DateTime(_shownHistory.Year, _shownHistory.Month, dayNumber).DayOfWeek + " " + dayNumber +"/" + _shownHistory.Month;
+
+            // TODO: Look up activity item
+            //_tipLabel.Text = SecondToTime(second);
+            //_tipLabel.Text = $"{(e.Y - GraphSpacing / 2)} ({absoluteY}) day {dayIndex}";
+            //_tipLabel.Text = astr;
+
+            _tipLabel.Location = _lastPosition;
+            _lastScrollPositionY = e.Y;
+
+            if (!_tipLabel.Visible)
+                _tipLabel.ShowFloating();
         }
 
         private void btnHistoryOk_Click(object sender, EventArgs e)
@@ -110,7 +130,6 @@
 
         private void DrawHistory(Bitmap target, MonthActivities history)
         {
-
             // Figure out when first activity started and when last activity ended (for the whole month)
             var firstTime = (uint)60 * 60 * 24;
             var lastTime = (uint)0;
@@ -120,9 +139,7 @@
                 lastTime = lastTime > activities.Last().EndSecond ? lastTime : activities.Last().EndSecond;
             }
 
-
             _graphFirstSecond = firstTime;
-
 
             var graphicsObj = Graphics.FromImage(_historyGraph);
             var pen = new Pen(Color.Olive, 1);
@@ -143,7 +160,6 @@
             }
 
             // Draw each day
-            int index = 0;
             int currentY = GraphSpacing;
             foreach (var dayNumber in history.Days.Keys.OrderBy(x => x))
             {
@@ -193,6 +209,8 @@
 
             // get activity for selected year/month
             var history = ActivityManager.GetMonthActivity((short)(_currentMonth / 100), (byte)(_currentMonth % 100));
+            _shownHistory = history;
+            _indexToDaynumber = _shownHistory.Days.Keys.OrderBy(x => x).ToArray();
 
             // Create a new bitmap that is as wide as the windows and as high as it needs to be to fit all days
             var width = ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth;

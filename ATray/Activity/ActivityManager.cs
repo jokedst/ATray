@@ -90,15 +90,17 @@ namespace ATray.Activity
         {
             var key = (year * 100) + month;
 
-            var filepath = Path.Combine(Program.SettingsDirectory, "Acts" + key + ".bin");
-            if (File.Exists(filepath))
-            {
-                return new MonthActivities(filepath);
-            }
-
             // TODO: Move this to top so the cache is used first
             if (ActivityCache.ContainsKey(key))
                 return ActivityCache[key];
+
+            var filepath = Path.Combine(Program.SettingsDirectory, "Acts" + key + ".bin");
+            if (File.Exists(filepath))
+            {
+                var monthActivities = new MonthActivities(filepath);
+                ActivityCache.Add(key, monthActivities);
+                return monthActivities;
+            }
 
             var newMonth = new MonthActivities(year, month);
             ActivityCache.Add(key, newMonth);
@@ -132,7 +134,7 @@ namespace ATray.Activity
                 default:
                     throw new ConfigurationErrorsException($"Unknown file format version '{ActivityFileFormatVersion}'");
             }
-            //ActivityCache[key] = activities;
+            ActivityCache[key] = activities;
 
             var sharedFolder = Program.Configuration.SharedActivityStorage;
             if (!Directory.Exists(sharedFolder)) return;

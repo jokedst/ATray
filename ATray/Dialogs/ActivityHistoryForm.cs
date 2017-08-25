@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Drawing.Imaging;
 
 namespace ATray
 {
@@ -98,7 +99,7 @@ namespace ATray
             }
             else
             {
-                _tipLabel.Text = $"Act:{_shownHistory.WindowTitles[activity.WindowTitleIndex]}";
+                _tipLabel.Text = $"{SecondToTime(second)} {_shownHistory.ApplicationNames[activity.ApplicationNameIndex]}\r{_shownHistory.WindowTitles[activity.WindowTitleIndex]}";
             }
             //var astr = $"Act: {activity?.WasActive.ToString() ?? "unknown"}";
             //var astr = new DateTime(_shownHistory.Year, _shownHistory.Month, dayNumber).DayOfWeek + " " + dayNumber +"/" + _shownHistory.Month;
@@ -138,6 +139,15 @@ namespace ATray
                 firstTime = firstTime < activities.First().StartSecond ? firstTime : activities.First().StartSecond;
                 lastTime = lastTime > activities.Last().EndSecond ? lastTime : activities.Last().EndSecond;
             }
+
+            // Create list of programs used, the most used firts
+            var programs = history.Days.Values.SelectMany(x => x.Where(a => a.WasActive))
+                .GroupBy(x => x.ApplicationNameIndex).ToDictionary(x => x.Key,
+                    spans => spans.Select(x => (int) x.EndSecond - x.StartSecond).Sum()).OrderByDescending(x=>x.Value);
+            // Assign unique colors to the most used programs
+            var colors = new[] {Color.BlueViolet,Color.CornflowerBlue, Color.Green, Color.DarkRed};
+            var brushes = colors.Select(x => new SolidBrush(x)).ToArray();
+            var brushLookup = programs.Zip(brushes, (program, color) => new {program, color}).ToDictionary(x=>x.program.Key,x=>x.color);
 
             _graphFirstSecond = firstTime;
 
@@ -190,7 +200,7 @@ namespace ATray
                     graphbox = new Rectangle((int)startpixel + GraphStartPixel, top, (int)(endPixel - startpixel) + 1, boxheight);
 
                     //graphicsObj.DrawRectangle(pen, graphbox);
-                    graphicsObj.FillRectangle(brush, graphbox);
+                    graphicsObj.FillRectangle(brushLookup.GetValueOrDefault(span.ApplicationNameIndex,  brush), graphbox);
                 }
                 currentY += GraphSpacing + GraphHeight;
             }

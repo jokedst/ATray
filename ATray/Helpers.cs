@@ -57,6 +57,15 @@ namespace ATray
                     .Where(file => reSearchPattern.IsMatch(file)))
                 .Any();
         }
+
+        public static TValue GetValueOrDefaultx<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
+        {
+            return dictionary.ContainsKey(key) ? dictionary[key] : default(TValue);
+        }
+        public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue = default(TValue))
+        {
+            return dictionary.ContainsKey(key) ? dictionary[key] : defaultValue;
+        }
     }
 
     internal static class ControlExtensions

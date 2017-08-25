@@ -1,4 +1,6 @@
-﻿namespace ATray
+﻿using System.Drawing;
+
+namespace ATray
 {
     using System;
     using System.Runtime.InteropServices;
@@ -37,6 +39,19 @@
 
         [DllImport("user32")]
         private static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        public override string Text
+        {
+            get { return base.Text; }
+            set
+            {
+                base.Text = value;
+                var w = PreferredWidth;
+                var h = PreferredHeight;
+                Width = w;
+                Height = h;
+            }
+        }
 
         /// <summary>
         /// Shows the control as a floating Window child 

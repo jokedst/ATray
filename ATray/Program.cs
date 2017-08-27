@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
-
-namespace ATray
+﻿namespace ATray
 {
     using System;
     using System.Diagnostics;
     using System.IO;
     using System.Threading;
+    using System.Threading.Tasks;
     using System.Windows.Forms;
     using RepositoryManager;
+    using Squirrel;
 
     public static class Program
     {
@@ -48,10 +48,28 @@ namespace ATray
             Repositories = new RepositoryCollection(RepoListFilePath);
             Configuration = new Configuration(ConfigurationFilePath);
 
+            var updateTask = Task.Run(CheckForUpdates);
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             MainWindowInstance = new MainWindow();
             Application.Run(MainWindowInstance);
+        }
+
+        private static async Task CheckForUpdates()
+        {
+            try
+            {
+                using (var mgr = new UpdateManager(@"E:\Projects\Misc\ATray\ATray\bin\RLZ"))
+                {
+                    var up = await mgr.UpdateApp();
+                    Trace.TraceInformation("Update check " + up.Version);
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.TraceWarning("Update check threw an exception: " + e.Message);
+            }
         }
     }
 }

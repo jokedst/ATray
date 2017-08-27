@@ -27,8 +27,6 @@
             Icon = trayIcon.Icon = Program.MainIcon;
             Program.Repositories.RepositoryStatusChanged += OnRepositoryStatusChanged;
             SystemEvents.SessionSwitch += SystemEventsOnSessionSwitch;
-
-            var animTray = new SysTray("Developer Little Helper", Icon, trayMenu.ContextMenu);
 #if DEBUG
             // DEBUG! Show dialog on boot for convinience
             //OnMenuClickSettings(null, null);
@@ -53,9 +51,9 @@
                 submenu.DropDownItems.Add(pullOption);
                 trayMenu.Items.Insert(0, submenu);
             }
-            //Properties.Resources.anim.MakeTransparent(Properties.Resources.anim.GetPixel(1,1));
-            animTray.SetAnimationClip(Properties.Resources.anim1);
-            animTray.StartAnimation(100, 3);
+
+            var animTray = new IconAnimator(trayIcon, Properties.Resources.anim1);
+            animTray.StartAnimation();
         }
 
         private void SystemEventsOnSessionSwitch(object sender, SessionSwitchEventArgs sessionSwitchEventArgs)

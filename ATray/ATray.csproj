@@ -140,7 +140,7 @@
     <Compile Include="MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="SysTray.cs" />
+    <Compile Include="IconAnimator.cs" />
     <Compile Include="WindowsInternals.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

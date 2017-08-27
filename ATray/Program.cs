@@ -60,7 +60,7 @@
         {
             try
             {
-                using (var mgr = new UpdateManager(@"E:\Projects\Misc\ATray\ATray\bin\RLZ"))
+                using (var mgr = new UpdateManager(@"E:\Projects\Misc\ATray\Releases"))
                 {
                     var up = await mgr.UpdateApp();
                     Trace.TraceInformation("Update check " + up.Version);

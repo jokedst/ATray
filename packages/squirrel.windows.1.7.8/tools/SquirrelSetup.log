@@ -1,0 +1,27 @@
+﻿2017-08-27 16:02:46> Program: Starting Squirrel Updater: 
+2017-08-27 16:03:27> Program: Starting Squirrel Updater: --releasify .\ATray.1.0.0.nupkg
+2017-08-27 16:03:28> Program: Bootstrapper EXE found at:E:\Projects\Misc\ATray\packages\squirrel.windows.1.7.8\tools\Setup.exe
+2017-08-27 16:03:28> Program: Creating release package: E:\Projects\Misc\ATray\Releases\ATray.1.0.0.nupkg
+2017-08-27 16:03:28> ReleasePackage: Creating release package: E:\Projects\Misc\ATray\Releases\ATray.1.0.0.nupkg => E:\Projects\Misc\ATray\Releases\ATray-1.0.0-full.nupkg
+2017-08-27 16:03:28> ReleasePackage: Extracting dependent packages: []
+2017-08-27 16:03:28> ReleasePackage: Removing unnecessary data
+2017-08-27 16:03:28> ReleasePackage: No release notes found in C:\Users\Jocke\AppData\Local\SquirrelTemp\tempa\ATray.nuspec
+2017-08-27 16:03:30> Program: Building embedded zip file for Setup.exe
+2017-08-27 18:13:34> Program: Starting Squirrel Updater: --releasify bin\Release\ATray.1.0.6448.nupkg
+2017-08-27 18:13:34> Program: Bootstrapper EXE found at:E:\Projects\Misc\ATray\packages\squirrel.windows.1.7.8\tools\Setup.exe
+2017-08-27 18:13:34> Unhandled exception: System.IO.FileNotFoundException: Could not find file 'bin\Release\ATray.1.0.6448.nupkg'.
+File name: 'bin\Release\ATray.1.0.6448.nupkg'
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.File.InternalCopy(String sourceFileName, String destFileName, Boolean overwrite, Boolean checkHost)
+   at System.IO.File.Copy(String sourceFileName, String destFileName, Boolean overwrite)
+   at Squirrel.Update.Program.Releasify(String package, String targetDir, String packagesDir, String bootstrapperExe, String backgroundGif, String signingOpts, String baseUrl, String setupIcon, Boolean generateMsi, String frameworkVersion, Boolean generateDeltas)
+   at Squirrel.Update.Program.executeCommandLine(String[] args)
+   at Squirrel.Update.Program.main(String[] args)
+2017-08-27 18:15:56> Program: Starting Squirrel Updater: --releasify bin\Release\ATray.1.0.1.nupkg
+2017-08-27 18:15:56> Program: Bootstrapper EXE found at:E:\Projects\Misc\ATray\packages\squirrel.windows.1.7.8\tools\Setup.exe
+2017-08-27 18:15:56> Program: Creating release package: E:\Projects\Misc\ATray\ATray\Releases\ATray.1.0.1.nupkg
+2017-08-27 18:15:56> ReleasePackage: Creating release package: E:\Projects\Misc\ATray\ATray\Releases\ATray.1.0.1.nupkg => E:\Projects\Misc\ATray\ATray\Releases\ATray-1.0.1-full.nupkg
+2017-08-27 18:15:57> ReleasePackage: Extracting dependent packages: []
+2017-08-27 18:15:57> ReleasePackage: Removing unnecessary data
+2017-08-27 18:15:57> ReleasePackage: No release notes found in C:\Users\Jocke\AppData\Local\SquirrelTemp\tempa\ATray.nuspec
+2017-08-27 18:15:58> Program: Building embedded zip file for Setup.exe

@@ -27,13 +27,8 @@
         internal DialogResult ShowDialog(IWin32Window owner)
         {
             if (Environment.OSVersion.Version.Major >= 6)
-            {
                 return ShowVistaDialog(owner);
-            }
-            else
-            {
-                return ShowLegacyDialog(owner);
-            }
+            return ShowLegacyDialog(owner);
         }
 
         private DialogResult ShowVistaDialog(IWin32Window owner)

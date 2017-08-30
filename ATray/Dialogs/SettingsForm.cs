@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Windows.Forms;
     using System.Diagnostics;
+    using System.Reflection;
     using RepositoryManager;
     using RepositoryManager.Git;
 
@@ -20,6 +21,9 @@
 #endif
             propertyGrid.SelectedObject = Program.Configuration.Clone();
             Program.Repositories.RepositoryUpdated += OnRepositoryUpdated;
+
+            var v = Assembly.GetExecutingAssembly().GetName().Version;
+            versionLabel.Text = $"v{v.Major}.{v.Minor}.{v.Build}";
         }
 
         private void OnRepositoryUpdated(object sender, RepositoryEventArgs repositoryEventArgs)

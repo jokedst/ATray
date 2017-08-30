@@ -27,6 +27,8 @@
         public int HistoryRedrawTimeout { get; set; }
         [Description("A shared directory (e.g. dropbox) to share activity between computers"), Category("History"), Editor(typeof(FolderNameEditor), typeof(UITypeEditor))]
         public string SharedActivityStorage { get; set; }
+        [Description("Start application automatically at login"), Category("General"), DefaultValue(false)]
+        public bool StartAtLogin { get; set; }
 
         public Configuration(string filename = null)
         {
@@ -141,12 +143,34 @@
         /// <param name="startAtWindowsLogin"></param>
         private void SetStartup(bool startAtWindowsLogin)
         {
-            var runKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+            try
+            {
+                var runKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
 
-            if (startAtWindowsLogin)
-                runKey.SetValue(Application.ProductName, Application.ExecutablePath);
-            else
-                runKey.DeleteValue(Application.ProductName, false);
+                if (startAtWindowsLogin)
+                    runKey.SetValue(Application.ProductName, Application.ExecutablePath);
+                else
+                    runKey.DeleteValue(Application.ProductName, false);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show($"Could not {(startAtWindowsLogin?"activate":"deactivate")} autostart, error: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Validates new setting values
+        /// </summary>
+        /// <param name="newConfig"></param>
+        /// <returns> false if the new settings re rejected and should not be saved</returns>
+        public bool ValidateChanges(Configuration newConfig)
+        {
+            // First validate the given values are correct
+
+            // If all ok, act on changes
+            if (StartAtLogin != newConfig.StartAtLogin)
+                SetStartup(newConfig.StartAtLogin);
+            return true;
         }
     }
 }

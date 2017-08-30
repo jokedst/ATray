@@ -29,7 +29,7 @@
             SystemEvents.SessionSwitch += SystemEventsOnSessionSwitch;
 #if DEBUG
             // DEBUG! Show dialog on boot for convinience
-            //OnMenuClickSettings(null, null);
+            OnMenuClickSettings(null, null);
             OnMenuClickHistory(null,null);
 #endif
             var first = true;

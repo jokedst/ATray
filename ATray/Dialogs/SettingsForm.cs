@@ -79,9 +79,15 @@
         private void btnOk_Click(object sender, EventArgs e)
         {
             // Save settings 
-            Program.Configuration = (Configuration) propertyGrid.SelectedObject;
+            var newConfig = (Configuration) propertyGrid.SelectedObject;
+            if (!Program.Configuration.ApplyChanges(newConfig))
+            {
+                MessageBox.Show("Invalid configuration for some reason", "Configuration error");
+                return;
+            }
+            Program.Configuration = newConfig;
             Program.Configuration.SaveToIniFile();
-            
+
             // Save new repo list
             Program.Repositories.Save();
             Close();

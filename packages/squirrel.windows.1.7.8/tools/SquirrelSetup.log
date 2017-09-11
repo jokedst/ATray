@@ -112,3 +112,141 @@ File name: 'bin\Release\ATray.1.0.6448.nupkg'
 2017-08-29 12:45:55> DeltaPackageBuilder: \lib\net45\lib\win32\x64\git2-a5cf255.dll not found in base package, marking as new
 2017-08-29 12:45:55> DeltaPackageBuilder: \lib\net45\lib\win32\x86\git2-a5cf255.dll not found in base package, marking as new
 2017-08-29 12:45:55> Program: Building embedded zip file for Setup.exe
+2017-09-06 18:12:57> Program: Starting Squirrel Updater: --releasify bin\Release\ATray.1.0.2.nupkg
+2017-09-06 18:12:57> Program: Bootstrapper EXE found at:C:\Users\JoakimWennergren\Source\Repos\ATray\packages\squirrel.windows.1.7.8\tools\Setup.exe
+2017-09-06 18:12:57> Program: Creating release package: C:\Users\JoakimWennergren\Source\Repos\ATray\ATray\Releases\ATray.1.0.2.nupkg
+2017-09-06 18:12:57> ReleasePackage: Creating release package: C:\Users\JoakimWennergren\Source\Repos\ATray\ATray\Releases\ATray.1.0.2.nupkg => C:\Users\JoakimWennergren\Source\Repos\ATray\ATray\Releases\ATray-1.0.2-full.nupkg
+2017-09-06 18:12:58> ReleasePackage: Extracting dependent packages: []
+2017-09-06 18:12:58> ReleasePackage: Removing unnecessary data
+2017-09-06 18:12:58> ReleasePackage: No release notes found in C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\ATray.nuspec
+2017-09-06 18:13:00> DeltaPackageBuilder: Extracting .\Releases\ATray-1.0.1-full.nupkg and C:\Users\JoakimWennergren\Source\Repos\ATray\ATray\Releases\ATray-1.0.2-full.nupkg into C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb
+2017-09-06 18:13:02> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\ATray.application => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\ATray.application
+2017-09-06 18:13:02> DeltaPackageBuilder: We really couldn't create a delta for ATray.application: System.DivideByZeroException: Attempted to divide by zero.
+   at Squirrel.Bsdiff.BinaryPatchUtility.Create(Byte[] oldData, Byte[] newData, Stream output)
+   at Squirrel.DeltaPackageBuilder.createDeltaForSingleFile(FileInfo targetFile, DirectoryInfo workingDirectory, Dictionary`2 baseFileListing)
+2017-09-06 18:13:02> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\ATray.exe => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\ATray.exe
+2017-09-06 18:13:02> DeltaPackageBuilder: \lib\net45\ATray.exe.config hasn't changed, writing dummy file
+2017-09-06 18:13:02> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\ATray.exe.manifest => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\ATray.exe.manifest
+2017-09-06 18:13:02> DeltaPackageBuilder: We really couldn't create a delta for ATray.exe.manifest: System.DivideByZeroException: Attempted to divide by zero.
+   at Squirrel.Bsdiff.BinaryPatchUtility.Create(Byte[] oldData, Byte[] newData, Stream output)
+   at Squirrel.DeltaPackageBuilder.createDeltaForSingleFile(FileInfo targetFile, DirectoryInfo workingDirectory, Dictionary`2 baseFileListing)
+2017-09-06 18:13:02> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\ATray_ExecutionStub.exe => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\ATray_ExecutionStub.exe
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\CredentialManagement.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\DeltaCompressionDotNet.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\DeltaCompressionDotNet.MsDelta.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\DeltaCompressionDotNet.PatchApi.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\LibGit2Sharp.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\LibGit2Sharp.dll.config hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\Microsoft.Alm.Authentication.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\Microsoft.Alm.Git.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\Mono.Cecil.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\Mono.Cecil.Mdb.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\Mono.Cecil.Pdb.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\Mono.Cecil.Rocks.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\Newtonsoft.Json.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\NuGet.Squirrel.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\Ookii.Dialogs.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\RepositoryManager.dll => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\RepositoryManager.dll
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\SharpCompress.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\SharpPlink-x64.svnExe hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\SharpSvn.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\Splat.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\Squirrel.dll hasn't changed, writing dummy file
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\app.publish\ATray.exe not found in base package, marking as new
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\lib\linux\x86_64\libgit2-a5cf255.so not found in base package, marking as new
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\lib\osx\libgit2-a5cf255.dylib not found in base package, marking as new
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\lib\win32\x64\git2-a5cf255.dll not found in base package, marking as new
+2017-09-06 18:13:03> DeltaPackageBuilder: \lib\net45\lib\win32\x86\git2-a5cf255.dll not found in base package, marking as new
+2017-09-06 18:13:03> Program: Building embedded zip file for Setup.exe
+2017-09-06 22:52:51> Program: Starting Squirrel Updater: --releasify bin\Release\ATray.1.0.3.nupkg
+2017-09-06 22:52:51> Program: Bootstrapper EXE found at:C:\Users\JoakimWennergren\Source\Repos\ATray\packages\squirrel.windows.1.7.8\tools\Setup.exe
+2017-09-06 22:52:51> Program: Creating release package: C:\Users\JoakimWennergren\Source\Repos\ATray\ATray\Releases\ATray.1.0.3.nupkg
+2017-09-06 22:52:51> ReleasePackage: Creating release package: C:\Users\JoakimWennergren\Source\Repos\ATray\ATray\Releases\ATray.1.0.3.nupkg => C:\Users\JoakimWennergren\Source\Repos\ATray\ATray\Releases\ATray-1.0.3-full.nupkg
+2017-09-06 22:52:52> ReleasePackage: Extracting dependent packages: []
+2017-09-06 22:52:52> ReleasePackage: Removing unnecessary data
+2017-09-06 22:52:52> ReleasePackage: No release notes found in C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\ATray.nuspec
+2017-09-06 22:52:54> DeltaPackageBuilder: Extracting .\Releases\ATray-1.0.2-full.nupkg and C:\Users\JoakimWennergren\Source\Repos\ATray\ATray\Releases\ATray-1.0.3-full.nupkg into C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb
+2017-09-06 22:52:56> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\ATray.application => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\ATray.application
+2017-09-06 22:52:56> DeltaPackageBuilder: We really couldn't create a delta for ATray.application: System.DivideByZeroException: Attempted to divide by zero.
+   at Squirrel.Bsdiff.BinaryPatchUtility.Create(Byte[] oldData, Byte[] newData, Stream output)
+   at Squirrel.DeltaPackageBuilder.createDeltaForSingleFile(FileInfo targetFile, DirectoryInfo workingDirectory, Dictionary`2 baseFileListing)
+2017-09-06 22:52:56> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\ATray.exe => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\ATray.exe
+2017-09-06 22:52:56> DeltaPackageBuilder: \lib\net45\ATray.exe.config hasn't changed, writing dummy file
+2017-09-06 22:52:56> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\ATray.exe.manifest => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\ATray.exe.manifest
+2017-09-06 22:52:56> DeltaPackageBuilder: We really couldn't create a delta for ATray.exe.manifest: System.DivideByZeroException: Attempted to divide by zero.
+   at Squirrel.Bsdiff.BinaryPatchUtility.Create(Byte[] oldData, Byte[] newData, Stream output)
+   at Squirrel.DeltaPackageBuilder.createDeltaForSingleFile(FileInfo targetFile, DirectoryInfo workingDirectory, Dictionary`2 baseFileListing)
+2017-09-06 22:52:56> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\ATray_ExecutionStub.exe => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\ATray_ExecutionStub.exe
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\CredentialManagement.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\DeltaCompressionDotNet.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\DeltaCompressionDotNet.MsDelta.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\DeltaCompressionDotNet.PatchApi.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\LibGit2Sharp.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\LibGit2Sharp.dll.config hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\Microsoft.Alm.Authentication.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\Microsoft.Alm.Git.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\Mono.Cecil.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\Mono.Cecil.Mdb.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\Mono.Cecil.Pdb.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\Mono.Cecil.Rocks.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\Newtonsoft.Json.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\NuGet.Squirrel.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\Ookii.Dialogs.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\RepositoryManager.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\SharpCompress.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\SharpPlink-x64.svnExe hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\SharpSvn.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\Splat.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\Squirrel.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\app.publish\ATray.exe => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\app.publish\ATray.exe
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\lib\linux\x86_64\libgit2-a5cf255.so hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\lib\osx\libgit2-a5cf255.dylib hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\lib\win32\x64\git2-a5cf255.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> DeltaPackageBuilder: \lib\net45\lib\win32\x86\git2-a5cf255.dll hasn't changed, writing dummy file
+2017-09-06 22:52:57> Program: Building embedded zip file for Setup.exe
+2017-09-11 22:01:33> Program: Starting Squirrel Updater: --releasify bin\Release\ATray.1.0.3.nupkg
+2017-09-11 22:01:33> Program: Bootstrapper EXE found at:C:\Users\JoakimWennergren\Source\Repos\ATray\packages\squirrel.windows.1.7.8\tools\Setup.exe
+2017-09-11 22:01:33> Program: Creating release package: C:\Users\JoakimWennergren\Source\Repos\ATray\ATray\Releases\ATray.1.0.3.nupkg
+2017-09-11 22:01:33> ReleasePackage: Creating release package: C:\Users\JoakimWennergren\Source\Repos\ATray\ATray\Releases\ATray.1.0.3.nupkg => C:\Users\JoakimWennergren\Source\Repos\ATray\ATray\Releases\ATray-1.0.3-full.nupkg
+2017-09-11 22:01:34> ReleasePackage: Extracting dependent packages: []
+2017-09-11 22:01:34> ReleasePackage: Removing unnecessary data
+2017-09-11 22:01:34> ReleasePackage: No release notes found in C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\ATray.nuspec
+2017-09-11 22:01:35> DeltaPackageBuilder: Extracting .\Releases\ATray-1.0.2-full.nupkg and C:\Users\JoakimWennergren\Source\Repos\ATray\ATray\Releases\ATray-1.0.3-full.nupkg into C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb
+2017-09-11 22:01:37> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\ATray.application => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\ATray.application
+2017-09-11 22:01:37> DeltaPackageBuilder: We really couldn't create a delta for ATray.application: System.DivideByZeroException: Attempted to divide by zero.
+   at Squirrel.Bsdiff.BinaryPatchUtility.Create(Byte[] oldData, Byte[] newData, Stream output)
+   at Squirrel.DeltaPackageBuilder.createDeltaForSingleFile(FileInfo targetFile, DirectoryInfo workingDirectory, Dictionary`2 baseFileListing)
+2017-09-11 22:01:38> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\ATray.exe => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\ATray.exe
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\ATray.exe.config hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\ATray.exe.manifest => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\ATray.exe.manifest
+2017-09-11 22:01:38> DeltaPackageBuilder: We really couldn't create a delta for ATray.exe.manifest: System.DivideByZeroException: Attempted to divide by zero.
+   at Squirrel.Bsdiff.BinaryPatchUtility.Create(Byte[] oldData, Byte[] newData, Stream output)
+   at Squirrel.DeltaPackageBuilder.createDeltaForSingleFile(FileInfo targetFile, DirectoryInfo workingDirectory, Dictionary`2 baseFileListing)
+2017-09-11 22:01:38> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\ATray_ExecutionStub.exe => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\ATray_ExecutionStub.exe
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\CredentialManagement.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\DeltaCompressionDotNet.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\DeltaCompressionDotNet.MsDelta.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\DeltaCompressionDotNet.PatchApi.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\LibGit2Sharp.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\LibGit2Sharp.dll.config hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\Microsoft.Alm.Authentication.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\Microsoft.Alm.Git.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\Mono.Cecil.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\Mono.Cecil.Mdb.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\Mono.Cecil.Pdb.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\Mono.Cecil.Rocks.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\Newtonsoft.Json.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\NuGet.Squirrel.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\Ookii.Dialogs.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\RepositoryManager.dll => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\RepositoryManager.dll
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\SharpCompress.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\SharpPlink-x64.svnExe hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\SharpSvn.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\Splat.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\Squirrel.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempa\lib\net45\app.publish\ATray.exe => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempb\lib\net45\app.publish\ATray.exe
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\lib\linux\x86_64\libgit2-a5cf255.so hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\lib\osx\libgit2-a5cf255.dylib hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\lib\win32\x64\git2-a5cf255.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> DeltaPackageBuilder: \lib\net45\lib\win32\x86\git2-a5cf255.dll hasn't changed, writing dummy file
+2017-09-11 22:01:38> Program: Building embedded zip file for Setup.exe

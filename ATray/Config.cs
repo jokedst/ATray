@@ -6,6 +6,7 @@
     using System.Drawing.Design;
     using System.IO;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Runtime.InteropServices;
     using System.Text;
     using System.Windows.Forms;
@@ -154,7 +155,7 @@
             }
             catch (Exception e)
             {
-                MessageBox.Show($"Could not {(startAtWindowsLogin?"activate":"deactivate")} autostart, error: {e.Message}");
+                MessageBox.Show($"Could not {(startAtWindowsLogin ? "activate" : "deactivate")} autostart, error: {e.Message}");
             }
         }
 
@@ -163,7 +164,7 @@
         /// </summary>
         /// <param name="newConfig"></param>
         /// <returns> false if the new settings re rejected and should not be saved</returns>
-        public bool ValidateChanges(Configuration newConfig)
+        public bool ApplyChanges(Configuration newConfig)
         {
             // First validate the given values are correct
 

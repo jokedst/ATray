@@ -3,6 +3,7 @@
     using System;
     using System.Diagnostics;
     using System.Drawing;
+    using System.Runtime.InteropServices;
     using System.Text;
     using System.Windows.Forms;
     using Activity;
@@ -204,6 +205,27 @@
             if (settingsForm == null || settingsForm.IsDisposed)
                 settingsForm = new SettingsForm();
             settingsForm.Show();
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            // Detect closing/opening of lid
+            if (m.Msg == WindowsInternals.WM_POWERBROADCAST && m.WParam.ToInt32() == WindowsInternals.PBT_POWERSETTINGCHANGE)
+            {
+                var ps = (WindowsInternals.POWERBROADCAST_SETTING) Marshal.PtrToStructure(m.LParam, typeof(WindowsInternals.POWERBROADCAST_SETTING));
+                IntPtr pData = (IntPtr) (m.LParam.ToInt32() + Marshal.SizeOf(ps));
+                int iData = (int) Marshal.PtrToStructure(pData, typeof(int));
+                string monitorState;
+                switch (iData)
+                {
+                    case 0: monitorState = "off"; break;
+                    case 1: monitorState = "on"; break;
+                    case 2: monitorState = "dimmed"; break;
+                    default: monitorState = "unknown"; break;
+                }
+                Trace.TraceInformation("Monitor changed to " + monitorState);
+            }
+            base.WndProc(ref m);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace ATray
+namespace ATray
 {
     using System;
     using System.Diagnostics;
@@ -60,9 +60,10 @@
         {
             try
             {
-                using (var mgr = new UpdateManager(@"E:\Projects\Misc\ATray\Releases"))
+                using (var mgr = UpdateManager.GitHubUpdateManager("https://github.com/jokedst/ATray"))
                 {
-                    var up = await mgr.UpdateApp();
+                    var manager = await mgr;
+                    var up = await manager.UpdateApp();
                     Trace.TraceInformation("Update check " + up.Version);
                 }
             }

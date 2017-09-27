@@ -25,6 +25,7 @@ namespace ATray
         internal static RepositoryCollection Repositories;
         internal static Configuration Configuration;
         internal static MainWindow MainWindowInstance;
+        internal static Task UpdateTask = null;
 
         /// <summary>
         /// The main entry point for the application.
@@ -48,7 +49,7 @@ namespace ATray
             Repositories = new RepositoryCollection(RepoListFilePath);
             Configuration = new Configuration(ConfigurationFilePath);
 
-            var updateTask = Task.Run(CheckForUpdates);
+            UpdateTask = Task.Run(CheckForUpdates);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -63,8 +64,17 @@ namespace ATray
                 using (var mgr = UpdateManager.GitHubUpdateManager("https://github.com/jokedst/ATray"))
                 {
                     var manager = await mgr;
-                    var up = await manager.UpdateApp();
-                    Trace.TraceInformation("Update check " + up.Version);
+                    var upOrNot = await manager.CheckForUpdate();
+                    if (upOrNot != null && upOrNot.ReleasesToApply.Count > 0)
+                    {
+                        var result = MessageBox.Show("An update is available. Do you want to update?", "UPDATE!", MessageBoxButtons.OKCancel);
+                        if (result == DialogResult.OK)
+                        {
+                            var up = await manager.UpdateApp();
+                            Trace.TraceInformation("Update check " + up.Version);
+                        }
+                    }
+                    manager.Dispose();
                 }
             }
             catch (Exception e)

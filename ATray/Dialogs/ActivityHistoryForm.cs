@@ -57,12 +57,18 @@ namespace ATray
         {
             // Check what files exists
             var rawMonths = ActivityManager.ListAvailableMonths();
+            if (rawMonths.Count == 0)
+            {
+                MessageBox.Show("No history to show!");
+                Close();
+                return;
+            }
 
             var months = rawMonths.Select(x => Tuple.Create(x.Key, new DateTime(x.Key / 100, x.Key % 100, 1).ToString("MMMM yyyy"))).ToList();
             monthDropDown.ValueMember = "item1";
             monthDropDown.DisplayMember = "item2";
             monthDropDown.DataSource = months;
-            monthDropDown.SelectedValue = rawMonths.Keys.Last();
+            monthDropDown.SelectedValue = rawMonths.Keys.LastOrDefault();
 
             nextMonthButton.Enabled = false;
             lastMonthButton.Enabled = rawMonths.Count > 1;
@@ -224,14 +230,14 @@ namespace ATray
 
             // Create a new bitmap that is as wide as the windows and as high as it needs to be to fit all days
             var width = ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth;
-            var height = history.Days.Count * (GraphHeight + GraphSpacing);
+            var height = history.Days.Count * (GraphHeight + GraphSpacing) + GraphSpacing;
 
             // Only create a new Bitmap if needed
             Bitmap lastHistoryGraph = null;
             if (_historyGraph == null || width != _historyGraph.Width || height != _historyGraph.Height)
             {
                 lastHistoryGraph = _historyGraph;
-                _historyGraph = new Bitmap( width,height,System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                _historyGraph = new Bitmap(width, height, PixelFormat.Format24bppRgb);
                 _historyGraph.MakeTransparent();
             }
 
@@ -245,7 +251,7 @@ namespace ATray
                 historyPicture.Controls.Add(label);
                 var pos = i % 4;
                 int y = GraphSpacing + (i/4)*(GraphSpacing + GraphHeight);
-                label.Location = new Point(pos<2?0: width - TimeLabelWidth, y+( pos ==0||pos==3?0:20));
+                label.Location = new Point(pos < 2 ? 0 : width - TimeLabelWidth, y + (pos == 0 || pos == 3 ? 0 : 20));
                 _timeLabels.Add(label);
             }
 
@@ -258,7 +264,9 @@ namespace ATray
 
                 _timeLabels[index++].Text = new DateTime(history.Year, history.Month, dayNumber).DayOfWeek + " " + dayNumber + "/" + history.Month;
                 _timeLabels[index++].Text = SecondToTime(todaysFirstSecond);
+                _timeLabels[index].Location = new Point(width - TimeLabelWidth, _timeLabels[index].Location.Y);
                 _timeLabels[index++].Text = SecondToTime(todaysLastSecond);
+                _timeLabels[index].Location = new Point(width - TimeLabelWidth, _timeLabels[index].Location.Y);
                 _timeLabels[index++].Text = "("+ SecondToTime(todaysLastSecond - todaysFirstSecond)+")";
             }
 
@@ -322,6 +330,15 @@ namespace ATray
             var nextMonth = laterMonths.FirstOrDefault();
 
             monthDropDown.SelectedValue = nextMonth;
+        }
+
+        protected override Point ScrollToControl(Control activeControl)
+        {
+            // Returning the current location prevents the panel from
+            // scrolling to the active control when the panel loses and regains focus
+            //return this.DisplayRectangle.Location;
+
+            return base.ScrollToControl(activeControl);
         }
     }
 }

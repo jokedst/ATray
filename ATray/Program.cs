@@ -3,6 +3,7 @@ namespace ATray
     using System;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows.Forms;
@@ -49,7 +50,7 @@ namespace ATray
             Repositories = new RepositoryCollection(RepoListFilePath);
             Configuration = new Configuration(ConfigurationFilePath);
 
-            UpdateTask = Task.Run(CheckForUpdates);
+            UpdateTask = Task.Run(UpdateApp);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -64,22 +65,60 @@ namespace ATray
                 using (var mgr = UpdateManager.GitHubUpdateManager("https://github.com/jokedst/ATray"))
                 {
                     var manager = await mgr;
-                    var upOrNot = await manager.CheckForUpdate();
-                    if (upOrNot != null && upOrNot.ReleasesToApply.Count > 0)
+                    try
                     {
-                        var result = MessageBox.Show("An update is available. Do you want to update?", "UPDATE!", MessageBoxButtons.OKCancel);
-                        if (result == DialogResult.OK)
+                        var upOrNot = await manager.CheckForUpdate();
+                        if (upOrNot != null && upOrNot.ReleasesToApply.Count > 0)
                         {
-                            var up = await manager.UpdateApp();
-                            Trace.TraceInformation("Update check " + up.Version);
+                            var result = MessageBox.Show("An update is available. Do you want to update?", "UPDATE!", MessageBoxButtons.OKCancel);
+                            if (result == DialogResult.OK)
+                            {
+                                var up = await manager.UpdateApp();
+                                Trace.TraceInformation("Update check " + up.Version);
+                            }
                         }
                     }
-                    manager.Dispose();
+                    finally 
+                    {
+                        manager.Dispose();
+                    }
                 }
             }
             catch (Exception e)
             {
                 Trace.TraceWarning("Update check threw an exception: " + e.Message);
+            }
+        }
+
+        public static async Task UpdateApp()
+        {
+            Thread.CurrentThread.Name = "SquirrelUpdateThread";
+            var restartNeeded = false;
+
+            using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/jokedst/ATray"))
+            {
+                var updates = await mgr.CheckForUpdate();
+                var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
+                if (lastVersion != null 
+                    && MessageBox.Show($"An update to version {lastVersion.Version} is available. Do you want to update?", "Update available", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                {
+                    //var lastVersion = updates.ReleasesToApply.OrderBy(x => x.Version).Last();
+                    await mgr.DownloadReleases(new[] { lastVersion });
+                    await mgr.ApplyReleases(updates);
+                    await mgr.UpdateApp();
+
+                    MessageBox.Show("The application has been updated - please close and restart.");
+                    restartNeeded = true;
+                }
+                else
+                {
+                    MessageBox.Show("No Updates are available at this time.");
+                }
+            }
+
+            if (restartNeeded)
+            {
+                UpdateManager.RestartApp();
             }
         }
     }

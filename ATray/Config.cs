@@ -147,9 +147,18 @@
             try
             {
                 var runKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+                if (runKey == null)
+                    throw new Exception("Can not open windows registry key");
 
                 if (startAtWindowsLogin)
-                    runKey.SetValue(Application.ProductName, Application.ExecutablePath);
+                {
+                    // The app is usually installed in AppData\Local\ATray\app-1.X.X , but since this changes between versions
+                    // the autorun would stop woring on update. But since there is a ATray.exe in AppData\Local\ATray as well,
+                    // we can use that instead (it just starts the current version)
+                    var parentExe = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "..", Path.GetFileName(Application.ExecutablePath));
+                    var exeToStart = File.Exists(parentExe) ? parentExe : Application.ExecutablePath;
+                    runKey.SetValue(Application.ProductName, exeToStart);
+                }
                 else
                     runKey.DeleteValue(Application.ProductName, false);
             }

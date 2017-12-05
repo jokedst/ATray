@@ -1,13 +1,20 @@
 ﻿namespace ATray
 {
     using System;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.Drawing;
+    using System.IO;
+    using System.IO.Pipes;
     using System.Runtime.InteropServices;
+    using System.Security.AccessControl;
+    using System.Security.Principal;
     using System.Text;
     using System.Windows.Forms;
     using Activity;
+    using Dialogs;
     using Microsoft.Win32;
+    using Newtonsoft.Json;
     using RepositoryManager;
 
     public partial class MainWindow : Form
@@ -30,8 +37,9 @@
             SystemEvents.SessionSwitch += SystemEventsOnSessionSwitch;
 #if DEBUG
             // DEBUG! Show dialog on boot for convinience
-            OnMenuClickSettings(null, null);
-            OnMenuClickHistory(null,null);
+         //   OnMenuClickSettings(null, null);
+            OnMenuClickHistory(null, null);
+          //  new DiskUsageForm().Show();
 #endif
             var first = true;
             foreach (var repo in Program.Repositories)
@@ -226,6 +234,64 @@
                 Trace.TraceInformation("Monitor changed to " + monitorState);
             }
             base.WndProc(ref m);
+        }
+
+        private void diskUsageToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            const int ERROR_CANCELLED = 1223; //The operation was canceled by the user.
+
+            var pipeName = Guid.NewGuid().ToString("N");
+            //var ps = new PipeSecurity();
+            //ps.AddAccessRule(new PipeAccessRule("Users", PipeAccessRights.ReadWrite, AccessControlType.Allow));
+            //ps.AddAccessRule(new PipeAccessRule(WindowsIdentity.GetCurrent().Owner, PipeAccessRights.FullControl, AccessControlType.Allow));
+
+            //var pipeIn =
+            //    new NamedPipeClientStream("<ServerName>",
+            //        "<PipeName>",
+            //        PipeAccessRights.ReadData | PipeAccessRights.WriteAttributes,
+            //        PipeOptions.None,
+            //        System.Security.Principal.TokenImpersonationLevel.None,
+            //        System.IO.HandleInheritability.None);
+            //, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message, 
+            using (NamedPipeServerStream pipeServer = new NamedPipeServerStream(pipeName, PipeDirection.In))
+            {
+                var info = new ProcessStartInfo(@"diskusage\diskusage.exe")
+                {
+                    Arguments = "-c -N " + pipeName,
+                    UseShellExecute = true,
+                    Verb = "runas"
+                };
+                Process duProcess;
+                try
+                {
+                    duProcess = Process.Start(info);
+                }
+                catch (Win32Exception ex)
+                {
+                    if (ex.NativeErrorCode != ERROR_CANCELLED) throw;
+                    MessageBox.Show("Why you no select Yes?");
+                    return;
+                }
+
+                pipeServer.WaitForConnection();
+                DiskNode rootNode;
+
+                using (StreamReader sr = new StreamReader(pipeServer))
+                using (JsonTextReader jsonReader = new JsonTextReader(sr))
+                {
+                    JsonSerializer ser = new JsonSerializer();
+                    rootNode = ser.Deserialize<DiskNode>(jsonReader);
+                }
+                //{
+                //    // Not sure if readline is best... this is a 60mb line after all
+                //    string temp;
+                //    while ((temp = sr.ReadLine()) != null)
+                //    {
+                //        Console.WriteLine("[CLIENT] Echo: ");
+                //    }
+                //}
+                duProcess.WaitForExit(1000);
+            }
         }
     }
 }

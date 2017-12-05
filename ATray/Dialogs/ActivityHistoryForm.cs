@@ -69,6 +69,9 @@ namespace ATray
             monthDropDown.DisplayMember = "item2";
             monthDropDown.DataSource = months;
             monthDropDown.SelectedValue = rawMonths.Keys.LastOrDefault();
+#if DEBUG
+            monthDropDown.SelectedValue = rawMonths.Keys.LastOrDefault() - 1;
+#endif
 
             nextMonthButton.Enabled = false;
             lastMonthButton.Enabled = rawMonths.Count > 1;
@@ -215,9 +218,14 @@ namespace ATray
 
         private void ActivityHistoryForm_Paint(object sender, PaintEventArgs e)
         {
+            // If we're showing the current month, redraw regularly so the image don't get stale
+            var monthNow = DateTime.Now.Year * 100 + DateTime.Now.Month;
+            var imageAgeInMinutes = DateTime.Now.Subtract(_lastHistoryRedraw).TotalMinutes;
+            var imageGettingOld = _currentMonth == monthNow && imageAgeInMinutes > Program.Configuration.HistoryRedrawTimeout;
+
             if (_historyGraph != null 
                 && ClientRectangle.Width == _lastWindowWidth
-                && !(DateTime.Now.Subtract(_lastHistoryRedraw).TotalMinutes > Program.Configuration.HistoryRedrawTimeout)
+                && !imageGettingOld
                 && !_forceRedraw)
             {
                 return;

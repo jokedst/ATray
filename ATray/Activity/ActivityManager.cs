@@ -137,7 +137,7 @@ namespace ATray.Activity
             ActivityCache[key] = activities;
 
             var sharedFolder = Program.Configuration.SharedActivityStorage;
-            if (!Directory.Exists(sharedFolder)) return;
+            if (string.IsNullOrWhiteSpace(sharedFolder) || !Directory.Exists(sharedFolder)) return;
             try
             {
 #if DEBUG
@@ -146,7 +146,7 @@ namespace ATray.Activity
                 if (!Directory.Exists(sharedFolder))
                     Directory.CreateDirectory(sharedFolder);
 #endif
-                File.Copy(filename, Path.Combine(sharedFolder, $"{Environment.MachineName}_Acts{key}.bin"));
+                File.Copy(filename, Path.Combine(sharedFolder, $"{Environment.MachineName}_Acts{key}.bin"), true);
             }
             catch (Exception e)
             {

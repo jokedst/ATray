@@ -7,7 +7,7 @@
     /// </summary>
     /// <remarks> An activityspan never crosses midnight </remarks>
     [Serializable]
-    internal class ActivitySpan
+    public class ActivitySpan
     {
         public uint StartSecond;
         public uint EndSecond;

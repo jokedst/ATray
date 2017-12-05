@@ -1,11 +1,11 @@
-using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
-using SharpSvn;
-
 namespace RepositoryManager
 {
+    using System;
+    using System.Collections.ObjectModel;
+    using System.Diagnostics;
+    using System.IO;
+    using SharpSvn;
+
     /// <summary>
     /// Tracks a SVN repository
     /// </summary>
@@ -63,6 +63,7 @@ namespace RepositoryManager
             AutomaticAction = automaticAction;
         }
 
+        /// <inheritdoc/>
         public RepoStatus UpdateStatus()
         {
             var stopwatch = Stopwatch.StartNew();

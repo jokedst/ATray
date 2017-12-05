@@ -5,18 +5,18 @@ namespace RepositoryManager.Git
     using System.Linq;
     using CredentialManagement;
     using LibGit2Sharp;
-
-    /// <summary>
-    /// 
-    /// </summary>
+    
+    /// <inheritdoc/>
     public class GitProvider : ISourceControlProvider
     {
+        /// <inheritdoc/>
         public IEnumerable<string> FindRepositories(string rootPath)
         {
             var gitDirs = Directory.EnumerateDirectories(rootPath, ".git", SearchOption.AllDirectories);
             return gitDirs.Select(x => x.Substring(0, x.Length - 4));
         }
 
+        /// <inheritdoc/>
         public RepoStatus GetStatus(string repoPath)
         {
             using (var repo = new Repository(repoPath))

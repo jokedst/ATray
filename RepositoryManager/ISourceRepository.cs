@@ -49,11 +49,16 @@ namespace RepositoryManager
     /// </summary>
     public enum Schedule
     {
+        /// <summary> Never automatically updated (including application start, computer wake-up etc) </summary>
         Never=0,
-        EveryMinute=1,
-        FifthMinute=5,
-        EveryHour=60,
-        EveryDay=60*24
+        /// <summary> Check for updates every minute </summary>
+        EveryMinute = 1,
+        /// <summary> Check for updates every 5 minutes </summary>
+        FifthMinute = 5,
+        /// <summary> Check for updates every hour </summary>
+        EveryHour = 60,
+        /// <summary> Check for updates every day </summary>
+        EveryDay = 60*24
     }
 
     /// <summary>

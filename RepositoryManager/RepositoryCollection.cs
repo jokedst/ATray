@@ -239,7 +239,7 @@
             }
         }
 
-        protected void PullRepoTask(ISourceRepository repo)
+        private void PullRepoTask(ISourceRepository repo)
         {
             var previousStatus = repo.LastStatus;
             repo.Update(true);

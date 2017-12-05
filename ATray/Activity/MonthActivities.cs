@@ -19,7 +19,7 @@
     /// The file must end with the string "KTHXBYE" as encoded by BinaryWriter
     /// </remarks>
     [Serializable]
-    internal class MonthActivities
+    public class MonthActivities
     {
         public short Year;
         public byte Month;

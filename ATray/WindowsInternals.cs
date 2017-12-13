@@ -84,9 +84,17 @@
 
         public static void GetForegroundProcessInfo(out string name, out string title)
         {
-            var proc = GetForegroundProcess();
-            name = proc?.ProcessName;
-            title = proc?.MainWindowTitle;
+            name = title = string.Empty;
+            try
+            {
+                var proc = GetForegroundProcess();
+                name = proc?.ProcessName ?? string.Empty;
+                title = proc?.MainWindowTitle ?? string.Empty;
+            }
+            catch (InvalidOperationException)
+            {
+                // The process probably died between the calls
+            }
         }
 
         public static Process GetForegroundProcess()

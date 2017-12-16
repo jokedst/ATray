@@ -5,6 +5,7 @@ namespace ATray
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Windows.Forms;
 
@@ -83,6 +84,25 @@ namespace ATray
             {
                 code.Invoke();
             }
+        }
+    }
+
+    internal class TortoiseGit
+    {
+        public static ProcessStartInfo LogCommand(string repoLocation)
+        {
+            return new ProcessStartInfo(Program.TortoiseGitLocation, "/command:log") {WorkingDirectory = repoLocation};
+        }
+
+        public static void RunResolve(string repoLocation) => RunCommand("resolve", repoLocation);
+        public static void RunLog(string repoLocation) => RunCommand("log", repoLocation);
+        public static void RunCommit(string repoLocation) => RunCommand("commit", repoLocation);
+
+        public static void RunCommand(string command, string repoLocation)
+        {
+            var startInfo = new ProcessStartInfo(Program.TortoiseGitLocation, "/command:" + command)
+                {WorkingDirectory = repoLocation};
+            Process.Start(startInfo);
         }
     }
 }

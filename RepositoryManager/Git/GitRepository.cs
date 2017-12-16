@@ -1,6 +1,7 @@
 namespace RepositoryManager.Git
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
@@ -139,10 +140,13 @@ namespace RepositoryManager.Git
                     var status = repo.RetrieveStatus(new StatusOptions());
 
                     var dirty = status.IsDirty;
-
-                    //var behind = repo.Branches["HEAD"].TrackingDetails.BehindBy ?? 0;
                     var behind = (repo.Head.TrackingDetails.BehindBy ?? 0) != 0;
                     var ahead = (repo.Head.TrackingDetails.AheadBy ?? 0) != 0;
+
+                    var repoStatus = RepoStatus.Clean;
+                    if (dirty) repoStatus |= RepoStatus.LocalChanges;
+                    if (behind) repoStatus |= RepoStatus.RemoteUnmergedCommits;
+                    if (ahead) repoStatus |= RepoStatus.LocalUnpushedCommits;
 
                     if (dirty)
                     {
@@ -232,6 +236,35 @@ namespace RepositoryManager.Git
                 // Ignore exceptions, regardless this is invalid
             }
             return false;
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<string> PossibleActions(RepoStatus status)
+        {
+            var ret = new List<string> {"Update"};
+            switch (status)
+            {
+                case RepoStatus.Unknown: return Enumerable.Empty<string>();
+                case RepoStatus.Disconnected: return new[] {"Configure remote"};
+                case RepoStatus.Error: return new[] {"Error info"};
+                    
+            }
+
+            if (status.HasFlag(RepoStatus.LocalChanges))
+            {
+                ret.Add("Commit");
+            }
+            if (status.HasFlag(RepoStatus.RemoteUnmergedCommits))
+            {
+                
+            }
+                return ret;
+        }
+
+        /// <inheritdoc />
+        public void PerformAction(string actionName)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

@@ -28,6 +28,10 @@ namespace ATray
         internal static MainWindow MainWindowInstance;
         internal static Task UpdateTask = null;
 
+        internal static string GitBashLocation = null;
+        internal static string TortoiseGitLocation = null;
+
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -51,11 +55,37 @@ namespace ATray
             Configuration = new Configuration(ConfigurationFilePath);
 
             UpdateTask = Task.Run(UpdateApp);
+            DetectInstalledPrograms();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             MainWindowInstance = new MainWindow();
             Application.Run(MainWindowInstance);
+        }
+
+        private static void DetectInstalledPrograms()
+        {
+            var paths = Environment.GetEnvironmentVariable("Path")?.Split(';');
+            if (paths == null) return;
+
+            // Git bash
+            GitBashLocation = paths.Where(p => p.Contains(@"\Git\"))
+                                   .Select(p => Path.Combine(p, "git-bash.exe"))
+                                   .FirstOrDefault(File.Exists)
+                           ?? paths.Where(p => p.Contains(@"\Git\"))
+                                   .Select(Path.GetDirectoryName)
+                                   .Select(p => Path.Combine(p, "git-bash.exe"))
+                                   .FirstOrDefault(File.Exists);
+
+            if (GitBashLocation == null && File.Exists(@"C:\Program Files\Git\git-bash.exe"))
+                GitBashLocation = @"C:\Program Files\Git\git-bash.exe";
+
+            // TortoiseGit
+            TortoiseGitLocation = paths.Where(p => p.Contains(@"\TortoiseGit\"))
+                .Select(p => Path.Combine(p, "TortoiseGitProc.exe"))
+                .FirstOrDefault(File.Exists);
+            if (TortoiseGitLocation == null && File.Exists(@"C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe"))
+                TortoiseGitLocation = @"C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe";
         }
 
         private static async Task CheckForUpdates()

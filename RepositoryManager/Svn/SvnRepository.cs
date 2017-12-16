@@ -1,6 +1,7 @@
 namespace RepositoryManager
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics;
     using System.IO;
@@ -34,6 +35,16 @@ namespace RepositoryManager
             {
                 return client.TryGetRepository(Location, out Uri uri, out Guid id);
             }
+        }
+
+        public IEnumerable<string> PossibleActions(RepoStatus status)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void PerformAction(string actionName)
+        {
+            throw new NotImplementedException();
         }
 
         private static readonly TraceSource Log = new TraceSource(nameof(SvnRepository));

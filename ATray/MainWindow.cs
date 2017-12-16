@@ -16,6 +16,7 @@
     using Microsoft.Win32;
     using Newtonsoft.Json;
     using RepositoryManager;
+    using RepositoryManager.Git;
 
     public partial class MainWindow : Form
     {
@@ -52,6 +53,15 @@
                 var repoLocation = repo.Location; // for clojures
                 var submenu = new ToolStripMenuItem($"{repo.Name}: {Environment.NewLine}   {repo.LastStatus}");
                 submenu.Name = repoLocation;
+                if (repo is GitRepository && Program.TortoiseGitLocation != null)
+                {
+                    submenu.DropDownItems.Add(new ToolStripMenuItem("Log", null, (sender, args) => Process.Start(TortoiseGit.LogCommand(repoLocation))));
+                    if (repo.LastStatus.HasFlag(RepoStatus.LocalChanges))
+                        submenu.DropDownItems.Add(new ToolStripMenuItem("Commit", null,(s,a)=> TortoiseGit.RunCommit(repoLocation)));
+                }
+                if(repo is GitRepository && Program.GitBashLocation!=null)
+                    submenu.DropDownItems.Add(new ToolStripMenuItem("Git Bash", null, (sender, args) => Process.Start(new ProcessStartInfo(Program.GitBashLocation) { WorkingDirectory = repoLocation })));
+
                 submenu.DropDownItems.Add(new ToolStripMenuItem("Open in explorer", null, (sender, args) => Process.Start(repoLocation)));
                 submenu.DropDownItems.Add(new ToolStripMenuItem("Update", null, (sender, args) => Program.Repositories.UpdateRepo(repoLocation)));
                 var pullOption = new ToolStripMenuItem("Pull Changes", null,
@@ -238,7 +248,7 @@
 
         private void diskUsageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            const int ERROR_CANCELLED = 1223; //The operation was canceled by the user.
+            const int errorCancelled = 1223; //The operation was canceled by the user.
 
             var pipeName = Guid.NewGuid().ToString("N");
             //var ps = new PipeSecurity();
@@ -268,8 +278,8 @@
                 }
                 catch (Win32Exception ex)
                 {
-                    if (ex.NativeErrorCode != ERROR_CANCELLED) throw;
-                    MessageBox.Show("Why you no select Yes?");
+                    if (ex.NativeErrorCode != errorCancelled) throw;
+                    MessageBox.Show("Operation aborted");
                     return;
                 }
 

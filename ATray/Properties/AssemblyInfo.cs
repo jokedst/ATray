@@ -2,11 +2,11 @@
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("ATray")]
-[assembly: AssemblyDescription("A tray app that tells you to get up and move arount every 20 minutes")]
+[assembly: AssemblyDescription("A tray app that does stuuf, e.g. tells you to get up and move arount every 20 minutes")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Jokedst")]
 [assembly: AssemblyProduct("ATray")]
-[assembly: AssemblyCopyright("Copyright © Jokedst 2011")]
+[assembly: AssemblyCopyright("Copyright © Jokedst 2011-2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]

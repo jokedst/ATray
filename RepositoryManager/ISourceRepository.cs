@@ -1,6 +1,8 @@
 namespace RepositoryManager
 {
     using System;
+    using System.Collections.Generic;
+    using System.Runtime.InteropServices.ComTypes;
 
     /// <summary>
     /// Represents a version controlled directory
@@ -42,6 +44,19 @@ namespace RepositoryManager
         /// Checks if this is a valid repository
         /// </summary>
         bool Valid();
+
+        /// <summary>
+        /// List all possible actions when in given state
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        IEnumerable<string> PossibleActions(RepoStatus status);
+
+        /// <summary>
+        /// Performs a named action
+        /// </summary>
+        /// <param name="actionName"></param>
+        void PerformAction(string actionName);
     }
     
     /// <summary>

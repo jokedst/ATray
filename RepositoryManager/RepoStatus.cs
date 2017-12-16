@@ -30,16 +30,19 @@ namespace RepositoryManager
         Behind = Clean & RemoteUnmergedCommits,
 
         /// <summary> Local changes and remote updates. Can not merge cleanly or haven't tried </summary>
-        ChangesConflict = RemoteUnmergedCommits & LocalChanges,
+        ChangesConflict = Clean & RemoteUnmergedCommits & LocalChanges,
 
         /// <summary> Local commits and remote updates. Can not merge cleanly or haven't tried </summary>
-        Conflict = RemoteUnmergedCommits & LocalUnpushedCommits,
+        Conflict = Clean & RemoteUnmergedCommits & LocalUnpushedCommits,
 
         /// <summary> Local commits + changes and remote updates. Can not merge cleanly or haven't tried </summary>
-        ConflictAndModified = RemoteUnmergedCommits & LocalUnpushedCommits & LocalChanges,
+        ConflictAndModified = Clean & RemoteUnmergedCommits & LocalUnpushedCommits & LocalChanges,
 
         /// <summary> Local commits are not pushed </summary>
         Ahead = Clean & LocalUnpushedCommits,
+
+        /// <summary> Uncommitted changes and lLocal commits are not pushed </summary>
+        DirtyAhead = Clean & LocalChanges & LocalUnpushedCommits,
 
         /// <summary> (flag) has local uncommited changes </summary>
         LocalChanges = 16,

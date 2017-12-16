@@ -97,7 +97,7 @@
             // Update menu
             foreach (var menuRow in trayMenu.Items.Find(e.Location, false))
             {
-                menuRow.Text = e.Name + ": \n" + e.NewStatus;
+                this.UIThread(()=>menuRow.Text = e.Name + ": \n" + e.NewStatus);
             }
         }
 
@@ -250,19 +250,8 @@
         {
             const int errorCancelled = 1223; //The operation was canceled by the user.
 
+            // Use a named pipe to tlk to diskusage.exe, since it will run as admin.
             var pipeName = Guid.NewGuid().ToString("N");
-            //var ps = new PipeSecurity();
-            //ps.AddAccessRule(new PipeAccessRule("Users", PipeAccessRights.ReadWrite, AccessControlType.Allow));
-            //ps.AddAccessRule(new PipeAccessRule(WindowsIdentity.GetCurrent().Owner, PipeAccessRights.FullControl, AccessControlType.Allow));
-
-            //var pipeIn =
-            //    new NamedPipeClientStream("<ServerName>",
-            //        "<PipeName>",
-            //        PipeAccessRights.ReadData | PipeAccessRights.WriteAttributes,
-            //        PipeOptions.None,
-            //        System.Security.Principal.TokenImpersonationLevel.None,
-            //        System.IO.HandleInheritability.None);
-            //, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message, 
             using (NamedPipeServerStream pipeServer = new NamedPipeServerStream(pipeName, PipeDirection.In))
             {
                 var info = new ProcessStartInfo(@"diskusage\diskusage.exe")
@@ -292,14 +281,7 @@
                     JsonSerializer ser = new JsonSerializer();
                     rootNode = ser.Deserialize<DiskNode>(jsonReader);
                 }
-                //{
-                //    // Not sure if readline is best... this is a 60mb line after all
-                //    string temp;
-                //    while ((temp = sr.ReadLine()) != null)
-                //    {
-                //        Console.WriteLine("[CLIENT] Echo: ");
-                //    }
-                //}
+
                 duProcess.WaitForExit(1000);
             }
         }

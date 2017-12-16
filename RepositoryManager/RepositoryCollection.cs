@@ -12,6 +12,7 @@
     using System.Threading.Tasks;
     using Git;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
 
     /// <summary>
     /// Manages a set of repositories
@@ -20,7 +21,7 @@
     {
         private const int SampleFrequency = 5000;
         /// <summary> Settings for serializing and deserializing JSON </summary>
-        private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto };
+        private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto , Converters = new List<JsonConverter>{new StringEnumConverter()} };
 
         /// <summary> Internal list of repos </summary>
         private List<ISourceRepository> _repositories;

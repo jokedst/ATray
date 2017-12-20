@@ -1,4 +1,6 @@
-﻿namespace ATray
+﻿using System.Management;
+
+namespace ATray
 {
     using System;
     using System.Diagnostics;
@@ -115,6 +117,33 @@
                 // The process probably died between the calls
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Example on how to detect Chrome incognito windows, in case we e.g. don't want to save the window title for those
+        /// </summary>
+        /// <returns></returns>
+        public static int FindChromeIncognitoWindows()
+        {
+            int incog = 0;
+            foreach (var process in Process.GetProcessesByName("chrome"))
+            {
+                using (ManagementObjectSearcher mos = new ManagementObjectSearcher(string.Format("SELECT * FROM Win32_Process WHERE ProcessId = {0}", process.Id)))
+                {
+                    foreach (ManagementObject mo in mos.Get())
+                    {
+                        // This writes a big dump of process info
+                        //Console.WriteLine(mo.GetText(TextFormat.Mof));
+
+                        if (mo["CommandLine"].ToString().Contains("--disable-databases"))
+                        {
+                            // Found incognito window
+                            incog++;
+                        }
+                    }
+                }
+            }
+            return incog;
         }
 
         /// <summary>

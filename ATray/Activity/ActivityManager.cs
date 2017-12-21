@@ -140,13 +140,12 @@ namespace ATray.Activity
             if (string.IsNullOrWhiteSpace(sharedFolder) || !Directory.Exists(sharedFolder)) return;
             try
             {
+                var sharedFilename = $"{Environment.MachineName}_Acts{key}.bin";
 #if DEBUG
                 // Debugging must not overwrite prod files
-                sharedFolder = Path.Combine(sharedFolder, "DEBUG");
-                if (!Directory.Exists(sharedFolder))
-                    Directory.CreateDirectory(sharedFolder);
+                sharedFilename +=  ".debug";
 #endif
-                File.Copy(filename, Path.Combine(sharedFolder, $"{Environment.MachineName}_Acts{key}.bin"), true);
+                File.Copy(filename, Path.Combine(sharedFolder, sharedFilename), true);
             }
             catch (Exception e)
             {

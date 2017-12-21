@@ -3,9 +3,13 @@
 namespace ATray
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
+    using System.Runtime.Caching;
     using System.Runtime.InteropServices;
     using System.Text;
+    using RepositoryManager;
 
     /// <summary>
     /// WinAPI functions
@@ -32,6 +36,9 @@ namespace ATray
 
         [DllImport(@"User32", SetLastError = true, EntryPoint = "RegisterPowerSettingNotification", CallingConvention = CallingConvention.StdCall)]
         private static extern IntPtr RegisterPowerSettingNotification(IntPtr hRecipient, ref Guid PowerSettingGuid, int Flags);
+
+        [DllImport("kernel32.dll")]
+        public static extern int GetPrivateProfileSection(string lpAppName, byte[] lpszReturnBuffer, int nSize, string lpFileName);
 
 
         private static Guid GUID_CONSOLE_DISPLAY_STATE = Guid.Parse("6fe69556-704a-47a0-8f24-c28d936fda47");
@@ -89,15 +96,42 @@ namespace ATray
             name = title = string.Empty;
             try
             {
-                var proc = GetForegroundProcess();
+                var handle = GetForegroundWindow();
+                GetWindowThreadProcessId(handle, out uint processId);
+                var proc = Process.GetProcessById((int)processId);
                 name = proc?.ProcessName ?? string.Empty;
-                title = proc?.MainWindowTitle ?? string.Empty;
+
+
+                const int nChars = 256;
+                var stringBuffer = new StringBuilder(nChars);
+
+                if (GetWindowText(handle, stringBuffer, nChars) > 0)
+                    title = stringBuffer.ToString();
+
+
+                //var proc = GetForegroundProcess();
+                if(string.IsNullOrWhiteSpace(title))
+                    title = proc?.MainWindowTitle ?? string.Empty;
+
+                var pid = proc.Id;
+
+                if (!(_pidCmdCache.Get(pid.ToString()) is bool filtered))
+                {
+                    var cmd = GetCommandLine(pid);
+                    filtered = cmd.Contains("--user-data-dir");
+                    _pidCmdCache.Add(pid.ToString(), filtered, DateTime.Now.AddHours(1));
+                }
+                if(filtered)
+                    title = "[unknown]";
             }
+            catch (ArgumentException) { }
             catch (InvalidOperationException)
             {
                 // The process probably died between the calls
             }
         }
+        
+        private static readonly MemoryCache _pidCmdCache = new MemoryCache("Atray-pids");
 
         public static Process GetForegroundProcess()
         {
@@ -144,6 +178,19 @@ namespace ATray
                 }
             }
             return incog;
+        }
+
+        public static string GetCommandLine(int pid)
+        {
+            using (ManagementObjectSearcher mos = new ManagementObjectSearcher(
+                $"SELECT CommandLine FROM Win32_Process WHERE ProcessId = {pid}"))
+            {
+                foreach (var mo in mos.Get().OfType<ManagementObject>())
+                {
+                    return mo?["CommandLine"]?.ToString() ?? string.Empty;
+                }
+            }
+            return string.Empty;
         }
 
         /// <summary>

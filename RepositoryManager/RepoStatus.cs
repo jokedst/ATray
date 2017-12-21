@@ -5,8 +5,33 @@ namespace RepositoryManager
     /// <summary>
     /// Current (or last known) status on a repository
     /// </summary>
-    [Flags]
     public enum RepoStatus
+    {
+        /// <summary> Update has never run  </summary>
+        Unknown,
+        /// <summary> No origin set </summary>
+        Disconnected,
+        /// <summary> No local changes, up to date with remote </summary>
+        Clean,
+        /// <summary> Local changes only </summary>
+        Dirty,
+        /// <summary> No local changes, behind remote </summary>
+        Behind,
+        /// <summary> Local changes and remote updates. Can not merge cleanly or haven't tried </summary>
+        Conflict,
+        /// <summary> Local changes and remote updates. Can merge cleanly </summary>
+        Mergeable,
+        /// <summary> Could not retrieve status </summary>
+        Error,
+        /// <summary> Local commits are not pushed </summary>
+        Ahead
+    }
+
+    /// <summary>
+    /// Attempt to flagify the enum - failed 
+    /// </summary>
+    [Flags]
+    public enum RepoStatusFlags
     {
         /// <summary> Update has never run  </summary>
         Unknown = 0,

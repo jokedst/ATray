@@ -56,10 +56,10 @@
                 if (repo is GitRepository && Program.TortoiseGitLocation != null)
                 {
                     submenu.DropDownItems.Add(new ToolStripMenuItem("Log", null, (sender, args) => Process.Start(TortoiseGit.LogCommand(repoLocation))));
-                    if (repo.LastStatus.HasFlag(RepoStatus.LocalChanges))
+                    if (repo.LastStatus.HasFlag(RepoStatus.Dirty))
                         submenu.DropDownItems.Add(new ToolStripMenuItem("Commit", null,(s,a)=> TortoiseGit.RunCommit(repoLocation)));
                 }
-                if(repo is GitRepository && Program.GitBashLocation!=null)
+                if(repo is GitRepository && Program.GitBashLocation != null)
                     submenu.DropDownItems.Add(new ToolStripMenuItem("Git Bash", null, (sender, args) => Process.Start(new ProcessStartInfo(Program.GitBashLocation) { WorkingDirectory = repoLocation })));
 
                 submenu.DropDownItems.Add(new ToolStripMenuItem("Open in explorer", null, (sender, args) => Process.Start(repoLocation)));

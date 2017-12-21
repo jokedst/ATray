@@ -37,6 +37,8 @@ namespace ATray
         private MonthActivities _shownHistory;
         private byte[] _indexToDaynumber;
 
+        private bool _showSharedHistory = true; // true is debug
+
         public ActivityHistoryForm()
         {
             InitializeComponent();

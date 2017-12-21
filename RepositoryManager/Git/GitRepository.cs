@@ -143,10 +143,10 @@ namespace RepositoryManager.Git
                     var behind = (repo.Head.TrackingDetails.BehindBy ?? 0) != 0;
                     var ahead = (repo.Head.TrackingDetails.AheadBy ?? 0) != 0;
 
-                    var repoStatus = RepoStatus.Clean;
-                    if (dirty) repoStatus |= RepoStatus.LocalChanges;
-                    if (behind) repoStatus |= RepoStatus.RemoteUnmergedCommits;
-                    if (ahead) repoStatus |= RepoStatus.LocalUnpushedCommits;
+                    var repoStatus = RepoStatusFlags.Clean;
+                    if (dirty) repoStatus |= RepoStatusFlags.LocalChanges;
+                    if (behind) repoStatus |= RepoStatusFlags.RemoteUnmergedCommits;
+                    if (ahead) repoStatus |= RepoStatusFlags.LocalUnpushedCommits;
 
                     if (dirty)
                     {
@@ -250,13 +250,9 @@ namespace RepositoryManager.Git
                     
             }
 
-            if (status.HasFlag(RepoStatus.LocalChanges))
+            if (status==(RepoStatus.Dirty))
             {
                 ret.Add("Commit");
-            }
-            if (status.HasFlag(RepoStatus.RemoteUnmergedCommits))
-            {
-                
             }
                 return ret;
         }

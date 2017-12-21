@@ -61,6 +61,8 @@ namespace ATray
             Application.SetCompatibleTextRenderingDefault(false);
             MainWindowInstance = new MainWindow();
             Application.Run(MainWindowInstance);
+
+            Trace.TraceInformation("LEAVING!");
         }
 
         private static void DetectInstalledPrograms()

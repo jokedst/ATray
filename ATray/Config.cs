@@ -43,6 +43,20 @@
             }
             _currentFileName = filename;
             if (filename!=null) ReadFromIniFile(filename);
+
+            var applicationName = Application.ProductName;
+#if DEBUG
+            applicationName += "_DEBUG";
+#endif
+            this._autostart = new AutoStart(applicationName, Application.ExecutablePath);
+
+            ValidateLoadedValues();
+        }
+
+        private void ValidateLoadedValues()
+        {
+            if(_autostart.IsSetToAutoStart() != StartAtLogin)
+                _autostart.SetStartup(StartAtLogin);
         }
 
         public Configuration Clone()
@@ -51,6 +65,7 @@
         }
 
         private string _currentFileName;
+        private readonly AutoStart _autostart;
 
         /// <summary>
         /// Reads all (existing) settings from an ini-file
@@ -137,37 +152,7 @@
 
         [DllImport("kernel32.dll")]
         private static extern int GetPrivateProfileSection(string lpAppName, byte[] lpszReturnBuffer, int nSize, string lpFileName);
-
-        /// <summary>
-        /// Set application to start at user login to windows
-        /// </summary>
-        /// <param name="startAtWindowsLogin"></param>
-        private void SetStartup(bool startAtWindowsLogin)
-        {
-            try
-            {
-                var runKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
-                if (runKey == null)
-                    throw new Exception("Can not open windows registry key");
-
-                if (startAtWindowsLogin)
-                {
-                    // The app is usually installed in AppData\Local\ATray\app-1.X.X , but since this changes between versions
-                    // the autorun would stop woring on update. But since there is a ATray.exe in AppData\Local\ATray as well,
-                    // we can use that instead (it just starts the current version)
-                    var parentExe = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "..", Path.GetFileName(Application.ExecutablePath));
-                    var exeToStart = File.Exists(parentExe) ? parentExe : Application.ExecutablePath;
-                    runKey.SetValue(Application.ProductName, exeToStart);
-                }
-                else
-                    runKey.DeleteValue(Application.ProductName, false);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show($"Could not {(startAtWindowsLogin ? "activate" : "deactivate")} autostart, error: {e.Message}");
-            }
-        }
-
+        
         /// <summary>
         /// Validates new setting values
         /// </summary>
@@ -179,7 +164,7 @@
 
             // If all ok, act on changes
             if (StartAtLogin != newConfig.StartAtLogin)
-                SetStartup(newConfig.StartAtLogin);
+                _autostart.SetStartup(newConfig.StartAtLogin);
             return true;
         }
     }

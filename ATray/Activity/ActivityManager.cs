@@ -14,6 +14,7 @@ namespace ATray.Activity
     {
         private const string SavefilePattern = "Acts{0}.bin";
         private static readonly Dictionary<int, MonthActivities> ActivityCache = new Dictionary<int, MonthActivities>();
+        private static readonly Dictionary<int,Dictionary<string, MonthActivities>> SharedActivityCache = new Dictionary<int, Dictionary<string, MonthActivities>>();
         private static readonly int ActivityFileFormatVersion = int.Parse(ConfigurationManager.AppSettings["ActivityFileFormatVersion"] ?? "1");
 
         static ActivityManager()
@@ -49,7 +50,7 @@ namespace ATray.Activity
             var activities = GetMonthActivity((short) now.Year, (byte) now.Month);
             var day = (byte) now.Day;
             if (!activities.Days.ContainsKey(day))
-                activities.Days.Add(day, new List<ActivitySpan>());
+                activities.Days.Add(day, new DayActivityList(activities, day));
 
             var appIndex = activities.GetApplicationNameIndex(appName);
             var titleIndex = activities.GetWindowTitleIndex(appTitle);
@@ -74,7 +75,7 @@ namespace ATray.Activity
             }
 
             // Can't update previous activity, create a new one
-            activities.Days[day].Add(new ActivitySpan
+            activities.Days[day].Add(new ActivitySpan(activities, day)
             {
                 StartSecond = currentSecond - intervalLength + 1,
                 EndSecond = currentSecond,
@@ -107,9 +108,31 @@ namespace ATray.Activity
             return newMonth;
         }
 
+        public static Dictionary<string, MonthActivities> GetSharedMonthActivities(short year, byte month)
+        {
+            var key = (year * 100) + month;
+            
+            if (SharedActivityCache.ContainsKey(key))
+                return SharedActivityCache[key];
+
+            var sharedPath = Program.Configuration.SharedActivityStorage;
+            foreach (var file in Directory.EnumerateFiles(sharedPath, $"*_Acts{key}.bin", SearchOption.TopDirectoryOnly))
+            {
+                var monthActivities = new MonthActivities(file);
+                var computer = Path.GetFileName(file).Split('_')[0];
+                if (!SharedActivityCache.ContainsKey(key))
+                    SharedActivityCache.Add(key, new Dictionary<string, MonthActivities>());
+                SharedActivityCache[key].Add(computer, monthActivities);
+            }
+
+            if (SharedActivityCache.ContainsKey(key))
+                return SharedActivityCache[key];
+            return new Dictionary<string, MonthActivities>();
+        }
+
         private static readonly Regex FileNameParser = new Regex(string.Format(SavefilePattern, @"(\d*)"), RegexOptions.Compiled);
 
-        public static SortedDictionary<int, string> ListAvailableMonths()
+        public static SortedDictionary<int, string> ListAvailableMonthsFiles(bool includeShared = false)
         {
             var result = new SortedDictionary<int, string>();
             var fileFilter = string.Format(SavefilePattern, "*");
@@ -119,7 +142,46 @@ namespace ATray.Activity
                 result.Add(int.Parse(match.Groups[1].Value), file);
             }
 
+            if (includeShared)
+            {
+                fileFilter = "*_" + fileFilter;
+                foreach (var file in Directory.EnumerateFiles(Program.Configuration.SharedActivityStorage, fileFilter, SearchOption.TopDirectoryOnly))
+                {
+                    var match = FileNameParser.Match(file);
+                    var key = int.Parse(match.Groups[1].Value);
+                    if (result.ContainsKey(key))
+                        result[key] += "|" + file;
+                    else
+                        result.Add(key, file);
+                }
+            }
+
             return result;
+        }
+
+        public static List<int> ListAvailableMonths(bool includeShared = false)
+        {
+            var result = new HashSet<int>();
+            var fileFilter = string.Format(SavefilePattern, "*");
+            foreach (var file in Directory.EnumerateFiles(Program.SettingsDirectory, fileFilter, SearchOption.TopDirectoryOnly))
+            {
+                var match = FileNameParser.Match(file);
+                result.Add(int.Parse(match.Groups[1].Value));
+            }
+
+            if (includeShared)
+            {
+                fileFilter = "*_" + fileFilter;
+                foreach (var file in Directory.EnumerateFiles(Program.Configuration.SharedActivityStorage, fileFilter, SearchOption.TopDirectoryOnly))
+                {
+                    var match = FileNameParser.Match(file);
+                    if(!match.Success) continue;
+                    var key = int.Parse(match.Groups[1].Value);
+                    result.Add(key);
+                }
+            }
+
+            return result.OrderBy(x=>x).ToList();
         }
 
         private static void StoreActivity(MonthActivities activities)
@@ -143,7 +205,9 @@ namespace ATray.Activity
                 var sharedFilename = $"{Environment.MachineName}_Acts{key}.bin";
 #if DEBUG
                 // Debugging must not overwrite prod files
-                sharedFilename +=  ".debug";
+                sharedFolder = Path.Combine(sharedFolder, "DEBUG");
+                if (!Directory.Exists(sharedFolder))
+                    Directory.CreateDirectory(sharedFolder);
 #endif
                 File.Copy(filename, Path.Combine(sharedFolder, sharedFilename), true);
             }

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Windows.Forms;
 
@@ -23,18 +24,24 @@
     {
         public short Year;
         public byte Month;
-        public readonly Dictionary<byte, List<ActivitySpan>> Days = new Dictionary<byte, List<ActivitySpan>>();
+        public readonly Dictionary<byte, DayActivityList> Days = new Dictionary<byte, DayActivityList>();
         public List<string> ApplicationNames = new List<string>();
         public List<string> WindowTitles = new List<string>();
+
+        public string ComputerName { get; }
 
         public MonthActivities(short year, byte month)
         {
             Year = year;
             Month = month;
+            ComputerName = Environment.MachineName;
         }
 
         public int GetApplicationNameIndex(string appName) => ApplicationNames.IndexOfOrAdd(appName);
         public int GetWindowTitleIndex(string appName) => WindowTitles.IndexOfOrAdd(appName);
+
+        public uint EarliestSecond => Days.Count == 0 ? 0 : Days.Min(x => x.Value.FirstSecond);
+        public uint LatestSecond => Days.Count == 0 ? 0 : Days.Max(x => x.Value.LastSecond);
 
         private void LoadFileV1(BinaryReader br, string filepath)
         {
@@ -45,10 +52,10 @@
             {
                 var dayNumber = br.ReadByte();
                 var actCount = br.ReadInt32();
-                var acts = new List<ActivitySpan>();
+                var acts = new DayActivityList(this, dayNumber);
                 for (int a = 0; a < actCount; a++)
                 {
-                    var act = new ActivitySpan
+                    var act = new ActivitySpan(this, acts)
                     {
                         StartSecond = br.ReadUInt32(),
                         EndSecond = br.ReadUInt32(),
@@ -75,10 +82,10 @@
             {
                 var dayNumber = br.ReadByte();
                 var actCount = br.ReadInt32();
-                var acts = new List<ActivitySpan>();
+                var acts = new DayActivityList(this, dayNumber);
                 for (int a = 0; a < actCount; a++)
                 {
-                    var act = new ActivitySpan
+                    var act = new ActivitySpan(this, acts)
                     {
                         StartSecond = br.ReadUInt32(),
                         EndSecond = br.ReadUInt32(),
@@ -130,6 +137,11 @@
                         throw new Exception("Could not read file " + filepath + ", incorrect header");
                 }
             }
+
+            var fileNameParts = Path.GetFileName(filepath).Split('_');
+            if (fileNameParts.Length > 1 && fileNameParts[1].StartsWith("Acts"))
+                ComputerName = fileNameParts[0];
+            else ComputerName = Environment.MachineName;
         }
 
         /// <summary>

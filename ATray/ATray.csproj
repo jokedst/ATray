@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ATray</RootNamespace>
     <AssemblyName>ATray</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -46,6 +46,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -56,6 +57,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
@@ -143,6 +145,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activity\DayActivityList.cs" />
     <Compile Include="AutoStart.cs" />
     <Compile Include="Dialogs\ActivityHistoryForm.cs">
       <SubType>Form</SubType>
@@ -153,6 +156,9 @@
     <Compile Include="Activity\ActivityManager.cs" />
     <Compile Include="Activity\ActivitySpan.cs" />
     <Compile Include="Activity\MonthActivities.cs" />
+    <Compile Include="Dialogs\ActivityHistoryFormDrawing.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Dialogs\AddRepositoryForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -167,6 +173,7 @@
       <DependentUpon>DiskUsageForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\OpenFolderDialog.cs" />
+    <Compile Include="Dialogs\ScreenSlot.cs" />
     <Compile Include="DiskNode.cs" />
     <Compile Include="FloatingLabel.cs">
       <SubType>Component</SubType>

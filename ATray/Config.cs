@@ -57,6 +57,18 @@
         {
             if(_autostart.IsSetToAutoStart() != StartAtLogin)
                 _autostart.SetStartup(StartAtLogin);
+
+#if DEBUG
+            if (string.IsNullOrWhiteSpace(SharedActivityStorage)) return;
+            var sharedPath = Path.GetFullPath(SharedActivityStorage);
+            if (sharedPath.Last()!=Path.DirectorySeparatorChar) sharedPath += Path.DirectorySeparatorChar;
+            if (!sharedPath.EndsWith("DEBUG") && Directory.Exists(sharedPath))
+            {
+                sharedPath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
+
+
+            }
+#endif
         }
 
         public Configuration Clone()

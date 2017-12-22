@@ -59,13 +59,29 @@ namespace ATray
                 .Any();
         }
 
-        public static TValue GetValueOrDefaultx<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
+        public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
         {
             return dictionary.ContainsKey(key) ? dictionary[key] : default(TValue);
         }
-        public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue = default(TValue))
+        public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue)
         {
             return dictionary.ContainsKey(key) ? dictionary[key] : defaultValue;
+        }
+
+        public static TResult MinOrDefault<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
+        {
+            if (source == null) return default(TResult);
+            var list = source.Select<TSource, TResult>(selector).ToList();
+            if (list.Count == 0) return default(TResult);
+            return list.Min<TResult>();
+        }
+
+        public static TResult MaxOrDefault<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
+        {
+            if (source == null) return default(TResult);
+            var list = source.Select<TSource, TResult>(selector).ToList();
+            if (list.Count == 0) return default(TResult);
+            return list.Max<TResult>();
         }
     }
 

@@ -1,26 +1,25 @@
-﻿using System.Diagnostics;
-using System.Drawing.Imaging;
-
-namespace ATray
+﻿namespace ATray
 {
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.Drawing.Imaging;
     using System.Linq;
+    using System.Text;
     using System.Windows.Forms;
     using Activity;
 
     public partial class ActivityHistoryForm : Form
     {
         // 40 pixels margins
-        private const int GraphStartPixel = 40;
-        private const int GraphHeight = 50;
+        public const int GraphStartPixel = 40;
+
+        public const int GraphHeight = 50;
         private const int GraphSpacing = 20;
         private const int TimeLabelWidth = 40;
 
         private readonly List<Label> _timeLabels = new List<Label>();
         private readonly FloatingLabel _tipLabel = new FloatingLabel();
-        private Bitmap _historyGraph;
         private int _lastWindowWidth;
         private DateTime _lastHistoryRedraw = DateTime.MinValue;
 
@@ -34,7 +33,7 @@ namespace ATray
         private uint _graphWidth;
         private uint _graphSeconds;
         private uint _graphFirstSecond;
-        private MonthActivities _shownHistory;
+        private Dictionary<string, MonthActivities> _shownHistory;
         private byte[] _indexToDaynumber;
 
         private bool _showSharedHistory = true; // true is debug
@@ -58,7 +57,7 @@ namespace ATray
         private void InitHistoryDropDown()
         {
             // Check what files exists
-            var rawMonths = ActivityManager.ListAvailableMonths();
+            var rawMonths = ActivityManager.ListAvailableMonths(_showSharedHistory);
             if (rawMonths.Count == 0)
             {
                 MessageBox.Show("No history to show!");
@@ -66,13 +65,13 @@ namespace ATray
                 return;
             }
 
-            var months = rawMonths.Select(x => Tuple.Create(x.Key, new DateTime(x.Key / 100, x.Key % 100, 1).ToString("MMMM yyyy"))).ToList();
+            var months = rawMonths.Select(x => Tuple.Create(x, new DateTime(x / 100, x % 100, 1).ToString("MMMM yyyy"))).ToList();
             monthDropDown.ValueMember = "item1";
             monthDropDown.DisplayMember = "item2";
             monthDropDown.DataSource = months;
-            monthDropDown.SelectedValue = rawMonths.Keys.LastOrDefault();
+            monthDropDown.SelectedValue = rawMonths.LastOrDefault();
 #if DEBUG
-            monthDropDown.SelectedValue = rawMonths.Keys.LastOrDefault() - 1;
+          //  monthDropDown.SelectedValue = rawMonths.LastOrDefault() - 1;
 #endif
 
             nextMonthButton.Enabled = false;
@@ -84,6 +83,9 @@ namespace ATray
             if (_tipLabel.Visible) _tipLabel.Hide();
         }
 
+        /// <summary>
+        /// Update tooltip when mouse moves over picture
+        /// </summary>
         private void HistoryPictureOnMouseMove(object sender, MouseEventArgs e)
         {
             var p = Cursor.Position;
@@ -92,33 +94,40 @@ namespace ATray
 
             if (_lastPosition.X == x && _lastPosition.Y == y && _lastScrollPositionY == e.Y) return;
             if (e.X < GraphStartPixel) return;
+            if (_indexToDaynumber.Length == 0) return;
 
             _lastPosition = new Point(x, y);
-            var second = (((uint)e.X - GraphStartPixel) * _graphSeconds / _graphWidth) + _graphFirstSecond;
 
-            var absoluteY = y - historyPicture.Location.Y - Location.Y;
+           // var absoluteY = y - historyPicture.Location.Y - Location.Y;
             var dayIndex = (e.Y - GraphSpacing / 2) / (GraphHeight + GraphSpacing);
             if (dayIndex < 0) dayIndex = 0;
             if (dayIndex >= _indexToDaynumber.Length) dayIndex = _indexToDaynumber.Length - 1;
             var dayNumber = _indexToDaynumber[dayIndex];
-            var activity = _shownHistory.Days[dayNumber].FirstOrDefault(a => a.EndSecond >= second);
-            if (activity?.StartSecond > second) activity = null;
 
-            if (activity == null)
-            {
-                _tipLabel.Text = SecondToTime(second) + " (no activity)";
-            }
+            var second = (((uint)e.X - GraphStartPixel) * _graphSeconds / _graphWidth) + _graphFirstSecond;
+
+            var graphPixel = e.X - GraphStartPixel;
+            var slot=    DaySlots.GetValueOrDefault(dayNumber).FirstOrDefault(d => d.EndX >= graphPixel);
+            if (slot == null || slot.StartX > graphPixel)
+                _tipLabel.Text = $"{SecondToTime(second)} (no activity)";
             else
-            {
-                _tipLabel.Text = $"{SecondToTime(second)} {_shownHistory.ApplicationNames[activity.ApplicationNameIndex]}\r{_shownHistory.WindowTitles[activity.WindowTitleIndex]}";
-            }
-            //var astr = $"Act: {activity?.WasActive.ToString() ?? "unknown"}";
-            //var astr = new DateTime(_shownHistory.Year, _shownHistory.Month, dayNumber).DayOfWeek + " " + dayNumber +"/" + _shownHistory.Month;
+                _tipLabel.Text = $"{SecondToTime(second)} {slot.Describe(_showSharedHistory)}";
 
-            // TODO: Look up activity item
-            //_tipLabel.Text = SecondToTime(second);
-            //_tipLabel.Text = $"{(e.Y - GraphSpacing / 2)} ({absoluteY}) day {dayIndex}";
-            //_tipLabel.Text = astr;
+            //var activityDesc = new StringBuilder();
+            //foreach (var computer in _shownHistory)
+            //{
+            //    var activity = computer.Value.Days.GetValueOrDefault(dayNumber)?
+            //        .FirstOrDefault(a => a.EndSecond >= second);
+            //    if (activity == null || activity.StartSecond > second)
+            //        continue;
+            //    activityDesc.Append(computer.Key)
+            //        .Append(": ")
+            //        .Append(computer.Value.ApplicationNames[activity.ApplicationNameIndex]);
+            //    var title = computer.Value.WindowTitles[activity.WindowTitleIndex];
+            //    if (!string.IsNullOrWhiteSpace(title)) activityDesc.Append("\r").Append(title);
+            //} 
+            //if(activityDesc.Length==0) activityDesc.Append(" (no activity)");
+            //_tipLabel.Text = $"{SecondToTime(second)} {activityDesc}";
 
             _tipLabel.Location = _lastPosition;
             _lastScrollPositionY = e.Y;
@@ -140,84 +149,6 @@ namespace ATray
             return $"{hour}:{minute:00}";
         }
 
-        private void DrawHistory(Bitmap target, MonthActivities history)
-        {
-            // Figure out when first activity started and when last activity ended (for the whole month)
-            var firstTime = (uint)60 * 60 * 24;
-            var lastTime = (uint)0;
-            foreach (List<ActivitySpan> activities in history.Days.Values)
-            {
-                firstTime = firstTime < activities.First().StartSecond ? firstTime : activities.First().StartSecond;
-                lastTime = lastTime > activities.Last().EndSecond ? lastTime : activities.Last().EndSecond;
-            }
-
-            // Create list of programs used, the most used firts
-            var programs = history.Days.Values.SelectMany(x => x.Where(a => a.WasActive))
-                .GroupBy(x => x.ApplicationNameIndex).ToDictionary(x => x.Key,
-                    spans => spans.Select(x => (int) x.EndSecond - x.StartSecond).Sum()).OrderByDescending(x=>x.Value);
-            // Assign unique colors to the most used programs
-            var colors = new[] {Color.BlueViolet,Color.CornflowerBlue, Color.Green, Color.DarkRed};
-            var brushes = colors.Select(x => new SolidBrush(x)).ToArray();
-            var brushLookup = programs.Zip(brushes, (program, color) => new {program, color}).ToDictionary(x=>x.program.Key,x=>x.color);
-
-            _graphFirstSecond = firstTime;
-
-            var graphicsObj = Graphics.FromImage(_historyGraph);
-            var pen = new Pen(Color.Olive, 1);
-            var brush = new SolidBrush(Color.Olive);
-
-            _graphWidth = (uint) (target.Width - 80);
-            _graphSeconds = lastTime - firstTime;
-            var daylineHeight = 2;
-
-            // Draw hour lines
-            var greypen = new Pen(Color.LightGray, 1);
-            var firstHour = (int)Math.Ceiling(firstTime / 3600.0);
-            var lastHour = (int)Math.Floor(lastTime / 3600.0);
-            for (int x = firstHour; x <= lastHour; x++)
-            {
-                var xpixel = (((x * 3600) - firstTime) * _graphWidth) / _graphSeconds + GraphStartPixel;
-                graphicsObj.DrawLine(greypen, xpixel, 10, xpixel,target.Height);
-            }
-
-            // Draw each day
-            int currentY = GraphSpacing;
-            foreach (var dayNumber in history.Days.Keys.OrderBy(x => x))
-            {
-                // at what pixel is this day first and last activities?
-                var todaysFirstSecond = 0u;
-                var todaysLastSecond = 0u;
-                if (history.Days[dayNumber].Any(x => x.WasActive))
-                {
-                    todaysFirstSecond = history.Days[dayNumber].First(x => x.WasActive).StartSecond;
-                    todaysLastSecond = history.Days[dayNumber].Last(x => x.WasActive).EndSecond;
-                }
-
-                var startpixel = ((todaysFirstSecond - firstTime) * _graphWidth) / _graphSeconds;
-                var endPixel = ((todaysLastSecond - firstTime) * _graphWidth) / _graphSeconds;
-
-                // Draw a small line representing the whole day
-                var graphbox = new Rectangle((int)startpixel + GraphStartPixel, currentY + GraphHeight / 2 - daylineHeight / 2, (int)(endPixel - startpixel) + 1, daylineHeight);
-                graphicsObj.DrawRectangle(pen, graphbox);
-
-                foreach (var span in history.Days[dayNumber])
-                {
-                    startpixel = ((span.StartSecond - firstTime) * _graphWidth) / _graphSeconds;
-                    endPixel = ((span.EndSecond - firstTime) * _graphWidth) / _graphSeconds;
-
-                    var top = currentY + (span.WasActive ? 0 : 15);
-                    var boxheight = span.WasActive ? GraphHeight - 1 : GraphHeight - 31;
-
-                    graphbox = new Rectangle((int)startpixel + GraphStartPixel, top, (int)(endPixel - startpixel) + 1, boxheight);
-
-                    //graphicsObj.DrawRectangle(pen, graphbox);
-                    graphicsObj.FillRectangle(brushLookup.GetValueOrDefault(span.ApplicationNameIndex,  brush), graphbox);
-                }
-                currentY += GraphSpacing + GraphHeight;
-            }
-            graphicsObj.Dispose();
-        }
-
         private void ActivityHistoryForm_Paint(object sender, PaintEventArgs e)
         {
             // If we're showing the current month, redraw regularly so the image don't get stale
@@ -234,13 +165,18 @@ namespace ATray
             }
 
             // get activity for selected year/month
-            var history = ActivityManager.GetMonthActivity((short)(_currentMonth / 100), (byte)(_currentMonth % 100));
+            var year = (short)(_currentMonth / 100);
+            var month = (byte)(_currentMonth % 100);
+            var history = _showSharedHistory
+                ? ActivityManager.GetSharedMonthActivities(year, month)
+                : new Dictionary<string, MonthActivities>{
+                    [string.Empty] = ActivityManager.GetMonthActivity(year, month)};
             _shownHistory = history;
-            _indexToDaynumber = _shownHistory.Days.Keys.OrderBy(x => x).ToArray();
-
+            _indexToDaynumber = _shownHistory.SelectMany(x=>x.Value.Days.Keys).Distinct().OrderBy(x => x).ToArray();
+         
             // Create a new bitmap that is as wide as the windows and as high as it needs to be to fit all days
             var width = ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth;
-            var height = history.Days.Count * (GraphHeight + GraphSpacing) + GraphSpacing;
+            var height = _indexToDaynumber.Length * (GraphHeight + GraphSpacing) + GraphSpacing;
 
             // Only create a new Bitmap if needed
             Bitmap lastHistoryGraph = null;
@@ -252,7 +188,7 @@ namespace ATray
             }
 
             // Make sure we have as many labels as we need
-            for (int i = _timeLabels.Count; i < history.Days.Count * 4; i++)
+            for (int i = _timeLabels.Count; i < _indexToDaynumber.Length * 4; i++)
             {
                 var label = new Label();
                 label.AutoSize = true;
@@ -267,12 +203,14 @@ namespace ATray
 
             // Put correct text on labels
             int index = 0;
-            foreach (var dayNumber in history.Days.Keys.OrderBy(x => x))
+            foreach (var dayNumber in _indexToDaynumber)
             {
-                var todaysFirstSecond = history.Days[dayNumber].FirstOrDefault(x => x.WasActive)?.StartSecond??0;
-                var todaysLastSecond = history.Days[dayNumber].LastOrDefault(x => x.WasActive)?.EndSecond??0;
+                var todaysFirstSecond = history.MinOrDefault(c => c.Value.Days.GetValueOrDefault(dayNumber)?
+                                            .FirstOrDefault(x => x.WasActive)?.StartSecond) ?? 0;
+                var todaysLastSecond = history.MaxOrDefault(c => c.Value.Days.GetValueOrDefault(dayNumber)?
+                                           .LastOrDefault(x => x.WasActive)?.EndSecond) ?? 0;
 
-                _timeLabels[index++].Text = new DateTime(history.Year, history.Month, dayNumber).DayOfWeek + " " + dayNumber + "/" + history.Month;
+                _timeLabels[index++].Text = new DateTime(year, month, dayNumber).DayOfWeek + " " + dayNumber + "/" + month;
                 _timeLabels[index++].Text = SecondToTime(todaysFirstSecond);
                 _timeLabels[index].Location = new Point(width - TimeLabelWidth, _timeLabels[index].Location.Y);
                 _timeLabels[index++].Text = SecondToTime(todaysLastSecond);
@@ -280,7 +218,7 @@ namespace ATray
                 _timeLabels[index++].Text = "("+ SecondToTime(todaysLastSecond - todaysFirstSecond)+")";
             }
 
-            DrawHistory(_historyGraph,history);
+            DrawHistory(_historyGraph, history);
 
             // Replace old Bitmap if we had to create a new
             if (lastHistoryGraph != null || historyPicture.Image == null)
@@ -351,4 +289,5 @@ namespace ATray
             return base.ScrollToControl(activeControl);
         }
     }
+    
 }

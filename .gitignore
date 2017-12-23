@@ -13,3 +13,5 @@
 /.vs
 *.user
 /debug.log
+
+/RepositoryManager.Tests/TestRepos

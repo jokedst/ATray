@@ -52,6 +52,20 @@
             Icon = new Icon(GetType(), "debug.ico");
 #endif
             InitHistoryDropDown();
+            InitComputerDropDown();
+        }
+
+        private void InitComputerDropDown()
+        {
+            var computers = ActivityManager.GetSharedHistoryComputers().Select(x =>new Tuple<string,string> (x, x)).ToList();
+            computers.RemoveAll(x => x.Item1 == Environment.MachineName);
+            computers.Add(new Tuple<string, string>("All","<all>"));
+            computers.Insert(0, new Tuple<string, string>(string.Empty,$"This computer ({Environment.MachineName})"));
+
+            computerDropDown.ValueMember = "item1";
+            computerDropDown.DisplayMember = "item2";
+            computerDropDown.DataSource = computers;
+            computerDropDown.SelectedValue = _showSharedHistory ? "<all>" : string.Empty;
         }
 
         private void InitHistoryDropDown()
@@ -287,6 +301,18 @@
             //return this.DisplayRectangle.Location;
 
             return base.ScrollToControl(activeControl);
+        }
+
+        private void computerDropDown_SelectedValueChanged(object sender, EventArgs e)
+        {
+            var value = (string)computerDropDown.SelectedValue;
+            if (string.IsNullOrEmpty(value)) _showSharedHistory = false;
+            else if(value=="<all>") _showSharedHistory = true;
+
+            InitHistoryDropDown();
+
+            _forceRedraw = true;
+            Refresh();
         }
     }
     

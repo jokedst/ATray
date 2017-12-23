@@ -17,6 +17,12 @@ namespace ATray.Activity
         private static readonly Dictionary<int,Dictionary<string, MonthActivities>> SharedActivityCache = new Dictionary<int, Dictionary<string, MonthActivities>>();
         private static readonly int ActivityFileFormatVersion = int.Parse(ConfigurationManager.AppSettings["ActivityFileFormatVersion"] ?? "1");
 
+#if DEBUG
+        private static string SharedPath => Path.Combine(Program.Configuration.SharedActivityStorage, "DEBUG");
+#else
+        private static string SharedPath => Program.Configuration.SharedActivityStorage;
+#endif
+
         static ActivityManager()
         {
             // LEGACY: Initially the activities were saved in the same dir as the .exe, but that's bad Windows citizenship so now it saves in AppData\Local
@@ -115,7 +121,7 @@ namespace ATray.Activity
             if (SharedActivityCache.ContainsKey(key))
                 return SharedActivityCache[key];
 
-            var sharedPath = Program.Configuration.SharedActivityStorage;
+            var sharedPath = SharedPath;
             foreach (var file in Directory.EnumerateFiles(sharedPath, $"*_Acts{key}.bin", SearchOption.TopDirectoryOnly))
             {
                 var monthActivities = new MonthActivities(file);
@@ -128,6 +134,12 @@ namespace ATray.Activity
             if (SharedActivityCache.ContainsKey(key))
                 return SharedActivityCache[key];
             return new Dictionary<string, MonthActivities>();
+        }
+
+        public static IEnumerable<string> GetSharedHistoryComputers()
+        {
+            return Directory.EnumerateFiles(SharedPath, $"*_Acts*.bin", SearchOption.TopDirectoryOnly)
+                .Select(file => Path.GetFileName(file).Split(new[] {'_'}, 2)[0]).Distinct();
         }
 
         private static readonly Regex FileNameParser = new Regex(string.Format(SavefilePattern, @"(\d*)"), RegexOptions.Compiled);
@@ -145,7 +157,7 @@ namespace ATray.Activity
             if (includeShared)
             {
                 fileFilter = "*_" + fileFilter;
-                foreach (var file in Directory.EnumerateFiles(Program.Configuration.SharedActivityStorage, fileFilter, SearchOption.TopDirectoryOnly))
+                foreach (var file in Directory.EnumerateFiles(SharedPath, fileFilter, SearchOption.TopDirectoryOnly))
                 {
                     var match = FileNameParser.Match(file);
                     var key = int.Parse(match.Groups[1].Value);
@@ -172,7 +184,7 @@ namespace ATray.Activity
             if (includeShared)
             {
                 fileFilter = "*_" + fileFilter;
-                foreach (var file in Directory.EnumerateFiles(Program.Configuration.SharedActivityStorage, fileFilter, SearchOption.TopDirectoryOnly))
+                foreach (var file in Directory.EnumerateFiles(SharedPath, fileFilter, SearchOption.TopDirectoryOnly))
                 {
                     var match = FileNameParser.Match(file);
                     if(!match.Success) continue;
@@ -198,17 +210,11 @@ namespace ATray.Activity
             }
             ActivityCache[key] = activities;
 
-            var sharedFolder = Program.Configuration.SharedActivityStorage;
+            var sharedFolder = SharedPath;
             if (string.IsNullOrWhiteSpace(sharedFolder) || !Directory.Exists(sharedFolder)) return;
             try
             {
                 var sharedFilename = $"{Environment.MachineName}_Acts{key}.bin";
-#if DEBUG
-                // Debugging must not overwrite prod files
-                sharedFolder = Path.Combine(sharedFolder, "DEBUG");
-                if (!Directory.Exists(sharedFolder))
-                    Directory.CreateDirectory(sharedFolder);
-#endif
                 File.Copy(filename, Path.Combine(sharedFolder, sharedFilename), true);
             }
             catch (Exception e)

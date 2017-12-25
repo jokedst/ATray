@@ -68,19 +68,19 @@ namespace ATray
             return dictionary.ContainsKey(key) ? dictionary[key] : defaultValue;
         }
 
-        public static TResult MinOrDefault<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
+        public static TResult MinOrDefault<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector, TResult defaultValue = default(TResult))
         {
-            if (source == null) return default(TResult);
-            var list = source.Select<TSource, TResult>(selector).ToList();
-            if (list.Count == 0) return default(TResult);
-            return list.Min<TResult>();
+            if (source == null) return defaultValue;
+            var list = source.Select(selector).ToList();
+            if (list.Count == 0) return defaultValue;
+            return list.Min();
         }
 
-        public static TResult MaxOrDefault<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
+        public static TResult MaxOrDefault<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector, TResult defaultValue = default(TResult))
         {
-            if (source == null) return default(TResult);
+            if (source == null) return defaultValue;
             var list = source.Select<TSource, TResult>(selector).ToList();
-            if (list.Count == 0) return default(TResult);
+            if (list.Count == 0) return defaultValue;
             return list.Max<TResult>();
         }
     }

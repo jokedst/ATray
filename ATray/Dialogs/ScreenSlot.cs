@@ -35,7 +35,7 @@
         public string Describe(bool includeComputerName)
         {
             var sb = new StringBuilder();
-            var first = true;
+            var first = !includeComputerName;
             foreach (var activity in Activities)
             {
                 if (first) first = false; else sb.Append(Environment.NewLine);

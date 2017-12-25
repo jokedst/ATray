@@ -62,7 +62,7 @@ namespace RepositoryManager.Git
 
             _fileEventTimer = new Timer(FileEventCallback, null, Timeout.Infinite, Timeout.Infinite);
             _fileEventTimerCreated = DateTime.Now;
-            ActivateFileListener();
+            //ActivateFileListener();
         }
 
         /// <inheritdoc />
@@ -107,6 +107,7 @@ namespace RepositoryManager.Git
         private readonly Timer _fileEventTimer;
         private readonly DateTime _fileEventTimerCreated;
         private int _fileEventCount = 0;
+        private FileSystemWatcher _fileSystemWatcher = null;
 
         private  void FileEventCallback(object state)
         {
@@ -115,17 +116,31 @@ namespace RepositoryManager.Git
             _fileEventCount = 0;
         }
 
-        private void ActivateFileListener()
+        /// <summary>
+        /// Activates a file listener that detects changes to the repo and updates status
+        /// </summary>
+        public void ActivateFileListener()
         {
+            if (_fileSystemWatcher != null) return;
             var postponedEvent = new PostponedEvent(2000, () => { Trace.TraceInformation("PostponedEvent fired"); });
-            var fsw = new FileSystemWatcher(Path.Combine(Location, ".git")) {EnableRaisingEvents = true};
-            fsw.Changed += (s, e) =>
+            _fileSystemWatcher = new FileSystemWatcher(Path.Combine(Location, ".git")) {EnableRaisingEvents = true};
+            _fileSystemWatcher.Changed += (s, e) =>
             {
                 Trace.TraceInformation($"Git repo modified {++_fileEventCount} times");
                 _fileEventTimer.Change(DateTime.Now.AddSeconds(2).Subtract(_fileEventTimerCreated),
                     TimeSpan.FromMilliseconds(-1));
                 postponedEvent.StartOrUpdate();
             };
+        }
+
+        /// <summary>
+        /// Deactivates and disposes the file listener
+        /// </summary>
+        public void DeactivateFileListener()
+        {
+            if (_fileSystemWatcher == null) return;
+            _fileSystemWatcher.Dispose();
+            _fileSystemWatcher = null;
         }
 
         /// <summary>

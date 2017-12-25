@@ -1,10 +1,9 @@
-﻿using System.Diagnostics;
-
-namespace ATray.Activity
+﻿namespace ATray.Activity
 {
     using System;
     using System.Collections.Generic;
     using System.Configuration;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -14,7 +13,7 @@ namespace ATray.Activity
     {
         private const string SavefilePattern = "Acts{0}.bin";
         private static readonly Dictionary<int, MonthActivities> ActivityCache = new Dictionary<int, MonthActivities>();
-        private static readonly Dictionary<int,Dictionary<string, MonthActivities>> SharedActivityCache = new Dictionary<int, Dictionary<string, MonthActivities>>();
+        private static readonly Dictionary<string, Dictionary<string, MonthActivities>> SharedActivityCache = new Dictionary<string, Dictionary<string, MonthActivities>>(StringComparer.InvariantCultureIgnoreCase);
         private static readonly int ActivityFileFormatVersion = int.Parse(ConfigurationManager.AppSettings["ActivityFileFormatVersion"] ?? "1");
 
 #if DEBUG
@@ -27,14 +26,12 @@ namespace ATray.Activity
         {
             // LEGACY: Initially the activities were saved in the same dir as the .exe, but that's bad Windows citizenship so now it saves in AppData\Local
             // However, old files in the bin dir should be moved if there are any
-            var thisDir = Directory.GetCurrentDirectory();
-            var fileFilter = string.Format(SavefilePattern, "*");
-            var legacyFiles = Directory.EnumerateFiles(".", fileFilter, SearchOption.TopDirectoryOnly).Count();
+            var legacyFiles = Directory.EnumerateFiles(".", string.Format(SavefilePattern, "*"), 
+                SearchOption.TopDirectoryOnly).Count();
             if (legacyFiles > 0)
             {
                 Program.MainWindowInstance.UIThread(() =>
-                    MessageBox.Show(
-                        $"There are {legacyFiles} old activity files ('Acts*.bin') in the Atray program directory (located at\"{thisDir}\").\n\nPlease move these to \"{Program.SettingsDirectory}\""));
+                    MessageBox.Show($"There are {legacyFiles} old activity files ('Acts*.bin') in the Atray program directory (located at\"{Directory.GetCurrentDirectory()}\").\n\nPlease move these to \"{Program.SettingsDirectory}\""));
             }
         }
 
@@ -96,8 +93,6 @@ namespace ATray.Activity
         public static MonthActivities GetMonthActivity(short year, byte month)
         {
             var key = (year * 100) + month;
-
-            // TODO: Move this to top so the cache is used first
             if (ActivityCache.ContainsKey(key))
                 return ActivityCache[key];
 
@@ -114,15 +109,15 @@ namespace ATray.Activity
             return newMonth;
         }
 
-        public static Dictionary<string, MonthActivities> GetSharedMonthActivities(short year, byte month)
+        public static Dictionary<string, MonthActivities> GetSharedMonthActivities(short year, byte month, string onlyComputer=null)
         {
-            var key = (year * 100) + month;
+            var key = $"{onlyComputer ?? "*"}_Acts{year * 100 + month}.bin";
             
             if (SharedActivityCache.ContainsKey(key))
                 return SharedActivityCache[key];
 
             var sharedPath = SharedPath;
-            foreach (var file in Directory.EnumerateFiles(sharedPath, $"*_Acts{key}.bin", SearchOption.TopDirectoryOnly))
+            foreach (var file in Directory.EnumerateFiles(sharedPath, key, SearchOption.TopDirectoryOnly))
             {
                 var monthActivities = new MonthActivities(file);
                 var computer = Path.GetFileName(file).Split('_')[0];
@@ -171,6 +166,28 @@ namespace ATray.Activity
             return result;
         }
 
+        public static List<int> ListAvailableMonths(string computer)
+        {
+            var result = new HashSet<int>();
+            var fileFilter = string.Format(SavefilePattern, "*");
+            var path = Program.SettingsDirectory;
+            if (!string.IsNullOrEmpty(computer) && computer != ".")
+            {
+                fileFilter = computer + "_" + fileFilter;
+                path = SharedPath;
+            }
+            
+            foreach (var file in Directory.EnumerateFiles(path, fileFilter, SearchOption.TopDirectoryOnly))
+            {
+                var match = FileNameParser.Match(file);
+                if (!match.Success) continue;
+                var key = int.Parse(match.Groups[1].Value);
+                result.Add(key);
+            }
+
+            return result.OrderBy(x => x).ToList();
+        }
+
         public static List<int> ListAvailableMonths(bool includeShared = false)
         {
             var result = new HashSet<int>();
@@ -193,7 +210,7 @@ namespace ATray.Activity
                 }
             }
 
-            return result.OrderBy(x=>x).ToList();
+            return result.OrderBy(x => x).ToList();
         }
 
         private static void StoreActivity(MonthActivities activities)

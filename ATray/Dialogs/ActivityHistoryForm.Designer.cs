@@ -43,7 +43,7 @@
             // 
             this.btnHistoryOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnHistoryOk.Location = new System.Drawing.Point(1096, 833);
-            this.btnHistoryOk.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.btnHistoryOk.Margin = new System.Windows.Forms.Padding(6);
             this.btnHistoryOk.Name = "btnHistoryOk";
             this.btnHistoryOk.Size = new System.Drawing.Size(150, 44);
             this.btnHistoryOk.TabIndex = 0;
@@ -59,7 +59,7 @@
             this.historyPanel.AutoScroll = true;
             this.historyPanel.Controls.Add(this.historyPicture);
             this.historyPanel.Location = new System.Drawing.Point(0, 62);
-            this.historyPanel.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.historyPanel.Margin = new System.Windows.Forms.Padding(6);
             this.historyPanel.Name = "historyPanel";
             this.historyPanel.Size = new System.Drawing.Size(1270, 760);
             this.historyPanel.TabIndex = 1;
@@ -67,7 +67,7 @@
             // historyPicture
             // 
             this.historyPicture.Location = new System.Drawing.Point(0, 0);
-            this.historyPicture.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.historyPicture.Margin = new System.Windows.Forms.Padding(6);
             this.historyPicture.Name = "historyPicture";
             this.historyPicture.Size = new System.Drawing.Size(100, 50);
             this.historyPicture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -78,7 +78,7 @@
             // lastMonthButton
             // 
             this.lastMonthButton.Location = new System.Drawing.Point(0, 0);
-            this.lastMonthButton.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.lastMonthButton.Margin = new System.Windows.Forms.Padding(6);
             this.lastMonthButton.Name = "lastMonthButton";
             this.lastMonthButton.Size = new System.Drawing.Size(50, 50);
             this.lastMonthButton.TabIndex = 2;
@@ -91,7 +91,7 @@
             this.monthDropDown.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.monthDropDown.FormattingEnabled = true;
             this.monthDropDown.Location = new System.Drawing.Point(62, 8);
-            this.monthDropDown.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.monthDropDown.Margin = new System.Windows.Forms.Padding(6);
             this.monthDropDown.Name = "monthDropDown";
             this.monthDropDown.Size = new System.Drawing.Size(338, 33);
             this.monthDropDown.TabIndex = 3;
@@ -100,7 +100,7 @@
             // nextMonthButton
             // 
             this.nextMonthButton.Location = new System.Drawing.Point(416, 0);
-            this.nextMonthButton.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.nextMonthButton.Margin = new System.Windows.Forms.Padding(6);
             this.nextMonthButton.Name = "nextMonthButton";
             this.nextMonthButton.Size = new System.Drawing.Size(50, 50);
             this.nextMonthButton.TabIndex = 4;
@@ -113,14 +113,11 @@
             this.computerDropDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.computerDropDown.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.computerDropDown.FormattingEnabled = true;
-            this.computerDropDown.Items.AddRange(new object[] {
-            "This computer"});
             this.computerDropDown.Location = new System.Drawing.Point(1058, 8);
             this.computerDropDown.Margin = new System.Windows.Forms.Padding(3, 6, 3, 3);
             this.computerDropDown.Name = "computerDropDown";
             this.computerDropDown.Size = new System.Drawing.Size(200, 33);
             this.computerDropDown.TabIndex = 5;
-            this.computerDropDown.SelectedValueChanged += new System.EventHandler(this.computerDropDown_SelectedValueChanged);
             // 
             // ActivityHistoryForm
             // 
@@ -134,7 +131,7 @@
             this.Controls.Add(this.historyPanel);
             this.Controls.Add(this.btnHistoryOk);
             this.Icon = global::ATray.Properties.Resources.main_icon;
-            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "ActivityHistoryForm";
             this.Text = "Activity History";
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.ActivityHistoryForm_Paint);

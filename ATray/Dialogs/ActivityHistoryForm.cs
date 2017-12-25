@@ -5,15 +5,14 @@
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.Linq;
-    using System.Text;
     using System.Windows.Forms;
     using Activity;
+    using NuGet;
 
     public partial class ActivityHistoryForm : Form
     {
         // 40 pixels margins
         public const int GraphStartPixel = 40;
-
         public const int GraphHeight = 50;
         private const int GraphSpacing = 20;
         private const int TimeLabelWidth = 40;
@@ -33,10 +32,11 @@
         private uint _graphWidth;
         private uint _graphSeconds;
         private uint _graphFirstSecond;
-        private Dictionary<string, MonthActivities> _shownHistory;
+        //private Dictionary<string, MonthActivities> _shownHistory;
         private byte[] _indexToDaynumber;
 
         private bool _showSharedHistory = true; // true is debug
+        private const string AllComputers = "*";
 
         public ActivityHistoryForm()
         {
@@ -51,27 +51,28 @@
 #if DEBUG
             Icon = new Icon(GetType(), "debug.ico");
 #endif
-            InitHistoryDropDown();
             InitComputerDropDown();
+            InitHistoryDropDown();
         }
 
         private void InitComputerDropDown()
         {
             var computers = ActivityManager.GetSharedHistoryComputers().Select(x =>new Tuple<string,string> (x, x)).ToList();
             computers.RemoveAll(x => x.Item1 == Environment.MachineName);
-            computers.Add(new Tuple<string, string>("All","<all>"));
-            computers.Insert(0, new Tuple<string, string>(string.Empty,$"This computer ({Environment.MachineName})"));
+            computers.Add(new Tuple<string, string>(AllComputers, "All"));
+            computers.Insert(0, new Tuple<string, string>(string.Empty,$"{Environment.MachineName} (this computer)"));
 
             computerDropDown.ValueMember = "item1";
             computerDropDown.DisplayMember = "item2";
             computerDropDown.DataSource = computers;
-            computerDropDown.SelectedValue = _showSharedHistory ? "<all>" : string.Empty;
+            computerDropDown.SelectedValue = _showSharedHistory ? AllComputers : string.Empty;
+            computerDropDown.SelectedValueChanged += computerDropDown_SelectedValueChanged;
         }
 
         private void InitHistoryDropDown()
         {
             // Check what files exists
-            var rawMonths = ActivityManager.ListAvailableMonths(_showSharedHistory);
+            var rawMonths = ActivityManager.ListAvailableMonths((string)computerDropDown.SelectedValue);
             if (rawMonths.Count == 0)
             {
                 MessageBox.Show("No history to show!");
@@ -84,18 +85,12 @@
             monthDropDown.DisplayMember = "item2";
             monthDropDown.DataSource = months;
             monthDropDown.SelectedValue = rawMonths.LastOrDefault();
-#if DEBUG
-          //  monthDropDown.SelectedValue = rawMonths.LastOrDefault() - 1;
-#endif
 
             nextMonthButton.Enabled = false;
             lastMonthButton.Enabled = rawMonths.Count > 1;
         }
 
-        private void HistoryPictureOnMouseLeave(object sender, EventArgs eventArgs)
-        {
-            if (_tipLabel.Visible) _tipLabel.Hide();
-        }
+        private void HistoryPictureOnMouseLeave(object sender, EventArgs eventArgs) => _tipLabel.Hide();
 
         /// <summary>
         /// Update tooltip when mouse moves over picture
@@ -126,23 +121,7 @@
                 _tipLabel.Text = $"{SecondToTime(second)} (no activity)";
             else
                 _tipLabel.Text = $"{SecondToTime(second)} {slot.Describe(_showSharedHistory)}";
-
-            //var activityDesc = new StringBuilder();
-            //foreach (var computer in _shownHistory)
-            //{
-            //    var activity = computer.Value.Days.GetValueOrDefault(dayNumber)?
-            //        .FirstOrDefault(a => a.EndSecond >= second);
-            //    if (activity == null || activity.StartSecond > second)
-            //        continue;
-            //    activityDesc.Append(computer.Key)
-            //        .Append(": ")
-            //        .Append(computer.Value.ApplicationNames[activity.ApplicationNameIndex]);
-            //    var title = computer.Value.WindowTitles[activity.WindowTitleIndex];
-            //    if (!string.IsNullOrWhiteSpace(title)) activityDesc.Append("\r").Append(title);
-            //} 
-            //if(activityDesc.Length==0) activityDesc.Append(" (no activity)");
-            //_tipLabel.Text = $"{SecondToTime(second)} {activityDesc}";
-
+            
             _tipLabel.Location = _lastPosition;
             _lastScrollPositionY = e.Y;
 
@@ -150,10 +129,7 @@
                 _tipLabel.ShowFloating();
         }
 
-        private void btnHistoryOk_Click(object sender, EventArgs e)
-        {
-            Hide();
-        }
+        private void btnHistoryOk_Click(object sender, EventArgs e) => Hide();
 
         private string SecondToTime(uint second)
         {
@@ -178,15 +154,20 @@
                 return;
             }
 
-            // get activity for selected year/month
+            // Get activity for selected year/month
             var year = (short)(_currentMonth / 100);
             var month = (byte)(_currentMonth % 100);
-            var history = _showSharedHistory
-                ? ActivityManager.GetSharedMonthActivities(year, month)
-                : new Dictionary<string, MonthActivities>{
-                    [string.Empty] = ActivityManager.GetMonthActivity(year, month)};
-            _shownHistory = history;
-            _indexToDaynumber = _shownHistory.SelectMany(x=>x.Value.Days.Keys).Distinct().OrderBy(x => x).ToArray();
+            Dictionary<string, MonthActivities> history;
+            if (_showSharedHistory)
+            {
+                var computer = (string) computerDropDown.SelectedValue;
+                if (computer == AllComputers) computer = null;
+                history = ActivityManager.GetSharedMonthActivities(year, month, computer);
+            }
+            else
+                history = new Dictionary<string, MonthActivities>{[string.Empty] = ActivityManager.GetMonthActivity(year, month)};
+            
+            _indexToDaynumber = history.SelectMany(x=>x.Value.Days.Keys).Distinct().OrderBy(x => x).ToArray();
          
             // Create a new bitmap that is as wide as the windows and as high as it needs to be to fit all days
             var width = ClientRectangle.Width - SystemInformation.VerticalScrollBarWidth;
@@ -272,42 +253,23 @@
 
         private void lastMonthButton_Click(object sender, EventArgs e)
         {
-            var earlierMonths =
-                monthDropDown.Items.Cast<Tuple<int, string>>()
-                             .Select(x => x.Item1)
-                             .Where(x => x < _currentMonth)
-                             .OrderByDescending(x => x);
-            var previousMonth = earlierMonths.FirstOrDefault();
-
-            monthDropDown.SelectedValue = previousMonth;
+            monthDropDown.SelectedValue = monthDropDown.Items.Cast<Tuple<int, string>>()
+                .Where(x => x.Item1 < _currentMonth)
+                .MinOrDefault(x => x.Item1, monthDropDown.SelectedValue);
         }
 
         private void nextMonthButton_Click(object sender, EventArgs e)
         {
-            var laterMonths =
-                monthDropDown.Items.Cast<Tuple<int, string>>()
-                             .Select(x => x.Item1)
-                             .Where(x => x > _currentMonth)
-                             .OrderBy(x => x);
-            var nextMonth = laterMonths.FirstOrDefault();
-
-            monthDropDown.SelectedValue = nextMonth;
-        }
-
-        protected override Point ScrollToControl(Control activeControl)
-        {
-            // Returning the current location prevents the panel from
-            // scrolling to the active control when the panel loses and regains focus
-            //return this.DisplayRectangle.Location;
-
-            return base.ScrollToControl(activeControl);
+            monthDropDown.SelectedValue = monthDropDown.Items.Cast<Tuple<int, string>>()
+                .Where(x => x.Item1 > _currentMonth)
+                .MinOrDefault(x => x.Item1, monthDropDown.SelectedValue);
         }
 
         private void computerDropDown_SelectedValueChanged(object sender, EventArgs e)
         {
             var value = (string)computerDropDown.SelectedValue;
             if (string.IsNullOrEmpty(value)) _showSharedHistory = false;
-            else if(value=="<all>") _showSharedHistory = true;
+            else _showSharedHistory = true;
 
             InitHistoryDropDown();
 

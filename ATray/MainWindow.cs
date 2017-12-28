@@ -215,6 +215,7 @@
         {
             if (historyForm == null || historyForm.IsDisposed)
                 historyForm = new ActivityHistoryForm();
+            if (historyForm.IsDisposed) return;
             historyForm.Show();
         }
 

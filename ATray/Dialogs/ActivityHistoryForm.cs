@@ -35,7 +35,7 @@
         //private Dictionary<string, MonthActivities> _shownHistory;
         private byte[] _indexToDaynumber;
 
-        private bool _showSharedHistory = true; // true is debug
+        private bool _showSharedHistory;
         private const string AllComputers = "*";
 
         public ActivityHistoryForm()

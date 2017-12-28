@@ -17,7 +17,9 @@
         private static readonly int ActivityFileFormatVersion = int.Parse(ConfigurationManager.AppSettings["ActivityFileFormatVersion"] ?? "1");
 
 #if DEBUG
-        private static string SharedPath => Path.Combine(Program.Configuration.SharedActivityStorage, "DEBUG");
+        private static string SharedPath => Program.Configuration.SharedActivityStorage != null
+            ? Path.Combine(Program.Configuration.SharedActivityStorage, "DEBUG")
+            : null;
 #else
         private static string SharedPath => Program.Configuration.SharedActivityStorage;
 #endif
@@ -133,6 +135,7 @@
 
         public static IEnumerable<string> GetSharedHistoryComputers()
         {
+            if (string.IsNullOrEmpty(SharedPath)) return Enumerable.Empty<string>();
             return Directory.EnumerateFiles(SharedPath, $"*_Acts*.bin", SearchOption.TopDirectoryOnly)
                 .Select(file => Path.GetFileName(file).Split(new[] {'_'}, 2)[0]).Distinct();
         }
@@ -176,7 +179,9 @@
                 fileFilter = computer + "_" + fileFilter;
                 path = SharedPath;
             }
-            
+
+            if (string.IsNullOrEmpty(path)) return new List<int>();
+
             foreach (var file in Directory.EnumerateFiles(path, fileFilter, SearchOption.TopDirectoryOnly))
             {
                 var match = FileNameParser.Match(file);

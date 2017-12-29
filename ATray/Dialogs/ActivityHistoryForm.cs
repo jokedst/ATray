@@ -7,7 +7,6 @@
     using System.Linq;
     using System.Windows.Forms;
     using Activity;
-    using NuGet;
 
     public partial class ActivityHistoryForm : Form
     {

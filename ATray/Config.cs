@@ -6,12 +6,10 @@
     using System.Drawing.Design;
     using System.IO;
     using System.Linq;
-    using System.Linq.Expressions;
     using System.Runtime.InteropServices;
     using System.Text;
     using System.Windows.Forms;
     using System.Windows.Forms.Design;
-    using Microsoft.Win32;
 
     /// <summary>
     /// All configurable values should go here
@@ -57,11 +55,10 @@
         {
             if(_autostart.IsSetToAutoStart() != StartAtLogin)
                 _autostart.SetStartup(StartAtLogin);
-
 #if DEBUG
             if (string.IsNullOrWhiteSpace(SharedActivityStorage)) return;
             var sharedPath = Path.GetFullPath(SharedActivityStorage);
-            if (sharedPath.Last()!=Path.DirectorySeparatorChar) sharedPath += Path.DirectorySeparatorChar;
+            if (sharedPath.Last() != Path.DirectorySeparatorChar) sharedPath += Path.DirectorySeparatorChar;
             if (!sharedPath.EndsWith("DEBUG") && Directory.Exists(sharedPath))
             {
                 sharedPath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);

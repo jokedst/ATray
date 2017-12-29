@@ -5,7 +5,6 @@
     using System.IO;
     using System.Linq;
     using System.Text;
-    using System.Windows.Forms;
 
     /// <summary>
     /// A collection of all activity during a month. 

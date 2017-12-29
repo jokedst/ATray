@@ -7,12 +7,9 @@
     using System.IO;
     using System.IO.Pipes;
     using System.Runtime.InteropServices;
-    using System.Security.AccessControl;
-    using System.Security.Principal;
     using System.Text;
     using System.Windows.Forms;
     using Activity;
-    using Dialogs;
     using Microsoft.Win32;
     using Newtonsoft.Json;
     using RepositoryManager;

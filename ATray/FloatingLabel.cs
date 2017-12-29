@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace ATray
+﻿namespace ATray
 {
     using System;
     using System.Runtime.InteropServices;

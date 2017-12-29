@@ -3,13 +3,11 @@
 namespace ATray
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
     using System.Runtime.Caching;
     using System.Runtime.InteropServices;
     using System.Text;
-    using RepositoryManager;
 
     /// <summary>
     /// WinAPI functions
@@ -32,7 +30,7 @@ namespace ATray
         private static extern int GetModuleFileNameEx(IntPtr hProcess, IntPtr hModule, StringBuilder lpFilename, int nSize);
 
         [DllImport("user32.dll")]
-        private static extern bool GetLastInputInfo(ref LASTINPUTINFO plii);
+        private static extern bool GetLastInputInfo(ref LastUserInput plii);
 
         [DllImport(@"User32", SetLastError = true, EntryPoint = "RegisterPowerSettingNotification", CallingConvention = CallingConvention.StdCall)]
         private static extern IntPtr RegisterPowerSettingNotification(IntPtr hRecipient, ref Guid PowerSettingGuid, int Flags);
@@ -199,11 +197,11 @@ namespace ATray
         /// <returns>User idle time in miliseconds</returns>
         public static uint GetIdleTime()
         {
-            var lastInPut = new LASTINPUTINFO();
-            lastInPut.cbSize = (uint)Marshal.SizeOf(lastInPut);
-            GetLastInputInfo(ref lastInPut);
+            var lastUserInput = new LastUserInput();
+            lastUserInput.StructSize = (uint)Marshal.SizeOf(lastUserInput);
+            GetLastInputInfo(ref lastUserInput);
 
-            return (uint)Environment.TickCount - lastInPut.dwTime;
+            return (uint)Environment.TickCount - lastUserInput.LastActivityMillisecond;
         }
 
         // This structure is sent when the PBT_POWERSETTINGSCHANGE message is sent.
@@ -214,6 +212,13 @@ namespace ATray
             public Guid PowerSetting;
             public uint DataLength;
             //public byte Data;
+        }
+
+        /// <summary> When the user was last active at the computer </summary>
+        internal struct LastUserInput
+        {
+            public uint StructSize;
+            public uint LastActivityMillisecond;
         }
     }
 }

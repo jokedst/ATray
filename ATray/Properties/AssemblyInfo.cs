@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("ATray")]
-[assembly: AssemblyDescription("A tray app that does stuuf, e.g. tells you to get up and move arount every 20 minutes")]
+[assembly: AssemblyDescription("A tray app that does stuff, e.g. tells you to get up and move arount every 20 minutes")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Jokedst")]
 [assembly: AssemblyProduct("ATray")]
@@ -15,5 +15,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.6.0")]
-[assembly: AssemblyFileVersion("1.0.6.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]

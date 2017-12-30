@@ -37,11 +37,13 @@ namespace RepositoryManager
             }
         }
 
+        /// <inheritdoc />
         public IEnumerable<string> PossibleActions(RepoStatus status)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public void PerformAction(string actionName)
         {
             throw new NotImplementedException();

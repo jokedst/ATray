@@ -37,7 +37,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -156,7 +156,6 @@
     <Reference Include="System.Management" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -294,7 +293,7 @@
     <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
       <Output TaskParameter="Assemblies" ItemName="myAssemblyInfo" />
     </GetAssemblyIdentity>
-    <Exec Command="$(SolutionDir)packages\NuGet.CommandLine.4.3.0\tools\NuGet.exe pack ATray.nuspec -Version %(myAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir) -BasePath $(OutDir)" />
+    <Exec Command="$(SolutionDir)packages\NuGet.CommandLine.4.4.1\tools\NuGet.exe pack ATray.nuspec -Version %(myAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir) -BasePath $(OutDir)" />
     <Exec Command="$(SolutionDir)packages\squirrel.windows.1.7.8\tools\squirrel --releasify $(OutDir)ATray.$([System.Version]::Parse(%(myAssemblyInfo.Version)).ToString(3)).nupkg" />
   </Target>
 </Project>

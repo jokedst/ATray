@@ -12,7 +12,7 @@ namespace RepositoryManager
         /// <param name="oldStatus">Status before event</param>
         /// <param name="newStatus">Status after event</param>
         /// <param name="name">Name of repo</param>
-        /// <param name="eventType"> Type of event </param>
+        /// <param name="eventType"> Event type (add/remove/update) </param>
         public RepositoryEventArgs(string repoLocation, RepoStatus oldStatus, RepoStatus newStatus, string name, RepositoryEventType eventType)
         {
             Location = repoLocation;
@@ -30,8 +30,7 @@ namespace RepositoryManager
         public RepoStatus NewStatus { get; }
         /// <summary> Name of repository </summary>
         public string Name { get; }
-        /// <summary> Type of event </summary>
+        /// <summary> Event types (add/remove/update) </summary>
         public RepositoryEventType EventType { get; }
-
     }
 }

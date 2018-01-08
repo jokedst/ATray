@@ -36,6 +36,8 @@ namespace RepositoryManager.Git
         public Schedule UpdateSchedule { get; set; }
         /// <inheritdoc />
         public AutoAction AutomaticAction { get; set; }
+        /// <summary> git-specific staus </summary>
+        public RepoStatusFlags GitStatus { get; private set; }
 
         /// <summary>
         /// Create new git tracker for given location
@@ -162,6 +164,7 @@ namespace RepositoryManager.Git
                     if (dirty) repoStatus |= RepoStatusFlags.LocalChanges;
                     if (behind) repoStatus |= RepoStatusFlags.RemoteUnmergedCommits;
                     if (ahead) repoStatus |= RepoStatusFlags.LocalUnpushedCommits;
+                    GitStatus = repoStatus;
 
                     if (dirty)
                     {
@@ -207,6 +210,7 @@ namespace RepositoryManager.Git
             catch (RepositoryNotFoundException)
             {
                 LastStatus = RepoStatus.Error;
+                GitStatus = RepoStatusFlags.Error;
             }
         }
 

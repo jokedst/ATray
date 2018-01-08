@@ -1,6 +1,6 @@
 namespace RepositoryManager
 {
-    /// <summary> Available types of events </summary>
+    /// <summary> Event types (add/remove/update) </summary>
     public enum RepositoryEventType
     {
         /// <summary> Repository updated </summary>

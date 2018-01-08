@@ -1,11 +1,13 @@
 ﻿namespace ATray
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
     using System.IO.Pipes;
+    using System.Linq;
     using System.Runtime.InteropServices;
     using System.Text;
     using System.Windows.Forms;
@@ -37,26 +39,50 @@
             // DEBUG! Show dialog on boot for convinience
          //   OnMenuClickSettings(null, null);
             OnMenuClickHistory(null, null);
-          //  new DiskUsageForm().Show();
+            //  new DiskUsageForm().Show();
 #endif
-            var first = true;
+            CreateRepositoryMenyEntries();
+
+            var animTray = new IconAnimator(trayIcon, Properties.Resources.anim1);
+            animTray.StartAnimation();
+        }
+
+        public void CreateRepositoryMenyEntries()
+        {
+            if(!trayMenu.Items.ContainsKey("RepositorySeparator"))
+                trayMenu.Items.Insert(0, new ToolStripSeparator() { Name = "RepositorySeparator" });
+            else
+            {
+                var toRemove = new List<string>();
+                for (int i = 0; i < trayMenu.Items.Count; i++)
+                {
+                    var name = trayMenu.Items[i].Name;
+                    if (name == "RepositorySeparator") break;
+                    if (Program.Repositories.All(x => x.Location != name))
+                        toRemove.Add(name);
+                }
+
+                foreach (var itemName in toRemove)
+                {
+                    trayMenu.Items.RemoveByKey(itemName);
+                }
+            }
+            
             foreach (var repo in Program.Repositories)
             {
-                if (first)
-                {
-                    trayMenu.Items.Insert(0, new ToolStripSeparator());
-                    first = false;
-                }
+                if (trayMenu.Items.ContainsKey(repo.Location))
+                    continue;
                 var repoLocation = repo.Location; // for clojures
-                var submenu = new ToolStripMenuItem($"{repo.Name}: {Environment.NewLine}   {repo.LastStatus}");
+                var submenu = new ToolStripMenuItem();
                 submenu.Name = repoLocation;
+
                 if (repo is GitRepository && Program.TortoiseGitLocation != null)
                 {
                     submenu.DropDownItems.Add(new ToolStripMenuItem("Log", null, (sender, args) => Process.Start(TortoiseGit.LogCommand(repoLocation))));
                     if (repo.LastStatus.HasFlag(RepoStatus.Dirty))
-                        submenu.DropDownItems.Add(new ToolStripMenuItem("Commit", null,(s,a)=> TortoiseGit.RunCommit(repoLocation)));
+                        submenu.DropDownItems.Add(new ToolStripMenuItem("Commit", null, (s, a) => TortoiseGit.RunCommit(repoLocation)));
                 }
-                if(repo is GitRepository && Program.GitBashLocation != null)
+                if (repo is GitRepository && Program.GitBashLocation != null)
                     submenu.DropDownItems.Add(new ToolStripMenuItem("Git Bash", null, (sender, args) => Process.Start(new ProcessStartInfo(Program.GitBashLocation) { WorkingDirectory = repoLocation })));
 
                 submenu.DropDownItems.Add(new ToolStripMenuItem("Open in explorer", null, (sender, args) => Process.Start(repoLocation)));
@@ -65,25 +91,19 @@
                     (sender, args) => Program.Repositories.UpdateRepo(repoLocation));
                 if (repo.LastStatus != RepoStatus.Behind) pullOption.Visible = false;
                 submenu.DropDownItems.Add(pullOption);
+                UpdateRepoMenu(submenu, repo.Name, repo.LastStatus);
                 trayMenu.Items.Insert(0, submenu);
             }
-
-            var animTray = new IconAnimator(trayIcon, Properties.Resources.anim1);
-            animTray.StartAnimation();
         }
 
-        private void SystemEventsOnSessionSwitch(object sender, SessionSwitchEventArgs sessionSwitchEventArgs)
+        private void UpdateRepoMenu(ToolStripItem menuItem, string repoName, RepoStatus status)
         {
-            // When logging in, unlocking and a few other events we want to update immediatly
-            switch (sessionSwitchEventArgs.Reason)
-            {
-                case SessionSwitchReason.SessionLogon:
-                case SessionSwitchReason.SessionUnlock:
-                    Program.Repositories.TriggerUpdate(r => r.UpdateSchedule != Schedule.Never);
-                    break;
-            }
+            menuItem.Text = $"{repoName}: {Environment.NewLine}   {status}";
+            var r = new Random();
+            menuItem.BackColor = Color.FromArgb(r.Next(256), r.Next(256), r.Next(256));
 
-            Trace.TraceInformation("Session changed? ({0})", sessionSwitchEventArgs.Reason);
+            if (status == RepoStatus.Conflict)
+                menuItem.BackColor = Color.Red;
         }
 
         private void OnRepositoryStatusChanged(object sender, RepositoryEventArgs e)
@@ -94,8 +114,19 @@
             // Update menu
             foreach (var menuRow in trayMenu.Items.Find(e.Location, false))
             {
-                this.UIThread(()=>menuRow.Text = e.Name + ": \n" + e.NewStatus);
+                //this.UIThread(() => menuRow.Text = e.Name + ": \n" + e.NewStatus);
+                this.UIThread(() => UpdateRepoMenu(menuRow, e.Name, e.NewStatus));
             }
+        }
+
+        private void SystemEventsOnSessionSwitch(object sender, SessionSwitchEventArgs sessionSwitchEventArgs)
+        {
+            // When logging in or unlocking we want to update immediatly
+            if (sessionSwitchEventArgs.Reason == SessionSwitchReason.SessionLogon ||
+                sessionSwitchEventArgs.Reason == SessionSwitchReason.SessionUnlock)
+                Program.Repositories.TriggerUpdate(r => r.UpdateSchedule != Schedule.Never);
+
+            Trace.TraceInformation("Session changed? ({0})", sessionSwitchEventArgs.Reason);
         }
 
         private static string MillisecondsToString(uint ms)
@@ -115,7 +146,7 @@
         private void OnResize(object sender, EventArgs e)
         {
             if (inWarnState) ShowMe();
-            else if (FormWindowState.Minimized == WindowState) Hide();
+            else if (WindowState == FormWindowState.Minimized) Hide();
         }
 
         private void OnTrayIconDoubleClick(object sender, EventArgs e)
@@ -182,14 +213,14 @@
             lblDebug.Text = foregroundApp + " : " + foregroundTitle;
         }
 
-        private void OnMainWindowLoad(object sender, EventArgs e)
-        {
-            mainTimer.Start();
-        }
+        private void OnMainWindowLoad(object sender, EventArgs e) 
+            => mainTimer.Start();
 
+        /// <summary>
+        /// Minimize the window when moving the mouse over it (unless a warning is shown)
+        /// </summary>
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
-            // If the window is not showing a warning, minimize when moving the mouse over it
             if (!inWarnState)
                 Hide();
         }
@@ -246,8 +277,6 @@
 
         private void diskUsageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            const int errorCancelled = 1223; //The operation was canceled by the user.
-
             // Use a named pipe to tlk to diskusage.exe, since it will run as admin.
             var pipeName = Guid.NewGuid().ToString("N");
             using (NamedPipeServerStream pipeServer = new NamedPipeServerStream(pipeName, PipeDirection.In))
@@ -265,7 +294,8 @@
                 }
                 catch (Win32Exception ex)
                 {
-                    if (ex.NativeErrorCode != errorCancelled) throw;
+                    // 1223 = The operation was canceled by the user
+                    if (ex.NativeErrorCode != 1223) throw;
                     MessageBox.Show("Operation aborted");
                     return;
                 }

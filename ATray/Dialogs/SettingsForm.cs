@@ -90,6 +90,7 @@
 
             // Save new repo list
             Program.Repositories.Save();
+            Program.MainWindowInstance.CreateRepositoryMenyEntries();
             Close();
         }
 

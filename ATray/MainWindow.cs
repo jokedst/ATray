@@ -24,6 +24,7 @@
         private bool inWarnState;
         private bool reallyClose;
         private DateTime lastSave = DateTime.MinValue;
+        private DateTime lastTimerEvent = DateTime.MinValue;
         private ActivityHistoryForm historyForm;
         private SettingsForm settingsForm;
 
@@ -175,10 +176,18 @@
         private void OnMainTimerTick(object sender, EventArgs e)
         {
             var idle = WindowsInternals.GetIdleTime();
-            lblSmall.Text = MillisecondsToString(idle);
-
             // Only call "Now" once to avoid annoying bugs
             var now = DateTime.Now;
+
+            var unpoweredSeconds = (uint) Math.Min(now.Subtract(lastTimerEvent).TotalSeconds, uint.MaxValue);
+            if (unpoweredSeconds > 100)
+            {
+                // This is supposed to fire every second. Now it hasn't -> most likely boot or sleep or something
+                idle = Math.Max(idle, unpoweredSeconds - 2);
+            }
+
+            lblSmall.Text = MillisecondsToString(idle);
+
 
             if (idle > Program.Configuration.MinimumBrakeLength * 1000)
             {
@@ -216,6 +225,7 @@
             
             lblWork.Text = MillisecondsToString(workingtime);
             lblDebug.Text = foregroundApp + " : " + foregroundTitle;
+            lastTimerEvent = now;
         }
 
         private void OnMainWindowLoad(object sender, EventArgs e) 

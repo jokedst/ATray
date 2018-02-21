@@ -254,7 +254,7 @@
         {
             monthDropDown.SelectedValue = monthDropDown.Items.Cast<Tuple<int, string>>()
                 .Where(x => x.Item1 < _currentMonth)
-                .MinOrDefault(x => x.Item1, monthDropDown.SelectedValue);
+                .MaxOrDefault(x => x.Item1, monthDropDown.SelectedValue);
         }
 
         private void nextMonthButton_Click(object sender, EventArgs e)

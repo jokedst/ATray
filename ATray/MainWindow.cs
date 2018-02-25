@@ -104,12 +104,17 @@
             //menuItem.BackColor = Color.FromArgb(r.Next(256), r.Next(256), r.Next(256));
 
             if (status == RepoStatus.Conflict)
-                menuItem.BackColor = Color.Red;
+                menuItem.BackColor = Color.FromArgb(0x80, Color.Red);
             else if (status == RepoStatus.Behind)
-                menuItem.BackColor = Color.Yellow;
+                menuItem.BackColor = Color.FromArgb(0x80, Color.Yellow);
             else if (status == RepoStatus.Dirty)
-                menuItem.BackColor = Color.FromArgb(0xB1, 0xB1, 0xFF);
+                menuItem.BackColor = Color.FromArgb(0x80, 0xB1, 0xB1, 0xFF);
             else menuItem.ResetBackColor();
+        }
+
+        public void ShowNotification(string text)
+        {
+            this.trayIcon.ShowBalloonTip(500, "ATray notification", text, ToolTipIcon.None);
         }
 
         private void OnRepositoryStatusChanged(object sender, RepositoryEventArgs e)

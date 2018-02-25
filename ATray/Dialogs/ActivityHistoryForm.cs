@@ -165,6 +165,9 @@
             }
             else
                 history = new Dictionary<string, MonthActivities>{[string.Empty] = ActivityManager.GetMonthActivity(year, month)};
+
+            // if(hidePlay)
+            //history = WorkPlayFilter.Filter(history, WorkPlayType.WorkOnly);
             
             _indexToDaynumber = history.SelectMany(x=>x.Value.Days.Keys).Distinct().OrderBy(x => x).ToArray();
          
@@ -267,8 +270,7 @@
         private void computerDropDown_SelectedValueChanged(object sender, EventArgs e)
         {
             var value = (string)computerDropDown.SelectedValue;
-            if (string.IsNullOrEmpty(value)) _showSharedHistory = false;
-            else _showSharedHistory = true;
+            _showSharedHistory = !string.IsNullOrEmpty(value);
 
             InitHistoryDropDown();
 
@@ -276,5 +278,4 @@
             Refresh();
         }
     }
-    
 }

@@ -54,12 +54,13 @@ namespace ATray
             Repositories = new RepositoryCollection(RepoListFilePath);
             Configuration = new Configuration(ConfigurationFilePath);
 
-            UpdateTask = Task.Run(UpdateApp);
+            UpdateTask = Task.Run(() => UpdateApp(false));
             DetectInstalledPrograms();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             MainWindowInstance = new MainWindow();
+            MainWindowInstance.ShowNotification("boot");
             Application.Run(MainWindowInstance);
 
             Trace.TraceInformation("LEAVING!");
@@ -90,67 +91,31 @@ namespace ATray
                 TortoiseGitLocation = @"C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe";
         }
 
-        private static async Task CheckForUpdates()
-        {
-            try
-            {
-                using (var mgr = UpdateManager.GitHubUpdateManager("https://github.com/jokedst/ATray"))
-                {
-                    var manager = await mgr;
-                    try
-                    {
-                        var upOrNot = await manager.CheckForUpdate();
-                        if (upOrNot != null && upOrNot.ReleasesToApply.Count > 0)
-                        {
-                            var result = MessageBox.Show("An update is available. Do you want to update?", "UPDATE!", MessageBoxButtons.OKCancel);
-                            if (result == DialogResult.OK)
-                            {
-                                var up = await manager.UpdateApp();
-                                Trace.TraceInformation("Update check " + up.Version);
-                            }
-                        }
-                    }
-                    finally 
-                    {
-                        manager.Dispose();
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Trace.TraceWarning("Update check threw an exception: " + e.Message);
-            }
-        }
-
-        public static async Task UpdateApp()
+        public static async Task UpdateApp(bool verbose)
         {
             Thread.CurrentThread.Name = "SquirrelUpdateThread";
-            var restartNeeded = false;
 
             using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/jokedst/ATray"))
             {
                 var updates = await mgr.CheckForUpdate();
-                var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
-                if (lastVersion != null 
-                    && MessageBox.Show($"An update to version {lastVersion.Version} is available. Do you want to update?", "Update available", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                var latestVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
+                if (latestVersion == null)
                 {
-                    //var lastVersion = updates.ReleasesToApply.OrderBy(x => x.Version).Last();
-                    await mgr.DownloadReleases(new[] { lastVersion });
+                    if (verbose)
+                        MessageBox.Show("No Updates are available at this time.");
+                    return;
+                }
+
+                if (MessageBox.Show(
+                        $"An update to version {latestVersion.Version} is available. Do you want to update?",
+                        "Update available", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                {
+                    await mgr.DownloadReleases(new[] {latestVersion});
                     await mgr.ApplyReleases(updates);
                     await mgr.UpdateApp();
-
-                    MessageBox.Show("The application has been updated - please close and restart.");
-                    restartNeeded = true;
+                    MainWindowInstance.ShowNotification("Atray has been updated and is restarting");
+                    UpdateManager.RestartApp();
                 }
-                else
-                {
-                    MessageBox.Show("No Updates are available at this time.");
-                }
-            }
-
-            if (restartNeeded)
-            {
-                UpdateManager.RestartApp();
             }
         }
     }

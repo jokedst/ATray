@@ -81,6 +81,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AtrayFacts.cs" />
+    <Compile Include="ExpectedExceptionAttribute.cs" />
+    <Compile Include="HashListFacts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

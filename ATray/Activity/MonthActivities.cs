@@ -26,14 +26,16 @@
         public readonly Dictionary<byte, DayActivityList> Days = new Dictionary<byte, DayActivityList>();
         public List<string> ApplicationNames = new List<string>();
         public List<string> WindowTitles = new List<string>();
-
         public string ComputerName { get; }
 
         public MonthActivities(short year, byte month)
+            : this(year,month,Environment.MachineName) { }
+
+        public MonthActivities(short year, byte month, string computerName)
         {
             Year = year;
             Month = month;
-            ComputerName = Environment.MachineName;
+            ComputerName = computerName;
         }
 
         public int GetApplicationNameIndex(string appName) => ApplicationNames.IndexOfOrAdd(appName);

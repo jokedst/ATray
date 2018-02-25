@@ -154,6 +154,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activity\DayActivityList.cs" />
+    <Compile Include="Activity\HashList.cs" />
+    <Compile Include="Activity\WorkPlayFilter.cs" />
     <Compile Include="AutoStart.cs" />
     <Compile Include="Dialogs\ActivityHistoryForm.cs">
       <SubType>Form</SubType>
@@ -182,6 +184,7 @@
     </Compile>
     <Compile Include="Dialogs\OpenFolderDialog.cs" />
     <Compile Include="Dialogs\ScreenSlot.cs" />
+    <Compile Include="Dialogs\WorkPlayType.cs" />
     <Compile Include="DiskNode.cs" />
     <Compile Include="FloatingLabel.cs">
       <SubType>Component</SubType>

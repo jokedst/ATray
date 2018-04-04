@@ -53,16 +53,17 @@
             }
 
             var activities = GetMonthActivity((short) now.Year, (byte) now.Month);
-            var day = (byte) now.Day;
-            if (!activities.Days.ContainsKey(day))
-                activities.Days.Add(day, new DayActivityList(activities, day));
+            var dayNumber = (byte) now.Day;
+            if (!activities.Days.ContainsKey(dayNumber))
+                activities.Days.Add(dayNumber, new DayActivityList(activities, dayNumber));
+            var dayActivities = activities.Days[dayNumber];
 
             var appIndex = activities.GetApplicationNameIndex(appName);
             var titleIndex = activities.GetWindowTitleIndex(appTitle);
 
-            if (activities.Days[day].Any())
+            if (dayActivities.Any())
             {
-                var last = activities.Days[day].Last();
+                var last = dayActivities.Last();
 
                 // Check if the last activity was same type AND it didn't end too long ago (e.g. the computer was shut off or something)
                 if (last.WasActive == wasActive && last.EndSecond + (intervalLength * 2) >= currentSecond)
@@ -72,7 +73,7 @@
                                                            last.WindowTitleIndex == titleIndex))
                     {
                         // The last activity had the same state as this, just update it
-                        activities.Days[day].Last().EndSecond = currentSecond;
+                        dayActivities.Last().EndSecond = currentSecond;
                         StoreActivity(activities);
                         return;
                     }
@@ -80,7 +81,7 @@
             }
 
             // Can't update previous activity, create a new one
-            activities.Days[day].Add(new ActivitySpan(activities, day)
+            dayActivities.Add(new ActivitySpan(activities, dayNumber)
             {
                 StartSecond = currentSecond - intervalLength + 1,
                 EndSecond = currentSecond,

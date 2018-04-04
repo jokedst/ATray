@@ -1,7 +1,6 @@
 ﻿namespace ATray
 {
     using System;
-    using System.Runtime.InteropServices;
     using System.Windows.Forms;
 
     /// <summary>
@@ -31,13 +30,7 @@
                 return p;
             }
         }
-
-        [DllImport("user32")]
-        private static extern int SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
-
-        [DllImport("user32")]
-        private static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
-
+        
         public override string Text
         {
             get { return base.Text; }
@@ -62,8 +55,8 @@
             {
                 CreateControl();
             }
-            SetParent(Handle, IntPtr.Zero);
-            ShowWindow(Handle, 1);
+            NativeMethods.SetParent(Handle, IntPtr.Zero);
+            NativeMethods.ShowWindow(Handle, 1);
         }
 
         private const int WM_NCHITTEST = 0x0084;

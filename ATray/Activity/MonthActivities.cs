@@ -29,7 +29,7 @@
         public string ComputerName { get; }
 
         public MonthActivities(short year, byte month)
-            : this(year,month,Environment.MachineName) { }
+            : this(year, month, Environment.MachineName) { }
 
         public MonthActivities(short year, byte month, string computerName)
         {
@@ -118,8 +118,7 @@
         /// <param name="filepath">The file to load</param>
         public MonthActivities(string filepath)
         {
-            using (Stream filestream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.None))
-            using (var br = new BinaryReader(filestream, Encoding.UTF8))
+            using (var br = new BinaryReader(new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.None), Encoding.UTF8))
             {
                 // Read the header, always 12 bytes
                 var buffer = new byte[12];
@@ -151,9 +150,8 @@
         /// <param name="filepath"></param>
         public void WriteToFile(string filepath)
         {
-            
             using (Stream filestream = new FileStream(filepath, FileMode.Create, FileAccess.Write, FileShare.None))
-            using (var bw = new BinaryWriter(filestream, Encoding.UTF8))
+            using (var bw = new BinaryWriter(filestream, Encoding.UTF8, true))
             {
                 bw.Write(Encoding.ASCII.GetBytes("ATRAY_ACTV1 "));
                 bw.Write(Year);
@@ -184,7 +182,7 @@
             // To minimize the risk of data loss due to crash while writing, write to RAM first
             using (var memoryStream = new MemoryStream())
             {
-                using (var bw = new BinaryWriter(memoryStream, Encoding.UTF8))
+                using (var bw = new BinaryWriter(memoryStream, Encoding.UTF8, true))
                 {
                     // Header, including version number ("V2")
                     bw.Write(Encoding.ASCII.GetBytes("ATRAY_ACTV2 "));

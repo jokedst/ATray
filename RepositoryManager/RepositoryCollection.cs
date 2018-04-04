@@ -16,7 +16,7 @@
 
     /// <summary>
     /// Manages a set of repositories
-    /// </summary>
+    /// </summary><inheritdoc />
     public class RepositoryCollection : IEnumerable<ISourceRepository>
     {
         private const int SampleFrequency = 5000;
@@ -25,11 +25,15 @@
 
         /// <summary> Internal list of repos </summary>
         private List<ISourceRepository> _repositories;
+
         private string RepoListFilePath { get; set; }
         private readonly Timer _timer;
         private readonly ConcurrentDictionary<string, Task> runningUpdates = new ConcurrentDictionary<string, Task>();
         private readonly object _lockObject = new object();
-        
+
+        private FileListeningMode _useFileListeners;
+        private readonly Dictionary<string, DelayedFileSystemWatcher> _fileListeners = new Dictionary<string, DelayedFileSystemWatcher>();
+  
         /// <summary>
         /// Load a reposet from a file
         /// </summary>
@@ -120,7 +124,13 @@
         public void Add(ISourceRepository repo)
         {
             lock (_lockObject)
+            {
                 _repositories.Add(repo);
+                if (_useFileListeners != FileListeningMode.None)
+                {
+                    _fileListeners.Add(repo.Location, new DelayedFileSystemWatcher(_useFileListeners==FileListeningMode.IndexOnly?repo.IndexLocation:repo.Location, repo.RefreshLocalStatus));
+                }
+            }
 
             // Raise event
             OnRepositoryListChanged(new RepositoryEventArgs(repo.Location, RepoStatus.Unknown, repo.LastStatus, repo.Name, RepositoryEventType.Added));
@@ -138,6 +148,12 @@
                 if(repo != null)
                 {
                     result = _repositories.Remove(repo);
+                }
+
+                if (_fileListeners.ContainsKey(repositoryLocation))
+                {
+                    _fileListeners[repositoryLocation].Dispose();
+                    _fileListeners.Remove(repositoryLocation);
                 }
             }
 
@@ -290,6 +306,32 @@
         {
             // TODO: Thread safety?
             return ((IEnumerable) _repositories).GetEnumerator();
+        }
+
+        /// <summary>
+        /// Sets file listening mode
+        /// </summary>
+        /// <param name="mode"> how to listen on file changes </param>
+        public void SetFileListening(FileListeningMode mode)
+        {
+            lock (_lockObject)
+            {
+                foreach (var listener in _fileListeners)
+                {
+                    listener.Value.Dispose();
+                }
+                _fileListeners.Clear();
+                _useFileListeners = mode;
+                if (mode == FileListeningMode.None) return;
+
+                foreach (var repository in _repositories)
+                {
+                    var path = mode== FileListeningMode.IndexOnly ? repository.IndexLocation : repository.Location;
+                    var repo2 = repository;
+
+                    _fileListeners.Add(repo2.Location,new DelayedFileSystemWatcher(path, () => repo2.RefreshLocalStatus()));
+                }
+            }
         }
     }
 }

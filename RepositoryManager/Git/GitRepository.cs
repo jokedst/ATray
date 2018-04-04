@@ -5,7 +5,6 @@ namespace RepositoryManager.Git
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
-    using System.Threading;
     using LibGit2Sharp;
     using LibGit2Sharp.Handlers;
 
@@ -61,10 +60,6 @@ namespace RepositoryManager.Git
             LastStatusAt = lastStatusAt;
             UpdateSchedule = updateSchedule;
             AutomaticAction = automaticAction;
-
-            _fileEventTimer = new Timer(FileEventCallback, null, Timeout.Infinite, Timeout.Infinite);
-            _fileEventTimerCreated = DateTime.Now;
-            //ActivateFileListener();
         }
 
         /// <inheritdoc />
@@ -84,8 +79,7 @@ namespace RepositoryManager.Git
                         fetchOptions.CredentialsProvider = CredentialsProvider.WinCred;
                     else
                         fetchOptions.CredentialsProvider = CredentialsProvider.MicrosoftAlm;
-
-                    //repo.Network.Fetch(origin, fetchOptions);
+                    
                     try
                     {
                         Commands.Fetch(repo, origin.Name, Enumerable.Empty<string>(), fetchOptions, null);
@@ -106,49 +100,10 @@ namespace RepositoryManager.Git
             return LastStatus;
         }
 
-        private readonly Timer _fileEventTimer;
-        private readonly DateTime _fileEventTimerCreated;
-        private int _fileEventCount = 0;
-        private FileSystemWatcher _fileSystemWatcher = null;
-
-        private  void FileEventCallback(object state)
-        {
-            Trace.TraceInformation($"Updating git repo due to file changes ({_fileEventCount} events logged)");
-            RefreshLocalStatus();
-            _fileEventCount = 0;
-        }
-
-        /// <summary>
-        /// Activates a file listener that detects changes to the repo and updates status
-        /// </summary>
-        public void ActivateFileListener()
-        {
-            if (_fileSystemWatcher != null) return;
-            var postponedEvent = new PostponedEvent(2000, () => { Trace.TraceInformation("PostponedEvent fired"); });
-            _fileSystemWatcher = new FileSystemWatcher(Path.Combine(Location, ".git")) {EnableRaisingEvents = true};
-            _fileSystemWatcher.Changed += (s, e) =>
-            {
-                Trace.TraceInformation($"Git repo modified {++_fileEventCount} times");
-                _fileEventTimer.Change(DateTime.Now.AddSeconds(2).Subtract(_fileEventTimerCreated),
-                    TimeSpan.FromMilliseconds(-1));
-                postponedEvent.StartOrUpdate();
-            };
-        }
-
-        /// <summary>
-        /// Deactivates and disposes the file listener
-        /// </summary>
-        public void DeactivateFileListener()
-        {
-            if (_fileSystemWatcher == null) return;
-            _fileSystemWatcher.Dispose();
-            _fileSystemWatcher = null;
-        }
-
         /// <summary>
         /// Refreshes the status without talking to remote servers
         /// </summary>
-        private void RefreshLocalStatus()
+        public void RefreshLocalStatus()
         {
             try
             {
@@ -281,6 +236,9 @@ namespace RepositoryManager.Git
         {
             throw new NotImplementedException();
         }
+
+        /// <inheritdoc />
+        public string IndexLocation => Path.Combine(this.Location, ".git");
 
         /// <summary>
         /// Checks status of remote without doing a fetch

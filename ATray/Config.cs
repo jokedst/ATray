@@ -158,7 +158,6 @@
                 .ToDictionary(x => x[0], x => x[1]);
         }
 
-
         [DllImport("kernel32.dll")]
         private static extern int GetPrivateProfileSection(string lpAppName, byte[] lpszReturnBuffer, int nSize, string lpFileName);
         

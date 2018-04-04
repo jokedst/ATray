@@ -63,6 +63,7 @@ namespace ATray
         {
             return dictionary.ContainsKey(key) ? dictionary[key] : default(TValue);
         }
+
         public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue)
         {
             return dictionary.ContainsKey(key) ? dictionary[key] : defaultValue;
@@ -83,6 +84,8 @@ namespace ATray
             if (list.Count == 0) return defaultValue;
             return list.Max<TResult>();
         }
+
+        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> values) => new HashSet<T>(values);
     }
 
     internal static class ControlExtensions

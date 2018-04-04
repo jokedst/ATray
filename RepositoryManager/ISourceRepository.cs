@@ -57,6 +57,16 @@ namespace RepositoryManager
         /// </summary>
         /// <param name="actionName"></param>
         void PerformAction(string actionName);
+
+        /// <summary>
+        /// Path to "index" or equivalent, where locally commited files are stored
+        /// </summary>
+        string IndexLocation { get; }
+
+        /// <summary>
+        /// Refreshes the status without talking to remote servers
+        /// </summary>
+        void RefreshLocalStatus();
     }
     
     /// <summary>

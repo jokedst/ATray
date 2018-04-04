@@ -115,5 +115,15 @@ namespace RepositoryManager
         {
             throw new NotImplementedException();
         }
+
+        /// <inheritdoc />
+        public string IndexLocation => Path.Combine(this.Location, ".svn");
+
+        /// <inheritdoc />
+        public void RefreshLocalStatus()
+        {
+            //throw new NotImplementedException();
+            Trace.TraceInformation($"SVN RefreshLocalStatus for {Location}");
+        }
     }
 }

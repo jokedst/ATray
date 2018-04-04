@@ -180,7 +180,7 @@
 
         private void OnMainTimerTick(object sender, EventArgs e)
         {
-            var idle = WindowsInternals.GetIdleTime();
+            var idle = NativeMethods.GetIdleTime();
             // Only call "Now" once to avoid annoying bugs
             var now = DateTime.Now;
 
@@ -218,7 +218,7 @@
                 }
             }
 
-            WindowsInternals.GetForegroundProcessInfo(out string foregroundApp, out string foregroundTitle);
+            NativeMethods.GetForegroundProcessInfo(out string foregroundApp, out string foregroundTitle);
 
             if (now.Subtract(lastSave).TotalSeconds > Program.Configuration.SaveInterval)
             {
@@ -277,9 +277,9 @@
         protected override void WndProc(ref Message m)
         {
             // Detect closing/opening of lid
-            if (m.Msg == WindowsInternals.WM_POWERBROADCAST && m.WParam.ToInt32() == WindowsInternals.PBT_POWERSETTINGCHANGE)
+            if (m.Msg == NativeMethods.WM_POWERBROADCAST && m.WParam.ToInt32() == NativeMethods.PBT_POWERSETTINGCHANGE)
             {
-                var ps = (WindowsInternals.POWERBROADCAST_SETTING) Marshal.PtrToStructure(m.LParam, typeof(WindowsInternals.POWERBROADCAST_SETTING));
+                var ps = (NativeMethods.POWERBROADCAST_SETTING) Marshal.PtrToStructure(m.LParam, typeof(NativeMethods.POWERBROADCAST_SETTING));
                 IntPtr pData = (IntPtr) (m.LParam.ToInt32() + Marshal.SizeOf(ps));
                 int iData = (int) Marshal.PtrToStructure(pData, typeof(int));
                 string monitorState;

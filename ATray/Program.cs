@@ -31,7 +31,6 @@ namespace ATray
         internal static string GitBashLocation = null;
         internal static string TortoiseGitLocation = null;
 
-
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -39,9 +38,7 @@ namespace ATray
         public static void Main()
         {
             // Due to the constant reading/writing to the activities files, running two instances of ATray (for the same config) is a really bad idea. So quit.
-            var mutexName = "Jokedst.Atray.single-exe-mutex." + SettingsDirectory.Replace('\\','¤');
-            Mutex mutex = new Mutex(false, mutexName);
-            if (!mutex.WaitOne(0, false))
+            if (!new Mutex(false, "Jokedst.Atray.single-exe-mutex." + SettingsDirectory.Replace('\\','¤')).WaitOne(0, false))
             {
                 MessageBox.Show("An instance of the application is already running.");
                 return;
@@ -53,6 +50,7 @@ namespace ATray
             // Load repos and config
             Repositories = new RepositoryCollection(RepoListFilePath);
             Configuration = new Configuration(ConfigurationFilePath);
+            Repositories.SetFileListening(FileListeningMode.AllChanges);
 
             UpdateTask = Task.Run(() => UpdateApp(false));
             DetectInstalledPrograms();

@@ -18,6 +18,8 @@
         public int ApplicationNameIndex;
         public int WindowTitleIndex;
 
+        [NonSerialized] public WorkPlayType Classification;
+
         /// <summary>
         /// Default constructor (for deserializers)
         /// </summary>
@@ -33,6 +35,17 @@
         {
             Owner = owner;
             Day = owner.Days[day];
+        }
+
+        public ActivitySpan( DayActivityList day, uint startSecond, uint endSecond, bool wasActive, string applicationName, string windowTitle)
+        {
+            Owner = day.Owner;
+            Day = day;
+            this.StartSecond = startSecond;
+            this.EndSecond = endSecond;
+            this.WasActive = wasActive;
+            this.ApplicationNameIndex = Owner.GetApplicationNameIndex(applicationName);
+            this.WindowTitleIndex = Owner.GetWindowTitleIndex(windowTitle);
         }
 
         public string ApplicationName()

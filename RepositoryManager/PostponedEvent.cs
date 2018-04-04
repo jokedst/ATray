@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace RepositoryManager
 {
     using System;
@@ -28,6 +30,7 @@ namespace RepositoryManager
 
             _timer = new Timer(state =>
             {
+                Trace.TraceInformation($"PostponedEvent fired after {_updatesSinceLastCallback} events");
                 _updatesSinceLastCallback = 0;
                 callbackAction();
             }, null, -1, -1);

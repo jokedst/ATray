@@ -116,5 +116,46 @@ namespace ATray
                 }
             }
         }
+
+        // Suggested version - was on jockestor for ages...
+        public static async Task UpdateAppV2()
+        {
+            try
+            {
+                using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/jokedst/ATray"))
+                {
+                    var updates = await mgr.CheckForUpdate();
+                    var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
+                    if (lastVersion == null)
+                    {
+                        MessageBox.Show("No Updates are available at this time.");
+                        return;
+                    }
+
+                    if (MessageBox.Show($"An update to version {lastVersion.Version} is available. Do you want to update?",
+                            "Update available", MessageBoxButtons.OKCancel) != DialogResult.OK)
+                    {
+                        return;
+                    }
+
+#if DEBUG
+                    MessageBox.Show("DEBUG: Don't actually perform the update in debug mode");
+                }
+#else
+                    await mgr.DownloadReleases(new[] {lastVersion});
+                    await mgr.ApplyReleases(updates);
+                    await mgr.UpdateApp();
+
+                    MessageBox.Show("The application has been updated and will restart");
+                }
+
+                UpdateManager.RestartApp();
+#endif
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Update check failed with an exception: " + e.Message);
+            }
+        }
     }
 }

@@ -265,6 +265,7 @@
                 historyForm = new ActivityHistoryForm();
             if (historyForm.IsDisposed) return;
             historyForm.Show();
+            settingsForm.Focus();
         }
 
         private void OnMenuClickSettings(object sender, EventArgs e)
@@ -272,6 +273,7 @@
             if (settingsForm == null || settingsForm.IsDisposed)
                 settingsForm = new SettingsForm();
             settingsForm.Show();
+            settingsForm.Focus();
         }
 
         protected override void WndProc(ref Message m)

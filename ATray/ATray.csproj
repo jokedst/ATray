@@ -283,6 +283,6 @@
       <Output TaskParameter="Assemblies" ItemName="myAssemblyInfo" />
     </GetAssemblyIdentity>
     <Exec Command="$(SolutionDir)packages\NuGet.CommandLine.4.4.1\tools\NuGet.exe pack ATray.nuspec -Version %(myAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir) -BasePath $(OutDir)" />
-    <Exec Command="$(SolutionDir)packages\squirrel.windows.1.7.8\tools\squirrel --releasify $(OutDir)ATray.$([System.Version]::Parse(%(myAssemblyInfo.Version)).ToString(3)).nupkg" />
+    <Exec Command="$(SolutionDir)packages\squirrel.windows.1.7.9\tools\squirrel --releasify $(OutDir)ATray.$([System.Version]::Parse(%(myAssemblyInfo.Version)).ToString(3)).nupkg" />
   </Target>
 </Project>

@@ -30,18 +30,29 @@ namespace RepositoryManager.Git
             }
         }
         /// <inheritdoc />
-        public DateTime LastStatusAt { get; private set; }
+        public DateTime LastStatusAt { get; protected set; }
         /// <inheritdoc />
         public Schedule UpdateSchedule { get; set; }
         /// <inheritdoc />
         public AutoAction AutomaticAction { get; set; }
         /// <summary> git-specific staus </summary>
-        public RepoStatusFlags GitStatus { get; private set; }
+        public RepoStatusFlags GitStatus { get; protected set; }
+
+        /// <summary> For serializers </summary>
+        protected GitRepository() { }
 
         /// <summary>
         /// Create new git tracker for given location
         /// </summary>
-        public GitRepository(string location, string name=null, DateTime lastStatusAt=default(DateTime), Schedule updateSchedule=Schedule.Never, AutoAction automaticAction=AutoAction.Fetch, RepoStatus lastStatus=RepoStatus.Unknown)
+        public GitRepository(string location) 
+            : this(location, null, default(DateTime), Schedule.Never, AutoAction.Fetch, RepoStatus.Unknown)
+        {
+        }
+
+        /// <summary>
+        /// Create new git tracker for given location
+        /// </summary>
+        public GitRepository(string location, string name, DateTime lastStatusAt, Schedule updateSchedule, AutoAction automaticAction, RepoStatus lastStatus)
         {
             // We assume the path is a directory
             if (location.EndsWith(Path.DirectorySeparatorChar.ToString()))

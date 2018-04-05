@@ -1,3 +1,6 @@
+using System.Reflection;
+using NuGet;
+
 namespace ATray
 {
     using System;
@@ -26,10 +29,10 @@ namespace ATray
         internal static RepositoryCollection Repositories;
         internal static Configuration Configuration;
         internal static MainWindow MainWindowInstance;
-        internal static Task UpdateTask = null;
+        internal static Task UpdateTask;
 
-        internal static string GitBashLocation = null;
-        internal static string TortoiseGitLocation = null;
+        internal static string GitBashLocation;
+        internal static string TortoiseGitLocation;
 
         /// <summary>
         /// The main entry point for the application.
@@ -92,65 +95,31 @@ namespace ATray
         public static async Task UpdateApp(bool verbose)
         {
             Thread.CurrentThread.Name = "SquirrelUpdateThread";
+            var thisVersion =new SemanticVersion( Assembly.GetExecutingAssembly().GetName().Version);
 
-            using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/jokedst/ATray"))
+            try
             {
-                var updates = await mgr.CheckForUpdate();
-                var latestVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
-                if (latestVersion == null)
+                using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/jokedst/ATray"))
                 {
-                    if (verbose)
-                        MessageBox.Show("No Updates are available at this time.");
-                    return;
-                }
+                    var updates = await mgr.CheckForUpdate();
+                    var latestVersion = updates?.ReleasesToApply?.Where(x=>x.Version>thisVersion).OrderBy(x => x.Version).LastOrDefault();
+                    if (latestVersion == null)
+                    {
+                        if (verbose)
+                            MessageBox.Show("No Updates are available at this time.");
+                        return;
+                    }
 
-                if (MessageBox.Show(
-                        $"An update to version {latestVersion.Version} is available. Do you want to update?",
-                        "Update available", MessageBoxButtons.OKCancel) == DialogResult.OK)
-                {
+                    if (MessageBox.Show($"An update to version {latestVersion.Version} is available. Do you want to update?",
+                            "Update available", MessageBoxButtons.OKCancel) != DialogResult.OK)
+                        return;
+
                     await mgr.DownloadReleases(new[] {latestVersion});
                     await mgr.ApplyReleases(updates);
                     await mgr.UpdateApp();
                     MainWindowInstance.ShowNotification("Atray has been updated and is restarting");
                     UpdateManager.RestartApp();
                 }
-            }
-        }
-
-        // Suggested version - was on jockestor for ages...
-        public static async Task UpdateAppV2()
-        {
-            try
-            {
-                using (var mgr = await UpdateManager.GitHubUpdateManager("https://github.com/jokedst/ATray"))
-                {
-                    var updates = await mgr.CheckForUpdate();
-                    var lastVersion = updates?.ReleasesToApply?.OrderBy(x => x.Version).LastOrDefault();
-                    if (lastVersion == null)
-                    {
-                        MessageBox.Show("No Updates are available at this time.");
-                        return;
-                    }
-
-                    if (MessageBox.Show($"An update to version {lastVersion.Version} is available. Do you want to update?",
-                            "Update available", MessageBoxButtons.OKCancel) != DialogResult.OK)
-                    {
-                        return;
-                    }
-
-#if DEBUG
-                    MessageBox.Show("DEBUG: Don't actually perform the update in debug mode");
-                }
-#else
-                    await mgr.DownloadReleases(new[] {lastVersion});
-                    await mgr.ApplyReleases(updates);
-                    await mgr.UpdateApp();
-
-                    MessageBox.Show("The application has been updated and will restart");
-                }
-
-                UpdateManager.RestartApp();
-#endif
             }
             catch (Exception e)
             {

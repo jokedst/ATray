@@ -208,7 +208,6 @@
     <Compile Include="Dialogs\SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Tools\BitmapTools.cs" />
     <Compile Include="Tools\OverallStatusType.cs" />
     <EmbeddedResource Include="Dialogs\ActivityHistoryForm.resx">
       <DependentUpon>ActivityHistoryForm.cs</DependentUpon>

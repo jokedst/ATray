@@ -15,7 +15,7 @@
                 return new UsernamePasswordCredentials { Username = creds.Username, Password = creds.Password };
             var uri = new Uri(url);
             var userPart = (string.IsNullOrEmpty(usernameFromUrl) ? string.Empty : usernameFromUrl + "@");
-            creds.Target = string.Format("git:{0}://{1}{2}", uri.Scheme, userPart, uri.Host);
+            creds.Target = $"git:{uri.Scheme}://{userPart}{uri.Host}";
 
             if (!creds.Load())
             {

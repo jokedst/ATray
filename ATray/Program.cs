@@ -1,3 +1,4 @@
+using System.Drawing;
 using System.Reflection;
 using NuGet;
 
@@ -18,11 +19,15 @@ namespace ATray
         /// <summary> Directory for storing application data </summary>
 #if DEBUG
         internal static string SettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Application.CompanyName, Application.ProductName, "DEBUG");
-        internal static System.Drawing.Icon MainIcon = Properties.Resources.debug_icon;
+        //internal static Icon MainIcon = Properties.Resources.debug_icon;
 #else
         internal static string SettingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Application.CompanyName, Application.ProductName);
-        internal static System.Drawing.Icon MainIcon = Properties.Resources.main_icon;
+        //internal static Icon MainIcon = Properties.Resources.main_icon;
 #endif
+        internal static Icon GreyIcon;
+        internal static Icon YellowIcon;
+        internal static Icon MainIcon;
+
         internal static string RepoListFilePath = Path.Combine(SettingsDirectory, "repositories.json");
         internal static string ConfigurationFilePath = Path.Combine(SettingsDirectory, "atray.ini");
 
@@ -47,6 +52,10 @@ namespace ATray
                 return;
             }
 
+            var icobmp=Properties.Resources.main_icon.ToBitmap();
+
+
+            LoadIcons();
             if (!Directory.Exists(SettingsDirectory))
                 Directory.CreateDirectory(SettingsDirectory);
 
@@ -65,6 +74,17 @@ namespace ATray
             Application.Run(MainWindowInstance);
 
             Trace.TraceInformation("LEAVING!");
+        }
+
+        private static void LoadIcons()
+        {
+            int y = 0;
+#if DEBUG
+            y += 32;
+#endif
+            GreyIcon = Icon.FromHandle(Properties.Resources.icons.Clone(new Rectangle(0, y, 32, 32), Properties.Resources.icons.PixelFormat).GetHicon());
+            YellowIcon = Icon.FromHandle(Properties.Resources.icons.Clone(new Rectangle(32, y, 32, 32), Properties.Resources.icons.PixelFormat).GetHicon());
+            MainIcon = Icon.FromHandle(Properties.Resources.icons.Clone(new Rectangle(64, y, 32, 32), Properties.Resources.icons.PixelFormat).GetHicon());
         }
 
         private static void DetectInstalledPrograms()

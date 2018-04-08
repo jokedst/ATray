@@ -227,6 +227,7 @@
             // 
             // versionLabel
             // 
+            this.versionLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.versionLabel.AutoSize = true;
             this.versionLabel.Location = new System.Drawing.Point(13, 663);
             this.versionLabel.Name = "versionLabel";

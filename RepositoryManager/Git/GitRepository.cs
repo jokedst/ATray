@@ -1,7 +1,6 @@
 namespace RepositoryManager.Git
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
@@ -25,10 +24,18 @@ namespace RepositoryManager.Git
             get => _lastStatus;
             private set
             {
+                var previousValue = _lastStatus;
                 _lastStatus = value;
                 LastStatusAt = DateTime.Now;
+
+                if (previousValue != _lastStatus)
+                {
+                    Debug.WriteLine($"Git repo '{Name}' status changed from {previousValue} to {_lastStatus}");
+                    OnRepositoryStatusChanged(new RepositoryEventArgs(Location, previousValue, _lastStatus, Name, RepositoryEventType.Updated));
+                }
             }
         }
+
         /// <inheritdoc />
         public DateTime LastStatusAt { get; protected set; }
         /// <inheritdoc />
@@ -37,6 +44,9 @@ namespace RepositoryManager.Git
         public AutoAction AutomaticAction { get; set; }
         /// <summary> git-specific staus </summary>
         public RepoStatusFlags GitStatus { get; protected set; }
+
+        /// <summary> Raised when status has changed on a repo </summary>
+        public event RepositoryEventHandler RepositoryStatusChanged;
 
         /// <summary> For serializers </summary>
         protected GitRepository() { }
@@ -86,6 +96,8 @@ namespace RepositoryManager.Git
                     var origin = repo.Network.Remotes[repo.Head.RemoteName];
                     if (origin == null) return RepoStatus.Error;
                     var fetchOptions = new FetchOptions();
+                    if (!origin.Url.Contains("://"))
+                        throw new Exception("git over SSH is not aupported by Atray");
                     if (credentialHelper?.Value == "wincred")
                         fetchOptions.CredentialsProvider = CredentialsProvider.WinCred;
                     else
@@ -116,6 +128,7 @@ namespace RepositoryManager.Git
         /// </summary>
         public void RefreshLocalStatus()
         {
+            Trace.TraceInformation($"Git RefreshLocalStatus called for {Location}");
             try
             {
                 using (var repo = new Repository(Location))
@@ -224,31 +237,6 @@ namespace RepositoryManager.Git
         }
 
         /// <inheritdoc />
-        public IEnumerable<string> PossibleActions(RepoStatus status)
-        {
-            var ret = new List<string> {"Update"};
-            switch (status)
-            {
-                case RepoStatus.Unknown: return Enumerable.Empty<string>();
-                case RepoStatus.Disconnected: return new[] {"Configure remote"};
-                case RepoStatus.Error: return new[] {"Error info"};
-                    
-            }
-
-            if (status==(RepoStatus.Dirty))
-            {
-                ret.Add("Commit");
-            }
-                return ret;
-        }
-
-        /// <inheritdoc />
-        public void PerformAction(string actionName)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
         public string IndexLocation => Path.Combine(this.Location, ".git");
 
         /// <summary>
@@ -300,6 +288,12 @@ namespace RepositoryManager.Git
                 Trace.TraceWarning(e.Message);
             }
             Trace.TraceInformation($"GLOBAL: Git ls-remote took {stopwatch.ElapsedMilliseconds / 1000.0} seconds");
+        }
+
+        /// <summary> Overridable event logic </summary>
+        protected virtual void OnRepositoryStatusChanged(RepositoryEventArgs e)
+        {
+            RepositoryStatusChanged?.Invoke(this, e);
         }
     }
 }

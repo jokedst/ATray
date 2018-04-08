@@ -1,4 +1,6 @@
-﻿namespace ATray
+﻿using ATray.Tools;
+
+namespace ATray
 {
     using System;
     using System.Collections.Generic;
@@ -27,13 +29,14 @@
         private DateTime lastTimerEvent = DateTime.MinValue;
         private ActivityHistoryForm historyForm;
         private SettingsForm settingsForm;
+        private OverallStatusType OverallStatus;
 
         public MainWindow()
         {
             InitializeComponent();
             WindowState = FormWindowState.Minimized;
             ShowInTaskbar = false;
-            Icon = trayIcon.Icon = Program.MainIcon;
+            Icon = trayIcon.Icon = Program.GreyIcon;
             Program.Repositories.RepositoryStatusChanged += OnRepositoryStatusChanged;
             SystemEvents.SessionSwitch += SystemEventsOnSessionSwitch;
 #if DEBUG
@@ -43,9 +46,12 @@
             //  new DiskUsageForm().Show();
 #endif
             CreateRepositoryMenyEntries();
-
-            var animTray = new IconAnimator(trayIcon, Properties.Resources.anim1);
-            animTray.StartAnimation();
+            trayMenu.Items.Insert(0, new ToolStripMenuItem("DEBUGTEST", null, (sender, args) =>
+            {
+                this.trayIcon.Icon = Program.GreyIcon;
+            }));
+            //var animTray = new IconAnimator(trayIcon, Properties.Resources.anim1);
+            //animTray.StartAnimation();
         }
 
         public void CreateRepositoryMenyEntries()
@@ -74,8 +80,7 @@
                 if (trayMenu.Items.ContainsKey(repo.Location))
                     continue;
                 var repoLocation = repo.Location; // for clojures
-                var submenu = new ToolStripMenuItem();
-                submenu.Name = repoLocation;
+                var submenu = new ToolStripMenuItem {Name = repoLocation};
 
                 if (repo is GitRepository && Program.TortoiseGitLocation != null)
                 {
@@ -95,13 +100,33 @@
                 UpdateRepoMenu(submenu, repo.Name, repo.LastStatus);
                 trayMenu.Items.Insert(0, submenu);
             }
+
+            UpdateIcon();
+        }
+
+        private void UpdateIcon()
+        {
+            var worstStatus = Program.Repositories.Select(x => x.LastStatus.ToOverallStatus()).OrderBy(x=>x).LastOrDefault();
+            if (worstStatus == OverallStatus) return;
+            OverallStatus = worstStatus;
+            switch (OverallStatus)
+            {
+                case OverallStatusType.Ok:
+                    this.trayIcon.Icon = Program.GreyIcon;
+                    break;
+                case OverallStatusType.WarnAhead:
+                case OverallStatusType.WarnBehind:
+                    this.trayIcon.Icon = Program.YellowIcon;
+                    break;
+                case OverallStatusType.CodeRed:
+                    this.trayIcon.Icon = Program.MainIcon;
+                    break;
+            }
         }
 
         private void UpdateRepoMenu(ToolStripItem menuItem, string repoName, RepoStatus status)
         {
             menuItem.Text = $"{repoName}: {Environment.NewLine}   {status}";
-            //var r = new Random();
-            //menuItem.BackColor = Color.FromArgb(r.Next(256), r.Next(256), r.Next(256));
 
             if (status == RepoStatus.Conflict)
                 menuItem.BackColor = Color.FromArgb(0x80, Color.Red);
@@ -126,7 +151,11 @@
             foreach (var menuRow in trayMenu.Items.Find(e.Location, false))
             {
                 //this.UIThread(() => menuRow.Text = e.Name + ": \n" + e.NewStatus);
-                this.UIThread(() => UpdateRepoMenu(menuRow, e.Name, e.NewStatus));
+                this.UIThread(() =>
+                {
+                    UpdateRepoMenu(menuRow, e.Name, e.NewStatus);
+                    UpdateIcon();
+                });
             }
         }
 
@@ -265,7 +294,7 @@
                 historyForm = new ActivityHistoryForm();
             if (historyForm.IsDisposed) return;
             historyForm.Show();
-            settingsForm.Focus();
+            historyForm.Focus();
         }
 
         private void OnMenuClickSettings(object sender, EventArgs e)

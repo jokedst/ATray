@@ -63,6 +63,11 @@
                     // Legacy fix for a moved class
                     json = json.Replace("RepositoryManager.GitRepository, RepositoryManager", "RepositoryManager.Git.GitRepository, RepositoryManager");
                     _repositories = JsonConvert.DeserializeObject<List<ISourceRepository>>(json, JsonSettings);
+                    foreach (var repository in _repositories)
+                    {
+                        repository.RefreshLocalStatus();
+                        repository.RepositoryStatusChanged += OnRepoChangedEventPropagator;
+                    }
                 }
                 else _repositories = new List<ISourceRepository>();
             }
@@ -130,10 +135,21 @@
                 {
                     _fileListeners.Add(repo.Location, new DelayedFileSystemWatcher(_useFileListeners==FileListeningMode.IndexOnly?repo.IndexLocation:repo.Location, repo.RefreshLocalStatus));
                 }
+
+                repo.RefreshLocalStatus();
+                repo.RepositoryStatusChanged += OnRepoChangedEventPropagator;
             }
 
             // Raise event
             OnRepositoryListChanged(new RepositoryEventArgs(repo.Location, RepoStatus.Unknown, repo.LastStatus, repo.Name, RepositoryEventType.Added));
+        }
+
+        /// <summary>
+        /// Forwards the event to any listeners of this object
+        /// </summary>
+        private void OnRepoChangedEventPropagator(object sender, RepositoryEventArgs args)
+        {
+            OnRepositoryStatusChanged(args);
         }
 
         /// <summary> Remove a repository from the collection </summary>
@@ -148,6 +164,7 @@
                 if(repo != null)
                 {
                     result = _repositories.Remove(repo);
+                    repo.RepositoryStatusChanged -= OnRepoChangedEventPropagator;
                 }
 
                 if (_fileListeners.ContainsKey(repositoryLocation))
@@ -207,8 +224,7 @@
             var eventArgs = new RepositoryEventArgs(repo.Location, previousStatus, repo.LastStatus, repo.Name, RepositoryEventType.Updated);
             OnRepositoryUpdated(eventArgs);
 
-            if(previousStatus != repo.LastStatus)
-                OnRepositoryStatusChanged(eventArgs);
+            //if(previousStatus != repo.LastStatus) OnRepositoryStatusChanged(eventArgs);
         }
 
         /// <summary>
@@ -263,12 +279,9 @@
             var eventArgs = new RepositoryEventArgs(repo.Location, previousStatus, repo.LastStatus, repo.Name, RepositoryEventType.Updated);
             OnRepositoryUpdated(eventArgs);
 
-            if (previousStatus != repo.LastStatus)
-                OnRepositoryStatusChanged(eventArgs);
+            //if (previousStatus != repo.LastStatus)
+            //    OnRepositoryStatusChanged(eventArgs);
         }
-
-        /// <summary> Delegate for repo update events </summary>
-        public delegate void RepositoryEventHandler(object sender, RepositoryEventArgs e);
 
         /// <summary> Raised when a repo has been updated </summary>
         public event RepositoryEventHandler RepositoryUpdated;
@@ -334,4 +347,7 @@
             }
         }
     }
+
+    /// <summary> Delegate for repo update events </summary>
+    public delegate void RepositoryEventHandler(object sender, RepositoryEventArgs e);
 }

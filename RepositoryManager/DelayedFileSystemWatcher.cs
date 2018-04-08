@@ -29,6 +29,11 @@ namespace RepositoryManager
                 Trace.TraceInformation($"Watched path {path} modified ({e.ChangeType.ToString()} {e.FullPath})");
                 _postponedEvent.StartOrUpdate();
             };
+            _watcher.Deleted+= (s, e) =>
+            {
+                Trace.TraceInformation($"Watched path {path} deleted ({e.ChangeType.ToString()} {e.FullPath})");
+                _postponedEvent.StartOrUpdate();
+            };
         }
 
         /// <summary> Releases all resources used by the current instance of <see cref="DelayedFileSystemWatcher" />. </summary>

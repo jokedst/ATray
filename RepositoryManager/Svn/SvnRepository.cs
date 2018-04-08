@@ -19,8 +19,25 @@ namespace RepositoryManager
         public string Name { get; set; }
         /// <inheritdoc />
         public string Location { get; set; }
+
         /// <inheritdoc />
-        public RepoStatus LastStatus { get; }
+        public RepoStatus LastStatus
+        {
+            get => _lastStatus;
+            private set
+            {
+                var previousValue = _lastStatus;
+                _lastStatus = value;
+                LastStatusAt = DateTime.Now;
+
+                if (previousValue != _lastStatus)
+                {
+                    Debug.WriteLine($"Git repo '{Name}' status changed from {previousValue} to {_lastStatus}");
+                    OnRepositoryStatusChanged(new RepositoryEventArgs(Location, previousValue, _lastStatus, Name, RepositoryEventType.Updated));
+                }
+            }
+        }
+
         /// <inheritdoc />
         public DateTime LastStatusAt { get; private set; }
         /// <inheritdoc />
@@ -37,19 +54,8 @@ namespace RepositoryManager
             }
         }
 
-        /// <inheritdoc />
-        public IEnumerable<string> PossibleActions(RepoStatus status)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public void PerformAction(string actionName)
-        {
-            throw new NotImplementedException();
-        }
-
         private static readonly TraceSource Log = new TraceSource(nameof(SvnRepository));
+        private RepoStatus _lastStatus;
 
         /// <summary>
         /// Create new SVN tracker for given location
@@ -68,7 +74,7 @@ namespace RepositoryManager
             }
 
             Location = location;
-            LastStatus = lastStatus;
+            _lastStatus = lastStatus;
 
             Name = name ?? Name;
             LastStatusAt = lastStatusAt;
@@ -124,6 +130,14 @@ namespace RepositoryManager
         {
             //throw new NotImplementedException();
             Trace.TraceInformation($"SVN RefreshLocalStatus for {Location}");
+        }
+
+        public event RepositoryEventHandler RepositoryStatusChanged;
+
+        /// <summary> Overridable event logic </summary>
+        protected virtual void OnRepositoryStatusChanged(RepositoryEventArgs e)
+        {
+            RepositoryStatusChanged?.Invoke(this, e);
         }
     }
 }

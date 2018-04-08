@@ -1,8 +1,6 @@
 namespace RepositoryManager
 {
     using System;
-    using System.Collections.Generic;
-    using System.Runtime.InteropServices.ComTypes;
 
     /// <summary>
     /// Represents a version controlled directory
@@ -46,19 +44,6 @@ namespace RepositoryManager
         bool Valid();
 
         /// <summary>
-        /// List all possible actions when in given state
-        /// </summary>
-        /// <param name="status"></param>
-        /// <returns></returns>
-        IEnumerable<string> PossibleActions(RepoStatus status);
-
-        /// <summary>
-        /// Performs a named action
-        /// </summary>
-        /// <param name="actionName"></param>
-        void PerformAction(string actionName);
-
-        /// <summary>
         /// Path to "index" or equivalent, where locally commited files are stored
         /// </summary>
         string IndexLocation { get; }
@@ -67,6 +52,9 @@ namespace RepositoryManager
         /// Refreshes the status without talking to remote servers
         /// </summary>
         void RefreshLocalStatus();
+
+        /// <summary> Raised when status has changed on a repo </summary>
+        event RepositoryEventHandler RepositoryStatusChanged;
     }
     
     /// <summary>

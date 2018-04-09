@@ -46,10 +46,6 @@ namespace ATray
             //  new DiskUsageForm().Show();
 #endif
             CreateRepositoryMenyEntries();
-            trayMenu.Items.Insert(0, new ToolStripMenuItem("DEBUGTEST", null, (sender, args) =>
-            {
-                this.trayIcon.Icon = Program.GreyIcon;
-            }));
             //var animTray = new IconAnimator(trayIcon, Properties.Resources.anim1);
             //animTray.StartAnimation();
         }

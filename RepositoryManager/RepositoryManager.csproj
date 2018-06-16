@@ -115,6 +115,7 @@
   <ItemGroup>
     <Compile Include="DelayedFileSystemWatcher.cs" />
     <Compile Include="FileListeningMode.cs" />
+    <Compile Include="IRepositoryCollection.cs" />
     <Compile Include="PostponedEvent.cs" />
     <Compile Include="RepositoryCollection.cs" />
     <Compile Include="RepositoryEventArgs.cs" />

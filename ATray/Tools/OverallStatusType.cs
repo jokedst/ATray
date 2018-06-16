@@ -46,5 +46,11 @@ namespace ATray.Tools
                 default: throw new ArgumentOutOfRangeException(nameof(overallStatus), overallStatus, null);
             }
         }
+
+        public static (string, string) Divide(this string main, char dividor)
+        {
+            var parts = main.Split(new[] {dividor}, 2);
+            return (parts[0], parts.Length == 1 ? null : parts[1]);
+        }
     }
 }

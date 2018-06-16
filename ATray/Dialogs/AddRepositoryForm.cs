@@ -1,4 +1,6 @@
-﻿namespace ATray
+﻿using System.Diagnostics;
+
+namespace ATray
 {
     using System;
     using System.Windows.Forms;
@@ -6,8 +8,17 @@
     using RepositoryManager;
     using RepositoryManager.Git;
 
-    public partial class AddRepositoryForm : Form
+    public interface IAddRepositoryDialog
     {
+        ISourceRepository AddRepository(IWin32Window owningWindow);
+        bool EditRepository(IWin32Window owningWindow, ISourceRepository repository);
+    }
+
+    public partial class AddRepositoryForm : Form, IAddRepositoryDialog
+    {
+        /// <summary> If editing contains the repo to edit </summary>
+        private ISourceRepository _repo;
+
         public AddRepositoryForm()
         {
             InitializeComponent();
@@ -18,7 +29,7 @@
         {
             using (var frm = new OpenFolderDialog())
             {
-                if (frm.ShowDialog(this) != DialogResult.OK) return;
+                if (frm.ShowDialog(Owner) != DialogResult.OK) return;
                 textboxPath.Text = frm.Folder;
                 if (string.IsNullOrWhiteSpace(NameTextBox.Text))
                 {
@@ -72,7 +83,7 @@
             }
         }
 
-        public string RepoName
+        private string RepoName
         {
             get => NameTextBox.Text;
             set => NameTextBox.Text = value;
@@ -87,6 +98,62 @@
         {
             var repo = new GitRepository(textboxPath.Text);
             validationResultLabel.Text = repo.Valid() ? "Valid!" : "Directory is not a valid repository!";
+        }
+
+        private void OnClickOk(object sender, EventArgs e)
+        {
+            var adding = false;
+            if (_repo == null)
+            {
+                adding = true;
+                _repo = new GitRepository(textboxPath.Text);
+            }
+            if (!_repo.Valid())
+            {
+                MessageBox.Show("Invalid directory! This is not a supported repository path.", "Invalid repository path");
+                return;
+            }
+
+            _repo.UpdateSchedule = ChosenSchedule;
+            if (!string.IsNullOrWhiteSpace(RepoName))
+                _repo.Name = RepoName;
+            if (adding && Program.Repositories.ContainsName(_repo.Name))
+            {
+                MessageBox.Show("A repository with name'" + _repo.Name + "' exists already", "Error adding repository");
+                return;
+            }
+
+            DialogResult = DialogResult.OK;
+        }
+
+        public ISourceRepository AddRepository(IWin32Window owningWindow)
+        {
+            Owner = owningWindow as Form;
+            _repo = null;
+            if (this.ShowDialog() != DialogResult.OK) return null;
+            var newRepo = _repo;
+            _repo = null;
+            return newRepo;
+        }
+
+        public bool EditRepository(IWin32Window owningWindow, ISourceRepository repository)
+        {
+            _repo = repository;
+            Owner = owningWindow as Form;
+            Text = "Edit Repository";
+            OkButtonText = "&Save";
+            textboxPath.Text = _repo.Location;
+            RepoName = _repo.Name;
+            SetSchedule((int)_repo.UpdateSchedule);
+
+            if (ShowDialog() != DialogResult.OK) return false;
+
+            Trace.TraceInformation($"About to edit repo {textboxPath.Text}");
+            _repo.Location = textboxPath.Text;
+            _repo.UpdateSchedule = ChosenSchedule;
+            _repo.Name = RepoName;
+            _repo = null;
+            return true;
         }
     }
 }

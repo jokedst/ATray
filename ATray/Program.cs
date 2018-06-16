@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 using NuGet;
 
 namespace ATray
@@ -31,7 +32,8 @@ namespace ATray
         internal static string RepoListFilePath = Path.Combine(SettingsDirectory, "repositories.json");
         internal static string ConfigurationFilePath = Path.Combine(SettingsDirectory, "atray.ini");
 
-        internal static RepositoryCollection Repositories;
+        internal static IServiceProvider ServiceProvider;
+        internal static IRepositoryCollection Repositories;
         internal static Configuration Configuration;
         internal static MainWindow MainWindowInstance;
         internal static Task UpdateTask;
@@ -39,6 +41,15 @@ namespace ATray
         internal static string GitBashLocation;
         internal static string TortoiseGitLocation;
 
+        internal static IServiceProvider InitializeIoC()
+        {
+            var serviceCollection = new ServiceCollection()
+                .AddSingleton<IRepositoryCollection, RepositoryCollection>(s=>new RepositoryCollection(RepoListFilePath))
+                .AddTransient<IAddRepositoryDialog,AddRepositoryForm>()
+                .AddTransient< ISettingsDialog,SettingsForm>();
+            var sp= serviceCollection.BuildServiceProvider();
+            return sp;
+        }
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -52,15 +63,13 @@ namespace ATray
                 return;
             }
 
-            var icobmp=Properties.Resources.main_icon.ToBitmap();
-
-
+            ServiceProvider = InitializeIoC();
             LoadIcons();
             if (!Directory.Exists(SettingsDirectory))
                 Directory.CreateDirectory(SettingsDirectory);
 
             // Load repos and config
-            Repositories = new RepositoryCollection(RepoListFilePath);
+            Repositories = ServiceProvider.GetService<IRepositoryCollection>(); // new RepositoryCollection(RepoListFilePath);
             Configuration = new Configuration(ConfigurationFilePath);
             Repositories.SetFileListening(FileListeningMode.AllChanges);
 

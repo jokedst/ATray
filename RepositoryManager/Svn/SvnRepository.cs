@@ -132,6 +132,7 @@ namespace RepositoryManager
             Trace.TraceInformation($"SVN RefreshLocalStatus for {Location}");
         }
 
+        /// <inheritdoc />
         public event RepositoryEventHandler RepositoryStatusChanged;
 
         /// <summary> Overridable event logic </summary>

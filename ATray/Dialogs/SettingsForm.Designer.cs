@@ -36,6 +36,7 @@
             this.updateNowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.versionLabel = new System.Windows.Forms.Label();
+            this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.repoListMenu.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabGeneral.SuspendLayout();
@@ -56,7 +57,7 @@
             this.columnPath});
             this.repoList.FullRowSelect = true;
             this.repoList.Location = new System.Drawing.Point(12, 44);
-            this.repoList.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.repoList.Margin = new System.Windows.Forms.Padding(6);
             this.repoList.Name = "repoList";
             this.repoList.Size = new System.Drawing.Size(816, 433);
             this.repoList.TabIndex = 0;
@@ -102,7 +103,7 @@
             this.addToolStripMenuItem.Name = "addToolStripMenuItem";
             this.addToolStripMenuItem.Size = new System.Drawing.Size(133, 36);
             this.addToolStripMenuItem.Text = "&Add";
-            this.addToolStripMenuItem.Click += new System.EventHandler(this.ClickAddRepository);
+            this.addToolStripMenuItem.Click += new System.EventHandler(this.OnClickAddRepository);
             // 
             // tabControl
             // 
@@ -112,7 +113,7 @@
             this.tabControl.Controls.Add(this.tabGeneral);
             this.tabControl.Controls.Add(this.tabRepoMan);
             this.tabControl.Location = new System.Drawing.Point(24, 23);
-            this.tabControl.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.tabControl.Margin = new System.Windows.Forms.Padding(6);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(860, 598);
@@ -122,9 +123,9 @@
             // 
             this.tabGeneral.Controls.Add(this.propertyGrid);
             this.tabGeneral.Location = new System.Drawing.Point(8, 39);
-            this.tabGeneral.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.tabGeneral.Margin = new System.Windows.Forms.Padding(6);
             this.tabGeneral.Name = "tabGeneral";
-            this.tabGeneral.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.tabGeneral.Padding = new System.Windows.Forms.Padding(6);
             this.tabGeneral.Size = new System.Drawing.Size(844, 551);
             this.tabGeneral.TabIndex = 0;
             this.tabGeneral.Text = "General";
@@ -135,7 +136,7 @@
             this.propertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.propertyGrid.LineColor = System.Drawing.SystemColors.ControlDark;
             this.propertyGrid.Location = new System.Drawing.Point(6, 6);
-            this.propertyGrid.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.propertyGrid.Margin = new System.Windows.Forms.Padding(6);
             this.propertyGrid.Name = "propertyGrid";
             this.propertyGrid.Size = new System.Drawing.Size(832, 539);
             this.propertyGrid.TabIndex = 0;
@@ -146,9 +147,9 @@
             this.tabRepoMan.Controls.Add(this.label1);
             this.tabRepoMan.Controls.Add(this.repoList);
             this.tabRepoMan.Location = new System.Drawing.Point(8, 39);
-            this.tabRepoMan.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.tabRepoMan.Margin = new System.Windows.Forms.Padding(6);
             this.tabRepoMan.Name = "tabRepoMan";
-            this.tabRepoMan.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.tabRepoMan.Padding = new System.Windows.Forms.Padding(6);
             this.tabRepoMan.Size = new System.Drawing.Size(844, 551);
             this.tabRepoMan.TabIndex = 1;
             this.tabRepoMan.Text = "RepoMan";
@@ -158,13 +159,13 @@
             // 
             this.buttonAddRepository.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.buttonAddRepository.Location = new System.Drawing.Point(8, 492);
-            this.buttonAddRepository.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.buttonAddRepository.Margin = new System.Windows.Forms.Padding(6);
             this.buttonAddRepository.Name = "buttonAddRepository";
             this.buttonAddRepository.Size = new System.Drawing.Size(150, 44);
             this.buttonAddRepository.TabIndex = 2;
             this.buttonAddRepository.Text = "&Add";
             this.buttonAddRepository.UseVisualStyleBackColor = true;
-            this.buttonAddRepository.Click += new System.EventHandler(this.ClickAddRepository);
+            this.buttonAddRepository.Click += new System.EventHandler(this.OnClickAddRepository);
             // 
             // label1
             // 
@@ -181,7 +182,7 @@
             this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnOk.Location = new System.Drawing.Point(572, 633);
-            this.btnOk.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.btnOk.Margin = new System.Windows.Forms.Padding(6);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(150, 44);
             this.btnOk.TabIndex = 2;
@@ -194,7 +195,7 @@
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Location = new System.Drawing.Point(734, 633);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(6);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(150, 44);
             this.btnCancel.TabIndex = 3;
@@ -207,21 +208,22 @@
             this.editRepoMenu.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.editRepoMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.updateNowToolStripMenuItem,
-            this.editToolStripMenuItem});
+            this.editToolStripMenuItem,
+            this.removeToolStripMenuItem});
             this.editRepoMenu.Name = "editRepoMenu";
-            this.editRepoMenu.Size = new System.Drawing.Size(220, 76);
+            this.editRepoMenu.Size = new System.Drawing.Size(301, 156);
             // 
             // updateNowToolStripMenuItem
             // 
             this.updateNowToolStripMenuItem.Name = "updateNowToolStripMenuItem";
-            this.updateNowToolStripMenuItem.Size = new System.Drawing.Size(219, 36);
+            this.updateNowToolStripMenuItem.Size = new System.Drawing.Size(300, 36);
             this.updateNowToolStripMenuItem.Text = "&Update now";
             this.updateNowToolStripMenuItem.Click += new System.EventHandler(this.OnClickUpdateRepo);
             // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(219, 36);
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(300, 36);
             this.editToolStripMenuItem.Text = "&Edit";
             this.editToolStripMenuItem.Click += new System.EventHandler(this.OnClickEdit);
             // 
@@ -234,6 +236,13 @@
             this.versionLabel.Size = new System.Drawing.Size(0, 25);
             this.versionLabel.TabIndex = 4;
             // 
+            // removeToolStripMenuItem
+            // 
+            this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
+            this.removeToolStripMenuItem.Size = new System.Drawing.Size(300, 36);
+            this.removeToolStripMenuItem.Text = "&Remove";
+            this.removeToolStripMenuItem.Click += new System.EventHandler(this.OnClickRemoveRepo);
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -244,7 +253,7 @@
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.tabControl);
             this.Icon = global::ATray.Properties.Resources.main_icon;
-            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "SettingsForm";
             this.Text = "Settings";
             this.Load += new System.EventHandler(this.SettingsForm_Load);
@@ -281,5 +290,6 @@
         private System.Windows.Forms.ToolStripMenuItem updateNowToolStripMenuItem;
         private System.Windows.Forms.PropertyGrid propertyGrid;
         private System.Windows.Forms.Label versionLabel;
+        private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
     }
 }

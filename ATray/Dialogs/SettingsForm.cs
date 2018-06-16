@@ -9,18 +9,29 @@
     using RepositoryManager;
     using RepositoryManager.Git;
 
-    public partial class SettingsForm : Form
+    public interface ISettingsDialog:IDisposable
     {
+        bool Focus();
+        void Show(IWin32Window owner);
+    }
+
+    public partial class SettingsForm : Form, ISettingsDialog
+    {
+        private readonly IAddRepositoryDialog _addRepositoryDialog;
+        private readonly IRepositoryCollection _repositories;
         //private List<ISourceRepository> _updatedRepoList = Program.Repositories;
 
-        public SettingsForm()
+        public SettingsForm(IAddRepositoryDialog addRepositoryDialog, IRepositoryCollection repositories)
         {
+            _addRepositoryDialog = addRepositoryDialog;
+            _repositories = repositories;
+
             InitializeComponent();
 #if DEBUG
             Icon = new Icon(GetType(), "debug.ico");
 #endif
             propertyGrid.SelectedObject = Program.Configuration.Clone();
-            Program.Repositories.RepositoryUpdated += OnRepositoryUpdated;
+            _repositories.RepositoryUpdated += OnRepositoryUpdated;
 
             var v = Assembly.GetExecutingAssembly().GetName().Version;
             versionLabel.Text = $"v{v.Major}.{v.Minor}.{v.Build}";
@@ -41,7 +52,7 @@
             if (disposing)
             {
                 components?.Dispose();
-                Program.Repositories.RepositoryUpdated -= OnRepositoryUpdated;
+                _repositories.RepositoryUpdated -= OnRepositoryUpdated;
             }
             base.Dispose(disposing);
         }
@@ -72,7 +83,7 @@
         private void btnCancel_Click(object sender, EventArgs e)
         {
             // Since the repo list actually modifies the live list, on cancel we simply restore the last list
-            Program.Repositories.ReloadFromFile();
+            _repositories.ReloadFromFile();
             Close();
         }
 
@@ -89,28 +100,16 @@
             Program.Configuration.SaveToIniFile();
 
             // Save new repo list
-            Program.Repositories.Save();
+            _repositories.Save();
             Program.MainWindowInstance.CreateRepositoryMenyEntries();
             Close();
         }
 
-        private void ClickAddRepository(object sender, EventArgs e)
+        private void OnClickAddRepository(object sender, EventArgs e)
         {
-            var dialog = new AddRepositoryForm();
-            if (dialog.ShowDialog() != DialogResult.OK) return;
-            Trace.TraceInformation($"About to add repo {dialog.textboxPath.Text}");
-
-            var repo = new GitRepository(dialog.textboxPath.Text);
-            if (!repo.Valid())
-            {
-                MessageBox.Show("Invalid directory! This is not a supported repository path.", "Invalid repository path");
-                return;
-            }
-
-            repo.UpdateSchedule = dialog.ChosenSchedule;
-            if (!string.IsNullOrWhiteSpace(dialog.RepoName))
-                repo.Name = dialog.RepoName;
-            Program.Repositories.Add(repo);
+            var repo = _addRepositoryDialog.AddRepository(this.Owner);
+            if (repo == null) return;
+            _repositories.Add(repo);
             UpdateRepoList();
         }
 
@@ -118,7 +117,7 @@
         {
             repoList.Items.Clear();
 
-            foreach (var repository in Program.Repositories)
+            foreach (var repository in _repositories)
             {
                 repoList.Items.Add(RepoToRow(repository));
             }
@@ -139,29 +138,47 @@
         private void OnClickEdit(object sender, EventArgs e)
         {
             if (_clickedRepository == null) return;
-            var location = _clickedRepository.SubItems[columnPath.Index].Text;
-            var repo = Program.Repositories.Single(x => x.Location == location);
+            var repository = _repositories.GetByName(_clickedRepository.SubItems[columnName.Index].Text);
+            if (_addRepositoryDialog.EditRepository(this.Owner, repository))
+            {
+                _repositories.RepositoryModified(repository);
+                UpdateRepoList();
+            }
 
-            var dialog = new AddRepositoryForm();
-            dialog.Text = "Edit Repository";
-            dialog.OkButtonText = "&Save";
-            dialog.textboxPath.Text = location;
-            dialog.SetSchedule((int)repo.UpdateSchedule);
-            dialog.RepoName = repo.Name;
-            if (dialog.ShowDialog() != DialogResult.OK) return;
+            //// Old code
+            //var location = _clickedRepository.SubItems[columnPath.Index].Text;
+            //var repo = _repositories.Single(x => x.Location == location);
 
-            Trace.TraceInformation($"About to edit repo {dialog.textboxPath.Text}");
-            repo.Location = dialog.textboxPath.Text;
-            repo.UpdateSchedule = dialog.ChosenSchedule;
-            repo.Name = dialog.RepoName;
-            UpdateRepoList();
+            //var dialog = new AddRepositoryForm(this.Owner ?? this)
+            //{
+            //    Text = "Edit Repository",
+            //    OkButtonText = "&Save",
+            //    textboxPath = {Text = location},
+            //    RepoName = repo.Name
+            //};
+            //dialog.SetSchedule((int)repo.UpdateSchedule);
+            //if (dialog.ShowDialog() != DialogResult.OK) return;
+
+            //Trace.TraceInformation($"About to edit repo {dialog.textboxPath.Text}");
+            //repo.Location = dialog.textboxPath.Text;
+            //repo.UpdateSchedule = dialog.ChosenSchedule;
+            //repo.Name = dialog.RepoName;
+            //UpdateRepoList();
         }
 
         private void OnClickUpdateRepo(object sender, EventArgs e)
         {
             if (_clickedRepository == null) return;
             var location = _clickedRepository.SubItems[columnPath.Index].Text;
-            Program.Repositories.UpdateRepo(location);
+            _repositories.UpdateRepo(location);
+        }
+
+        private void OnClickRemoveRepo(object sender, EventArgs e)
+        {
+            if (_clickedRepository == null) return;
+            var location = _clickedRepository.SubItems[columnPath.Index].Text;
+            _repositories.Remove(location);
+            UpdateRepoList();
         }
     }
 }

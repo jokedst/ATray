@@ -1,4 +1,5 @@
 ﻿using ATray.Tools;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ATray
 {
@@ -30,6 +31,7 @@ namespace ATray
         private ActivityHistoryForm historyForm;
         private SettingsForm settingsForm;
         private OverallStatusType OverallStatus;
+        private WebServer webServer;
 
         public MainWindow()
         {
@@ -41,13 +43,16 @@ namespace ATray
             SystemEvents.SessionSwitch += SystemEventsOnSessionSwitch;
 #if DEBUG
             // DEBUG! Show dialog on boot for convinience
-         //   OnMenuClickSettings(null, null);
-            OnMenuClickHistory(null, null);
+            OnMenuClickSettings(null, null);
+            //OnMenuClickHistory(null, null);
             //  new DiskUsageForm().Show();
 #endif
             CreateRepositoryMenyEntries();
             //var animTray = new IconAnimator(trayIcon, Properties.Resources.anim1);
             //animTray.StartAnimation();
+
+            this.webServer = new WebServer(this, "http://localhost:14754");
+            this.webServer.Run();
         }
 
         public void CreateRepositoryMenyEntries()
@@ -295,10 +300,12 @@ namespace ATray
 
         private void OnMenuClickSettings(object sender, EventArgs e)
         {
-            if (settingsForm == null || settingsForm.IsDisposed)
-                settingsForm = new SettingsForm();
-            settingsForm.Show();
-            settingsForm.Focus();
+            ISettingsDialog settingsDialog = Program.ServiceProvider.GetService<ISettingsDialog>();
+            //settingsForm;
+            //if (settingsDialog == null || settingsForm.IsDisposed)
+            //    settingsDialog = new SettingsForm();
+            settingsDialog.Show(this);
+            settingsDialog.Focus();
         }
 
         protected override void WndProc(ref Message m)

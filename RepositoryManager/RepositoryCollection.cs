@@ -17,7 +17,7 @@
     /// <summary>
     /// Manages a set of repositories
     /// </summary><inheritdoc />
-    public class RepositoryCollection : IEnumerable<ISourceRepository>
+    public class RepositoryCollection : IRepositoryCollection
     {
         private const int SampleFrequency = 5000;
         /// <summary> Settings for serializing and deserializing JSON </summary>
@@ -25,6 +25,7 @@
 
         /// <summary> Internal list of repos </summary>
         private List<ISourceRepository> _repositories;
+        private Dictionary<string, ISourceRepository> _repositoriesByName;
 
         private string RepoListFilePath { get; set; }
         private readonly Timer _timer;
@@ -63,8 +64,20 @@
                     // Legacy fix for a moved class
                     json = json.Replace("RepositoryManager.GitRepository, RepositoryManager", "RepositoryManager.Git.GitRepository, RepositoryManager");
                     _repositories = JsonConvert.DeserializeObject<List<ISourceRepository>>(json, JsonSettings);
+                    _repositoriesByName = new Dictionary<string, ISourceRepository>(StringComparer.OrdinalIgnoreCase);
+
                     foreach (var repository in _repositories)
                     {
+                        // Name must be unique
+                        if (_repositoriesByName.ContainsKey(repository.Name))
+                        {
+                            var uniqueIndex = 2;
+                            string name;
+                            do name = $"{repository.Name} ({uniqueIndex++})";
+                            while (_repositoriesByName.ContainsKey(name));
+                            repository.Name = name;
+                        }
+                        _repositoriesByName.Add(repository.Name, repository);
                         repository.RefreshLocalStatus();
                         repository.RepositoryStatusChanged += OnRepoChangedEventPropagator;
                     }
@@ -125,15 +138,53 @@
                 File.WriteAllText(RepoListFilePath, JsonConvert.SerializeObject(_repositories, JsonSettings), Encoding.UTF8);
         }
 
+        /// <summary>
+        /// Checks if a name is used by this collection
+        /// </summary>
+        /// <param name="repositoryName"> Repository name to check </param>
+        /// <returns> true if exists, false if not </returns>
+        public bool ContainsName(string repositoryName)
+        {
+            return _repositoriesByName.ContainsKey(repositoryName);
+        }
+
+        /// <summary>
+        /// Gets a repository by it's name
+        /// </summary>
+        public ISourceRepository GetByName(string repoName)
+        {
+            return _repositoriesByName.TryGetValue(repoName, out var repo) ? repo : null;
+        }
+
+        /// <inheritdoc />
+        public void RepositoryModified(ISourceRepository repository)
+        {
+            lock (_lockObject)
+            {
+                // Find the repo
+                var repo = _repositoriesByName.Single(x => x.Value == repository);
+                if (repo.Key != repo.Value.Name)
+                {
+                    _repositoriesByName.Remove(repo.Key);
+                    _repositoriesByName.Add(repository.Name, repository);
+                }
+            }
+        }
+
         /// <summary> Add a repository to the collection </summary>
         public void Add(ISourceRepository repo)
         {
             lock (_lockObject)
             {
+                if(_repositoriesByName.ContainsKey(repo.Name))
+                    throw new ArgumentException($"A repository with the name '{repo.Name}' already exist", nameof(repo));
                 _repositories.Add(repo);
+                _repositoriesByName.Add(repo.Name, repo);
                 if (_useFileListeners != FileListeningMode.None)
                 {
-                    _fileListeners.Add(repo.Location, new DelayedFileSystemWatcher(_useFileListeners==FileListeningMode.IndexOnly?repo.IndexLocation:repo.Location, repo.RefreshLocalStatus));
+                    // Since we still use repo location as key, but can have severla (i know, stupid) we must check so we don't create two file listeners for same location
+                    if(!_fileListeners.ContainsKey(repo.Location))
+                        _fileListeners.Add(repo.Location, new DelayedFileSystemWatcher(_useFileListeners==FileListeningMode.IndexOnly?repo.IndexLocation:repo.Location, repo.RefreshLocalStatus));
                 }
 
                 repo.RefreshLocalStatus();
@@ -342,7 +393,8 @@
                     var path = mode== FileListeningMode.IndexOnly ? repository.IndexLocation : repository.Location;
                     var repo2 = repository;
 
-                    _fileListeners.Add(repo2.Location,new DelayedFileSystemWatcher(path, () => repo2.RefreshLocalStatus()));
+                    if (!_fileListeners.ContainsKey(repo2.Location))
+                        _fileListeners.Add(repo2.Location,new DelayedFileSystemWatcher(path, () => repo2.RefreshLocalStatus()));
                 }
             }
         }

@@ -216,7 +216,9 @@
     <Compile Include="Dialogs\SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Tools\IFactory.cs" />
     <Compile Include="Tools\OverallStatusType.cs" />
+    <Compile Include="Tools\SimpleFactory.cs" />
     <Compile Include="Tools\SimpleWebServer.cs" />
     <EmbeddedResource Include="Dialogs\ActivityHistoryForm.resx">
       <DependentUpon>ActivityHistoryForm.cs</DependentUpon>

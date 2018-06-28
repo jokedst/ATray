@@ -139,6 +139,7 @@
             this.scheduleTrackBar.Size = new System.Drawing.Size(520, 90);
             this.scheduleTrackBar.TabIndex = 7;
             this.scheduleTrackBar.TickStyle = System.Windows.Forms.TickStyle.Both;
+            this.scheduleTrackBar.LargeChange = 1;
             this.scheduleTrackBar.Scroll += new System.EventHandler(this.scheduleTrackBar_Scroll);
             // 
             // scheduleLabel

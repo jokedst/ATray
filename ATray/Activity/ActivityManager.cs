@@ -23,20 +23,7 @@
 #else
         private static string SharedPath => Program.Configuration.SharedActivityStorage;
 #endif
-
-        static ActivityManager()
-        {
-            // LEGACY: Initially the activities were saved in the same dir as the .exe, but that's bad Windows citizenship so now it saves in AppData\Local
-            // However, old files in the bin dir should be moved if there are any
-            var legacyFiles = Directory.EnumerateFiles(".", string.Format(SavefilePattern, "*"), 
-                SearchOption.TopDirectoryOnly).Count();
-            if (legacyFiles > 0)
-            {
-                Program.MainWindowInstance.UIThread(() =>
-                    MessageBox.Show($"There are {legacyFiles} old activity files ('Acts*.bin') in the Atray program directory (located at\"{Directory.GetCurrentDirectory()}\").\n\nPlease move these to \"{Program.SettingsDirectory}\""));
-            }
-        }
-
+        
         public static void SaveActivity(DateTime now, uint intervalLength, bool wasActive, string appName, string appTitle)
         {
             var currentSecond = (uint) now.TimeOfDay.TotalSeconds;

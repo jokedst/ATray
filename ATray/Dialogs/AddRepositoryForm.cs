@@ -16,11 +16,14 @@ namespace ATray
 
     public partial class AddRepositoryForm : Form, IAddRepositoryDialog
     {
+        private readonly IRepositoryCollection _repositoryCollection;
+
         /// <summary> If editing contains the repo to edit </summary>
         private ISourceRepository _repo;
 
-        public AddRepositoryForm()
+        public AddRepositoryForm(IRepositoryCollection repositoryCollection)
         {
+            _repositoryCollection = repositoryCollection;
             InitializeComponent();
             Icon = Program.MainIcon;
         }
@@ -117,7 +120,7 @@ namespace ATray
             _repo.UpdateSchedule = ChosenSchedule;
             if (!string.IsNullOrWhiteSpace(RepoName))
                 _repo.Name = RepoName;
-            if (adding && Program.Repositories.ContainsName(_repo.Name))
+            if (adding && _repositoryCollection.ContainsName(_repo.Name))
             {
                 MessageBox.Show("A repository with name'" + _repo.Name + "' exists already", "Error adding repository");
                 return;

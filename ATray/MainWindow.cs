@@ -20,7 +20,12 @@ namespace ATray
     using RepositoryManager;
     using RepositoryManager.Git;
 
-    public partial class MainWindow : Form
+    public interface IShowNotifications
+    {
+        void ShowNotification(string text);
+    }
+
+    public partial class MainWindow : Form, IShowNotifications
     {
         private uint workingtime;
         private DateTime startTime = DateTime.Now;
@@ -33,14 +38,23 @@ namespace ATray
         private OverallStatusType OverallStatus;
         private WebServer webServer;
 
-        public MainWindow()
+        private readonly IRepositoryCollection _repositoryCollection;
+        private readonly IFactory<ISettingsDialog> _settingsDialogFactory;
+        private ISettingsDialog _settingsDialog;
+
+        public MainWindow(IRepositoryCollection repositoryCollection, IFactory<ISettingsDialog> settingsDialogFactory)
         {
+            _repositoryCollection = repositoryCollection;
+            _settingsDialogFactory = settingsDialogFactory;
+
             InitializeComponent();
             WindowState = FormWindowState.Minimized;
             ShowInTaskbar = false;
             Icon = trayIcon.Icon = Program.GreyIcon;
-            Program.Repositories.RepositoryStatusChanged += OnRepositoryStatusChanged;
+            _repositoryCollection.RepositoryStatusChanged += OnRepositoryStatusChanged;
+            _repositoryCollection.RepositoryListChanged += OnRepositoyListChanged;
             SystemEvents.SessionSwitch += SystemEventsOnSessionSwitch;
+            SystemEvents.PowerModeChanged += SystemEventsOnPowerModeChanged;
 #if DEBUG
             // DEBUG! Show dialog on boot for convinience
             OnMenuClickSettings(null, null);
@@ -53,6 +67,18 @@ namespace ATray
 
             this.webServer = new WebServer(this, "http://localhost:14754");
             this.webServer.Run();
+
+            NativeMethods.RegisterForPowerNotifications(this.Handle);
+        }
+
+        private void SystemEventsOnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            Debug.WriteLine("Event fired: PowerModeChanged "+e.Mode);
+        }
+
+        private void OnRepositoyListChanged(object sender, RepositoryEventArgs e)
+        {
+            CreateRepositoryMenyEntries();
         }
 
         public void CreateRepositoryMenyEntries()
@@ -66,7 +92,7 @@ namespace ATray
                 {
                     var name = trayMenu.Items[i].Name;
                     if (name == "RepositorySeparator") break;
-                    if (Program.Repositories.All(x => x.Location != name))
+                    if (!_repositoryCollection.ContainsName(name))
                         toRemove.Add(name);
                 }
 
@@ -76,7 +102,7 @@ namespace ATray
                 }
             }
             
-            foreach (var repo in Program.Repositories)
+            foreach (var repo in _repositoryCollection)
             {
                 if (trayMenu.Items.ContainsKey(repo.Location))
                     continue;
@@ -93,9 +119,9 @@ namespace ATray
                     submenu.DropDownItems.Add(new ToolStripMenuItem("Git Bash", null, (sender, args) => Process.Start(new ProcessStartInfo(Program.GitBashLocation) { WorkingDirectory = repoLocation })));
 
                 submenu.DropDownItems.Add(new ToolStripMenuItem("Open in explorer", null, (sender, args) => Process.Start(repoLocation)));
-                submenu.DropDownItems.Add(new ToolStripMenuItem("Update", null, (sender, args) => Program.Repositories.UpdateRepo(repoLocation)));
+                submenu.DropDownItems.Add(new ToolStripMenuItem("Update", null, (sender, args) => _repositoryCollection.UpdateRepo(repoLocation)));
                 var pullOption = new ToolStripMenuItem("Pull Changes", null,
-                    (sender, args) => Program.Repositories.UpdateRepo(repoLocation));
+                    (sender, args) => _repositoryCollection.UpdateRepo(repoLocation));
                 if (repo.LastStatus != RepoStatus.Behind) pullOption.Visible = false;
                 submenu.DropDownItems.Add(pullOption);
                 UpdateRepoMenu(submenu, repo.Name, repo.LastStatus);
@@ -107,7 +133,7 @@ namespace ATray
 
         private void UpdateIcon()
         {
-            var worstStatus = Program.Repositories.Select(x => x.LastStatus.ToOverallStatus()).OrderBy(x=>x).LastOrDefault();
+            var worstStatus = _repositoryCollection.Select(x => x.LastStatus.ToOverallStatus()).OrderBy(x=>x).LastOrDefault();
             if (worstStatus == OverallStatus) return;
             OverallStatus = worstStatus;
             switch (OverallStatus)
@@ -165,9 +191,9 @@ namespace ATray
             // When logging in or unlocking we want to update immediatly
             if (sessionSwitchEventArgs.Reason == SessionSwitchReason.SessionLogon ||
                 sessionSwitchEventArgs.Reason == SessionSwitchReason.SessionUnlock)
-                Program.Repositories.TriggerUpdate(r => r.UpdateSchedule != Schedule.Never);
+                _repositoryCollection.TriggerUpdate(r => r.UpdateSchedule != Schedule.Never);
 
-            Trace.TraceInformation("Session changed? ({0})", sessionSwitchEventArgs.Reason);
+            Trace.TraceInformation("Session changed ({0})", sessionSwitchEventArgs.Reason);
         }
 
         private static string MillisecondsToString(uint ms)
@@ -300,12 +326,11 @@ namespace ATray
 
         private void OnMenuClickSettings(object sender, EventArgs e)
         {
-            ISettingsDialog settingsDialog = Program.ServiceProvider.GetService<ISettingsDialog>();
-            //settingsForm;
-            //if (settingsDialog == null || settingsForm.IsDisposed)
-            //    settingsDialog = new SettingsForm();
-            settingsDialog.Show(this);
-            settingsDialog.Focus();
+            if (_settingsDialog == null || _settingsDialog.IsDisposed)
+                _settingsDialog = _settingsDialogFactory.Build();
+            if(!_settingsDialog.Visible)
+                _settingsDialog.Show(this);
+            _settingsDialog.Focus();
         }
 
         protected override void WndProc(ref Message m)
@@ -325,6 +350,10 @@ namespace ATray
                     default: monitorState = "unknown"; break;
                 }
                 Trace.TraceInformation("Monitor changed to " + monitorState);
+            }
+            else if (m.Msg == NativeMethods.WM_POWERBROADCAST)
+            {
+                Debug.WriteLine("Power event {0:x}", m.WParam.ToInt32());
             }
             base.WndProc(ref m);
         }

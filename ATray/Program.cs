@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Reflection;
+using ATray.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using NuGet;
 
@@ -32,10 +33,9 @@ namespace ATray
         internal static string RepoListFilePath = Path.Combine(SettingsDirectory, "repositories.json");
         internal static string ConfigurationFilePath = Path.Combine(SettingsDirectory, "atray.ini");
 
-        internal static IServiceProvider ServiceProvider;
-        internal static IRepositoryCollection Repositories;
+        private static IServiceProvider ServiceProvider;
         internal static Configuration Configuration;
-        internal static MainWindow MainWindowInstance;
+        private static MainWindow MainWindowInstance;
         internal static Task UpdateTask;
 
         internal static string GitBashLocation;
@@ -44,12 +44,16 @@ namespace ATray
         internal static IServiceProvider InitializeIoC()
         {
             var serviceCollection = new ServiceCollection()
-                .AddSingleton<IRepositoryCollection, RepositoryCollection>(s=>new RepositoryCollection(RepoListFilePath))
-                .AddTransient<IAddRepositoryDialog,AddRepositoryForm>()
-                .AddTransient< ISettingsDialog,SettingsForm>();
-            var sp= serviceCollection.BuildServiceProvider();
+                .AddSingleton<IRepositoryCollection, RepositoryCollection>(s => new RepositoryCollection(RepoListFilePath))
+                .AddTransient<IAddRepositoryDialog, AddRepositoryForm>()
+                .AddTransient<ISettingsDialog, SettingsForm>()
+                .AddSingleton<MainWindow>()
+                .AddSingleton<IShowNotifications, MainWindow>()
+                .AddSingleton<IFactory<ISettingsDialog>, SimpleFactory<ISettingsDialog>>();
+            var sp = serviceCollection.BuildServiceProvider();
             return sp;
         }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -69,16 +73,16 @@ namespace ATray
                 Directory.CreateDirectory(SettingsDirectory);
 
             // Load repos and config
-            Repositories = ServiceProvider.GetService<IRepositoryCollection>(); // new RepositoryCollection(RepoListFilePath);
+            var repositories = ServiceProvider.GetService<IRepositoryCollection>();
             Configuration = new Configuration(ConfigurationFilePath);
-            Repositories.SetFileListening(FileListeningMode.AllChanges);
+            repositories.SetFileListening(FileListeningMode.AllChanges);
 
             UpdateTask = Task.Run(() => UpdateApp(false));
             DetectInstalledPrograms();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            MainWindowInstance = new MainWindow();
+            MainWindowInstance = ServiceProvider.GetService<MainWindow>(); 
             MainWindowInstance.ShowNotification("boot");
             Application.Run(MainWindowInstance);
 

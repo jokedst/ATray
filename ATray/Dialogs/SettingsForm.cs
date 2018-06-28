@@ -2,17 +2,16 @@
 {
     using System;
     using System.Drawing;
-    using System.Linq;
     using System.Windows.Forms;
-    using System.Diagnostics;
     using System.Reflection;
     using RepositoryManager;
-    using RepositoryManager.Git;
 
     public interface ISettingsDialog:IDisposable
     {
         bool Focus();
         void Show(IWin32Window owner);
+        bool IsDisposed { get; }
+        bool Visible { get; }
     }
 
     public partial class SettingsForm : Form, ISettingsDialog
@@ -25,7 +24,7 @@
         {
             _addRepositoryDialog = addRepositoryDialog;
             _repositories = repositories;
-
+            
             InitializeComponent();
 #if DEBUG
             Icon = new Icon(GetType(), "debug.ico");
@@ -101,7 +100,6 @@
 
             // Save new repo list
             _repositories.Save();
-            Program.MainWindowInstance.CreateRepositoryMenyEntries();
             Close();
         }
 

@@ -45,12 +45,14 @@ namespace ATray
         public static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
 
         private static Guid GUID_CONSOLE_DISPLAY_STATE = Guid.Parse("6fe69556-704a-47a0-8f24-c28d936fda47");
+        static Guid GUID_MONITOR_POWER_ON = new Guid(0x02731015, 0x4510, 0x4526, 0x99, 0xE6, 0xE5, 0xA1, 0x7E, 0xBD, 0x1A, 0xEA);
         public const int WM_POWERBROADCAST = 0x0218;
         public const int PBT_POWERSETTINGCHANGE = 0x8013;
 
-        private static void RegisterForPowerNotifications(IntPtr hwnd)
+        public static void RegisterForPowerNotifications(IntPtr hwnd)
         {
             var hPowerSrc = RegisterPowerSettingNotification(hwnd, ref GUID_CONSOLE_DISPLAY_STATE, 0);
+            var hMonitorOn = RegisterPowerSettingNotification(hwnd,ref GUID_MONITOR_POWER_ON,0);
         }
 
         public static string GetForegroundWindowText()

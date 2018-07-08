@@ -163,8 +163,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activity\ActivityMonitor.cs" />
     <Compile Include="Activity\DayActivityList.cs" />
     <Compile Include="Activity\HashList.cs" />
+    <Compile Include="Activity\IActivityMonitor.cs" />
     <Compile Include="Activity\WorkPlayFilter.cs" />
     <Compile Include="AutoStart.cs" />
     <Compile Include="Dialogs\ActivityHistoryForm.cs">
@@ -209,6 +211,7 @@
     <Compile Include="IconAnimator.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Dialogs\SettingsForm.cs">
       <SubType>Form</SubType>
@@ -217,7 +220,9 @@
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Tools\IFactory.cs" />
+    <Compile Include="Tools\InternalTraceListener.cs" />
     <Compile Include="Tools\OverallStatusType.cs" />
+    <Compile Include="Tools\PubSubHub.cs" />
     <Compile Include="Tools\SimpleFactory.cs" />
     <Compile Include="Tools\SimpleWebServer.cs" />
     <EmbeddedResource Include="Dialogs\ActivityHistoryForm.resx">

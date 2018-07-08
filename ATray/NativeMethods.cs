@@ -44,6 +44,9 @@ namespace ATray
         [DllImport("user32")]
         public static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
 
+        [DllImport("user32.dll")]
+        internal static extern void LockWorkStation();
+
         private static Guid GUID_CONSOLE_DISPLAY_STATE = Guid.Parse("6fe69556-704a-47a0-8f24-c28d936fda47");
         static Guid GUID_MONITOR_POWER_ON = new Guid(0x02731015, 0x4510, 0x4526, 0x99, 0xE6, 0xE5, 0xA1, 0x7E, 0xBD, 0x1A, 0xEA);
         public const int WM_POWERBROADCAST = 0x0218;
@@ -199,10 +202,10 @@ namespace ATray
         }
 
         /// <summary>
-        /// Returns time since last user action, i.e. how long they've been idle
+        /// Returns milliseconds since last user action, i.e. how long they've been idle
         /// </summary>
-        /// <returns>User idle time in miliseconds</returns>
-        public static uint GetIdleTime()
+        /// <returns>User idle time in milliseconds</returns>
+        public static uint GetIdleMilliseconds()
         {
             var lastUserInput = new LastUserInput();
             lastUserInput.StructSize = (uint)Marshal.SizeOf(lastUserInput);
@@ -227,5 +230,12 @@ namespace ATray
             public uint StructSize;
             public uint LastActivityMillisecond;
         }
+    }
+
+    public enum MonitorState
+    {
+        Off = 0,
+        On = 1,
+        Dimmed = 2
     }
 }

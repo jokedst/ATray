@@ -28,6 +28,8 @@
         public string SharedActivityStorage { get; set; }
         [Description("Start application automatically at login"), Category("General"), DefaultValue(false)]
         public bool StartAtLogin { get; set; }
+        [Description("Locks computer when the monitor is turned off (=laptop lid close)"), Category("General"), DefaultValue(false)]
+        public bool LockOnMonitorOff { get; set; }
 
         public Configuration(string filename = null)
         {
@@ -111,7 +113,7 @@
         }
 
         /// <summary>
-        /// Saves all settings to an ini-file, under "General" section
+        /// Saves all settings to an ini-file
         /// </summary>
         /// <param name="filename">File to write to (default uses same file as loaded from)</param>
         public void SaveToIniFile(string filename = null)

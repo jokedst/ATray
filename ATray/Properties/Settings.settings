@@ -1,5 +1,12 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ATray.Properties" GeneratedClassName="Settings">
   <Profiles />
-  <Settings />
+  <Settings>
+    <Setting Name="TheDec" Description="Muu is the word" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">1.23</Value>
+    </Setting>
+    <Setting Name="AnUse" Type="System.String" Scope="User">
+      <Value Profile="(Default)">eating</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

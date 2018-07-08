@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Reflection;
+using ATray.Activity;
 using ATray.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using NuGet;
@@ -40,6 +41,7 @@ namespace ATray
 
         internal static string GitBashLocation;
         internal static string TortoiseGitLocation;
+        private static TraceSource Tracer = new TraceSource("Atray.Program", SourceLevels.Information);
 
         internal static IServiceProvider InitializeIoC()
         {
@@ -49,7 +51,9 @@ namespace ATray
                 .AddTransient<ISettingsDialog, SettingsForm>()
                 .AddSingleton<MainWindow>()
                 .AddSingleton<IShowNotifications, MainWindow>()
-                .AddSingleton<IFactory<ISettingsDialog>, SimpleFactory<ISettingsDialog>>();
+                .AddSingleton<IFactory<ISettingsDialog>, SimpleFactory<ISettingsDialog>>()
+                .AddSingleton<IActivityMonitor, ActivityMonitor>()
+                .AddSingleton(typeof(IPubSubHub<>), typeof(ObservableBase<>));
             var sp = serviceCollection.BuildServiceProvider();
             return sp;
         }
@@ -66,6 +70,9 @@ namespace ATray
                 MessageBox.Show("An instance of the application is already running.");
                 return;
             }
+
+            Tracer.Listeners.Add(new InternalTraceListener(){Name = "InternalTracer"});
+            Tracer.TraceInformation("Starting ATray");
 
             ServiceProvider = InitializeIoC();
             LoadIcons();

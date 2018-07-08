@@ -1,5 +1,4 @@
 ﻿using ATray.Tools;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ATray
 {
@@ -11,11 +10,8 @@ namespace ATray
     using System.IO;
     using System.IO.Pipes;
     using System.Linq;
-    using System.Runtime.InteropServices;
-    using System.Text;
     using System.Windows.Forms;
     using Activity;
-    using Microsoft.Win32;
     using Newtonsoft.Json;
     using RepositoryManager;
     using RepositoryManager.Git;
@@ -27,25 +23,24 @@ namespace ATray
 
     public partial class MainWindow : Form, IShowNotifications
     {
-        private uint workingtime;
-        private DateTime startTime = DateTime.Now;
         private bool inWarnState;
         private bool reallyClose;
-        private DateTime lastSave = DateTime.MinValue;
-        private DateTime lastTimerEvent = DateTime.MinValue;
         private ActivityHistoryForm historyForm;
-        private SettingsForm settingsForm;
         private OverallStatusType OverallStatus;
         private WebServer webServer;
 
         private readonly IRepositoryCollection _repositoryCollection;
         private readonly IFactory<ISettingsDialog> _settingsDialogFactory;
+        private readonly IActivityMonitor _activityMonitor;
         private ISettingsDialog _settingsDialog;
 
-        public MainWindow(IRepositoryCollection repositoryCollection, IFactory<ISettingsDialog> settingsDialogFactory)
+        public MainWindow(IRepositoryCollection repositoryCollection, 
+            IFactory<ISettingsDialog> settingsDialogFactory,
+            IActivityMonitor activityMonitor)
         {
             _repositoryCollection = repositoryCollection;
             _settingsDialogFactory = settingsDialogFactory;
+            _activityMonitor = activityMonitor;
 
             InitializeComponent();
             WindowState = FormWindowState.Minimized;
@@ -53,8 +48,29 @@ namespace ATray
             Icon = trayIcon.Icon = Program.GreyIcon;
             _repositoryCollection.RepositoryStatusChanged += OnRepositoryStatusChanged;
             _repositoryCollection.RepositoryListChanged += OnRepositoyListChanged;
-            SystemEvents.SessionSwitch += SystemEventsOnSessionSwitch;
-            SystemEvents.PowerModeChanged += SystemEventsOnPowerModeChanged;
+            activityMonitor.UserWorkedTooLong += (sender, e) =>
+            {
+                BackColor = Color.Red;
+                lblInfo.Text = "Take a break!";
+                ShowMe();
+                TopMost = true;
+                inWarnState = true;
+            };
+            activityMonitor.UserHasTakenBreak += (sender, e) =>
+            {
+                BackColor = Color.Green;
+                lblInfo.Text = "You can start working now";
+                TopMost = false;
+                inWarnState = false;
+            };
+            activityMonitor.UserIsBackFromAbsense += (sender, e) =>
+            {
+                _repositoryCollection.TriggerUpdate(r => r.UpdateSchedule != Schedule.Never);
+            };
+
+            lblSmall.DataBindings.Add(new Binding(nameof(Label.Text), activityMonitor, nameof(ActivityMonitor.IdleTime)));
+            lblWork.DataBindings.Add(new Binding(nameof(Label.Text), activityMonitor, nameof(ActivityMonitor.WorkingTime)));
+            lblDebug.DataBindings.Add(new Binding(nameof(Label.Text), activityMonitor, nameof(ActivityMonitor.CurrentlyActiveWindow)));
 #if DEBUG
             // DEBUG! Show dialog on boot for convinience
             OnMenuClickSettings(null, null);
@@ -69,11 +85,6 @@ namespace ATray
             this.webServer.Run();
 
             NativeMethods.RegisterForPowerNotifications(this.Handle);
-        }
-
-        private void SystemEventsOnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
-        {
-            Debug.WriteLine("Event fired: PowerModeChanged "+e.Mode);
         }
 
         private void OnRepositoyListChanged(object sender, RepositoryEventArgs e)
@@ -175,39 +186,14 @@ namespace ATray
             trayIcon.ShowBalloonTip(500, "Repo changed", $"Repository {e.Name} has changed from status {e.OldStatus} to {e.NewStatus}", ToolTipIcon.Info);
 
             // Update menu
-            foreach (var menuRow in trayMenu.Items.Find(e.Location, false))
+            var menuItems = trayMenu.Items.Find(e.Location, false);
+            if (menuItems.Length == 0) return;
+            this.UIThread(() =>
             {
-                //this.UIThread(() => menuRow.Text = e.Name + ": \n" + e.NewStatus);
-                this.UIThread(() =>
-                {
-                    UpdateRepoMenu(menuRow, e.Name, e.NewStatus);
-                    UpdateIcon();
-                });
-            }
-        }
-
-        private void SystemEventsOnSessionSwitch(object sender, SessionSwitchEventArgs sessionSwitchEventArgs)
-        {
-            // When logging in or unlocking we want to update immediatly
-            if (sessionSwitchEventArgs.Reason == SessionSwitchReason.SessionLogon ||
-                sessionSwitchEventArgs.Reason == SessionSwitchReason.SessionUnlock)
-                _repositoryCollection.TriggerUpdate(r => r.UpdateSchedule != Schedule.Never);
-
-            Trace.TraceInformation("Session changed ({0})", sessionSwitchEventArgs.Reason);
-        }
-
-        private static string MillisecondsToString(uint ms)
-        {
-            var totsec = (uint)Math.Round(ms / 1000d);
-            var totmin = totsec / 60;
-            var tothour = totmin / 60;
-            var sec = totsec % 60;
-            var min = totmin % 60;
-            var sb = new StringBuilder();
-            if (tothour > 0) sb.AppendFormat("{0}h", tothour);
-            if (totmin > 0) sb.AppendFormat("{0}m", min);
-            sb.AppendFormat("{0}s", sec);
-            return sb.ToString();
+                foreach (var affectedMenuItem in menuItems)
+                    UpdateRepoMenu(affectedMenuItem, e.Name, e.NewStatus);
+                UpdateIcon();
+            });
         }
 
         private void OnResize(object sender, EventArgs e)
@@ -228,69 +214,14 @@ namespace ATray
             ShowInTaskbar = true;
         }
 
-        private void menuExit_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Actually exit the program for real
+        /// </summary>
+        private void OnMenuClickExit(object sender, EventArgs e)
         {
             reallyClose = true;
             Close();
         }
-
-        private void OnMainTimerTick(object sender, EventArgs e)
-        {
-            var idle = NativeMethods.GetIdleTime();
-            // Only call "Now" once to avoid annoying bugs
-            var now = DateTime.Now;
-
-            var unpoweredSeconds = (uint) Math.Min(now.Subtract(lastTimerEvent).TotalSeconds, uint.MaxValue);
-            if (unpoweredSeconds > 100)
-            {
-                // This is supposed to fire every second. Now it hasn't -> most likely boot or sleep or something
-                idle = Math.Max(idle, unpoweredSeconds - 2);
-            }
-
-            lblSmall.Text = MillisecondsToString(idle);
-
-
-            if (idle > Program.Configuration.MinimumBrakeLength * 1000)
-            {
-                BackColor = Color.Green;
-                lblInfo.Text = "You can start working now";
-                workingtime = 0;
-                startTime = now;
-                TopMost = false;
-                inWarnState = false;
-            }
-            else
-            {
-                workingtime += (uint)now.Subtract(startTime).TotalMilliseconds;
-                startTime = now;
-
-                if (workingtime > Program.Configuration.MaximumWorkTime * 1000 && !inWarnState)
-                {
-                    BackColor = Color.Red;
-                    lblInfo.Text = "Take a break!";
-                    ShowMe();
-                    TopMost = true;
-                    inWarnState = true;
-                }
-            }
-
-            NativeMethods.GetForegroundProcessInfo(out string foregroundApp, out string foregroundTitle);
-
-            if (now.Subtract(lastSave).TotalSeconds > Program.Configuration.SaveInterval)
-            {
-                // Time to save
-                var wasActive = idle < Program.Configuration.SaveInterval * 1000;
-                ActivityManager.SaveActivity(now, (uint) Program.Configuration.SaveInterval, wasActive, foregroundApp, foregroundTitle);
-                lastSave = now;
-            }
-            
-            lblWork.Text = MillisecondsToString(workingtime);
-            lblDebug.Text = foregroundApp + " : " + foregroundTitle;
-            lastTimerEvent = now;
-        }
-
-        private void OnMainWindowLoad(object sender, EventArgs e) 
-            => mainTimer.Start();
 
         /// <summary>
         /// Minimize the window when moving the mouse over it (unless a warning is shown)
@@ -333,32 +264,7 @@ namespace ATray
             _settingsDialog.Focus();
         }
 
-        protected override void WndProc(ref Message m)
-        {
-            // Detect closing/opening of lid
-            if (m.Msg == NativeMethods.WM_POWERBROADCAST && m.WParam.ToInt32() == NativeMethods.PBT_POWERSETTINGCHANGE)
-            {
-                var ps = (NativeMethods.POWERBROADCAST_SETTING) Marshal.PtrToStructure(m.LParam, typeof(NativeMethods.POWERBROADCAST_SETTING));
-                IntPtr pData = (IntPtr) (m.LParam.ToInt32() + Marshal.SizeOf(ps));
-                int iData = (int) Marshal.PtrToStructure(pData, typeof(int));
-                string monitorState;
-                switch (iData)
-                {
-                    case 0: monitorState = "off"; break;
-                    case 1: monitorState = "on"; break;
-                    case 2: monitorState = "dimmed"; break;
-                    default: monitorState = "unknown"; break;
-                }
-                Trace.TraceInformation("Monitor changed to " + monitorState);
-            }
-            else if (m.Msg == NativeMethods.WM_POWERBROADCAST)
-            {
-                Debug.WriteLine("Power event {0:x}", m.WParam.ToInt32());
-            }
-            base.WndProc(ref m);
-        }
-
-        private void diskUsageToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OnMenuClickDiskUsage(object sender, EventArgs e)
         {
             // Use a named pipe to tlk to diskusage.exe, since it will run as admin.
             var pipeName = Guid.NewGuid().ToString("N");
@@ -395,6 +301,12 @@ namespace ATray
 
                 duProcess.WaitForExit(1000);
             }
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            _activityMonitor.HandleWindowsMessage(m);
+            base.WndProc(ref m);
         }
     }
 }

@@ -31,15 +31,14 @@
             this.components = new System.ComponentModel.Container();
             this.trayIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.trayMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.diskUsageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.menuHistory = new System.Windows.Forms.ToolStripMenuItem();
             this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
-            this.mainTimer = new System.Windows.Forms.Timer(this.components);
             this.lblInfo = new System.Windows.Forms.Label();
             this.lblSmall = new System.Windows.Forms.Label();
             this.lblWork = new System.Windows.Forms.Label();
             this.lblDebug = new System.Windows.Forms.Label();
-            this.diskUsageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trayMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -59,33 +58,35 @@
             this.menuHistory,
             this.menuExit});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(245, 192);
+            this.trayMenu.Size = new System.Drawing.Size(231, 148);
+            // 
+            // diskUsageToolStripMenuItem
+            // 
+            this.diskUsageToolStripMenuItem.Name = "diskUsageToolStripMenuItem";
+            this.diskUsageToolStripMenuItem.Size = new System.Drawing.Size(230, 36);
+            this.diskUsageToolStripMenuItem.Text = "Disk usage";
+            this.diskUsageToolStripMenuItem.Click += new System.EventHandler(this.OnMenuClickDiskUsage);
             // 
             // menuSettings
             // 
             this.menuSettings.Name = "menuSettings";
-            this.menuSettings.Size = new System.Drawing.Size(244, 36);
+            this.menuSettings.Size = new System.Drawing.Size(230, 36);
             this.menuSettings.Text = "&Settings";
             this.menuSettings.Click += new System.EventHandler(this.OnMenuClickSettings);
             // 
             // menuHistory
             // 
             this.menuHistory.Name = "menuHistory";
-            this.menuHistory.Size = new System.Drawing.Size(244, 36);
+            this.menuHistory.Size = new System.Drawing.Size(230, 36);
             this.menuHistory.Text = "Show &History";
             this.menuHistory.Click += new System.EventHandler(this.OnMenuClickHistory);
             // 
             // menuExit
             // 
             this.menuExit.Name = "menuExit";
-            this.menuExit.Size = new System.Drawing.Size(244, 36);
+            this.menuExit.Size = new System.Drawing.Size(230, 36);
             this.menuExit.Text = "&Exit";
-            this.menuExit.Click += new System.EventHandler(this.menuExit_Click);
-            // 
-            // mainTimer
-            // 
-            this.mainTimer.Interval = 1000;
-            this.mainTimer.Tick += new System.EventHandler(this.OnMainTimerTick);
+            this.menuExit.Click += new System.EventHandler(this.OnMenuClickExit);
             // 
             // lblInfo
             // 
@@ -130,13 +131,6 @@
             this.lblDebug.Size = new System.Drawing.Size(0, 25);
             this.lblDebug.TabIndex = 4;
             // 
-            // diskUsageToolStripMenuItem
-            // 
-            this.diskUsageToolStripMenuItem.Name = "diskUsageToolStripMenuItem";
-            this.diskUsageToolStripMenuItem.Size = new System.Drawing.Size(244, 36);
-            this.diskUsageToolStripMenuItem.Text = "Disk usage";
-            this.diskUsageToolStripMenuItem.Click += new System.EventHandler(this.diskUsageToolStripMenuItem_Click);
-            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -146,11 +140,10 @@
             this.Controls.Add(this.lblWork);
             this.Controls.Add(this.lblSmall);
             this.Controls.Add(this.lblInfo);
-            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "MainWindow";
             this.Text = "A tray application";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnFormClosing);
-            this.Load += new System.EventHandler(this.OnMainWindowLoad);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnMouseMove);
             this.Resize += new System.EventHandler(this.OnResize);
             this.trayMenu.ResumeLayout(false);
@@ -164,7 +157,6 @@
         private System.Windows.Forms.NotifyIcon trayIcon;
         private System.Windows.Forms.ContextMenuStrip trayMenu;
         private System.Windows.Forms.ToolStripMenuItem menuExit;
-        private System.Windows.Forms.Timer mainTimer;
         private System.Windows.Forms.Label lblInfo;
         private System.Windows.Forms.Label lblSmall;
         private System.Windows.Forms.Label lblWork;

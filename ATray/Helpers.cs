@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ATray
@@ -86,6 +87,20 @@ namespace ATray
         }
 
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> values) => new HashSet<T>(values);
+
+        public static string MillisecondsToString(uint ms)
+        {
+            var totsec = (uint)Math.Round(ms / 1000d);
+            var totmin = totsec / 60;
+            var tothour = totmin / 60;
+            var sec = totsec % 60;
+            var min = totmin % 60;
+            var sb = new StringBuilder();
+            if (tothour > 0) sb.AppendFormat("{0}h", tothour);
+            if (totmin > 0) sb.AppendFormat("{0}m", min);
+            sb.AppendFormat("{0}s", sec);
+            return sb.ToString();
+        }
     }
 
     internal static class ControlExtensions

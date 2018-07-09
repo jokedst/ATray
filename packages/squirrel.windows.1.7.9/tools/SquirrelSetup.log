@@ -79,3 +79,56 @@
 2018-04-08 13:11:44> DeltaPackageBuilder: \lib\net45\lib\win32\x64\git2-6311e88.dll not found in base package, marking as new
 2018-04-08 13:11:44> DeltaPackageBuilder: \lib\net45\lib\win32\x86\git2-6311e88.dll not found in base package, marking as new
 2018-04-08 13:11:44> Program: Building embedded zip file for Setup.exe
+2018-07-09 14:11:08> Program: Starting Squirrel Updater: --releasify bin\Release\ATray.1.2.1.nupkg
+2018-07-09 14:11:08> Program: Bootstrapper EXE found at:C:\Users\JoakimWennergren\Projects\ATray\packages\squirrel.windows.1.7.9\tools\Setup.exe
+2018-07-09 14:11:08> Program: Creating release package: C:\Users\JoakimWennergren\Projects\ATray\ATray\Releases\ATray.1.2.1.nupkg
+2018-07-09 14:11:08> ReleasePackage: Creating release package: C:\Users\JoakimWennergren\Projects\ATray\ATray\Releases\ATray.1.2.1.nupkg => C:\Users\JoakimWennergren\Projects\ATray\ATray\Releases\ATray-1.2.1-full.nupkg
+2018-07-09 14:11:09> ReleasePackage: Extracting dependent packages: []
+2018-07-09 14:11:09> ReleasePackage: Removing unnecessary data
+2018-07-09 14:11:09> ReleasePackage: No release notes found in C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempc\ATray.nuspec
+2018-07-09 14:11:10> DeltaPackageBuilder: Extracting .\Releases\ATray-1.2.0-full.nupkg and C:\Users\JoakimWennergren\Projects\ATray\ATray\Releases\ATray-1.2.1-full.nupkg into C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempd
+2018-07-09 14:11:13> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempc\lib\net45\ATray.exe => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempd\lib\net45\ATray.exe
+2018-07-09 14:11:13> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempc\lib\net45\ATray.exe.config => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempd\lib\net45\ATray.exe.config
+2018-07-09 14:11:13> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempc\lib\net45\ATray_ExecutionStub.exe => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempd\lib\net45\ATray_ExecutionStub.exe
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\CredentialManagement.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\DeltaCompressionDotNet.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\DeltaCompressionDotNet.MsDelta.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\DeltaCompressionDotNet.PatchApi.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\LibGit2Sharp.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\LibGit2Sharp.dll.config hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\Microsoft.Alm.Authentication.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\Microsoft.Alm.Git.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\Microsoft.Extensions.DependencyInjection.Abstractions.dll not found in base package, marking as new
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\Microsoft.Extensions.DependencyInjection.dll not found in base package, marking as new
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\Mono.Cecil.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\Mono.Cecil.Mdb.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\Mono.Cecil.Pdb.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\Mono.Cecil.Rocks.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\Newtonsoft.Json.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: \lib\net45\NuGet.Squirrel.dll hasn't changed, writing dummy file
+2018-07-09 14:11:13> DeltaPackageBuilder: Delta patching C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempc\lib\net45\RepositoryManager.dll => C:\Users\JoakimWennergren\AppData\Local\SquirrelTemp\tempd\lib\net45\RepositoryManager.dll
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\RepositoryManager.dll.config hasn't changed, writing dummy file
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\SharpCompress.dll hasn't changed, writing dummy file
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\SharpPlink-Win32.svnExe hasn't changed, writing dummy file
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\SharpSvn.dll hasn't changed, writing dummy file
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\Splat.dll hasn't changed, writing dummy file
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\Squirrel.dll hasn't changed, writing dummy file
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\System.Data.Common.dll not found in base package, marking as new
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\System.Diagnostics.StackTrace.dll not found in base package, marking as new
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\System.Diagnostics.Tracing.dll not found in base package, marking as new
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\System.Globalization.Extensions.dll not found in base package, marking as new
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\System.IO.Compression.dll not found in base package, marking as new
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\System.Net.Http.dll not found in base package, marking as new
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\System.Net.Sockets.dll not found in base package, marking as new
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\System.Runtime.Serialization.Primitives.dll not found in base package, marking as new
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\System.Security.Cryptography.Algorithms.dll not found in base package, marking as new
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\System.Security.SecureString.dll not found in base package, marking as new
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\System.Threading.Overlapped.dll not found in base package, marking as new
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\System.Xml.XPath.XDocument.dll not found in base package, marking as new
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\diskusage\DiskUsage.exe hasn't changed, writing dummy file
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\diskusage\NtfsReader.dll hasn't changed, writing dummy file
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\lib\linux\x86_64\libgit2-6311e88.so hasn't changed, writing dummy file
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\lib\osx\libgit2-6311e88.dylib hasn't changed, writing dummy file
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\lib\win32\x64\git2-6311e88.dll hasn't changed, writing dummy file
+2018-07-09 14:11:14> DeltaPackageBuilder: \lib\net45\lib\win32\x86\git2-6311e88.dll hasn't changed, writing dummy file
+2018-07-09 14:11:14> Program: Building embedded zip file for Setup.exe

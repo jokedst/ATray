@@ -7,6 +7,10 @@
     using System.Text;
     using Activity;
 
+    /// <summary>
+    /// Represents one "slot" on the activity history screen - a time period where nothing changes.
+    /// Can have several activities (one from each computer shown)
+    /// </summary>
     public class ScreenSlot
     {
         public ScreenSlot(uint startX, uint endX, int y, IEnumerable<ActivitySpan> activities)
@@ -39,6 +43,7 @@
             foreach (var activity in Activities)
             {
                 if (first) first = false; else sb.Append(Environment.NewLine);
+                sb.Append('(').Append(activity.Classification.ToString()[0]).Append(") ");
                 if (includeComputerName) sb.Append(activity.Owner.ComputerName).Append(": ");
                 sb.Append(activity.ApplicationName());
 

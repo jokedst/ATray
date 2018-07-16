@@ -37,7 +37,7 @@
             Day = owner.Days[day];
         }
 
-        public ActivitySpan( DayActivityList day, uint startSecond, uint endSecond, bool wasActive, string applicationName, string windowTitle)
+        public ActivitySpan(DayActivityList day, uint startSecond, uint endSecond, bool wasActive, string applicationName, string windowTitle)
         {
             Owner = day.Owner;
             Day = day;

@@ -10,7 +10,19 @@
     public partial class ActivityHistoryForm
     {
         private Bitmap _historyGraph;
-        private Dictionary<string, Brush> textureBrushes = new Dictionary<string, Brush>();
+        private readonly Dictionary<string, Brush> _textureBrushes = new Dictionary<string, Brush>();
+        private readonly SolidBrush[] _programBrushes = { new SolidBrush(Color.BlueViolet), new SolidBrush(Color.CornflowerBlue), new SolidBrush(Color.Green), new SolidBrush(Color.DarkRed), new SolidBrush(Color.Olive)};
+        private readonly SolidBrush[] _workBrushes = {new SolidBrush(Color.BlueViolet), new SolidBrush(Color.CornflowerBlue), new SolidBrush(Color.Green), new SolidBrush(Color.DarkRed)};
+
+        private SolidBrush ActivityBrush(ActivitySpan activity, Dictionary<string, SolidBrush> brushLookup)
+        {
+            if (showWork.Checked)
+            {
+                return _workBrushes[(int)activity.Classification];
+            }
+
+            return brushLookup.GetValueOrDefault(activity.ApplicationName()) ?? _programBrushes.Last();
+        }
 
         private void DrawHistory(Bitmap target, Dictionary<string, MonthActivities> history)
         {
@@ -29,9 +41,9 @@
                 .OrderByDescending(x => x.Value);
 
             // Assign unique colors to the most used programs
-            var colors = new[] {Color.BlueViolet, Color.CornflowerBlue, Color.Green, Color.DarkRed};
-            var brushes = colors.Select(x => new SolidBrush(x)).ToArray();
-            var brushLookup = programs.Zip(brushes, (program, color) => new {program, color})
+            //var colors = new[] {Color.BlueViolet, Color.CornflowerBlue, Color.Green, Color.DarkRed};
+            //var brushes = colors.Select(x => new SolidBrush(x)).ToArray();
+            var brushLookup = programs.Zip(_programBrushes, (program, color) => new {program, color})
                 .ToDictionary(x => x.program.Key, x => x.color);
             var idleBrush = new SolidBrush(Color.Gray);
 
@@ -86,37 +98,37 @@
                 var allPixels = startz.Keys.Concat(endz.Keys).Distinct()
                     .OrderBy(x => x).ToList();
 
-                var notEnded = new HashSet<ActivitySpan>();
+                var activeActivities = new HashSet<ActivitySpan>();
                 for (var index = 0; index < allPixels.Count-1; index++)
                 {
                     startpixel = allPixels[index];
                     endPixel = allPixels[index + 1] -0;
                     // Add new activities
                     if (startz.ContainsKey(startpixel))
-                        notEnded.AddRange(startz[startpixel]);
+                        activeActivities.AddRange(startz[startpixel]);
                     // Remove ending activities
                     if (endz.ContainsKey(startpixel))
                         foreach (var endedSpan in endz[startpixel])
-                            notEnded.Remove(endedSpan);
+                            activeActivities.Remove(endedSpan);
 
-                    var span = new ScreenSlot(startpixel, endPixel, currentY, notEnded);
+                    var span = new ScreenSlot(startpixel, endPixel, currentY, activeActivities);
                     DaySlots[dayNumber].Add(span);
 
                     // Select brush
                     Brush thisBrush;
                     if (!span.WasActive)
                         thisBrush = idleBrush;
-                    else if (notEnded.Count(x => x.WasActive)==1)
-                        thisBrush = brushLookup.GetValueOrDefault(notEnded.Single(x => x.WasActive).ApplicationName(), brush);
+                    else if (activeActivities.Count(x => x.WasActive) == 1)
+                    {
+                        thisBrush = ActivityBrush(activeActivities.Single(x => x.WasActive), brushLookup);
+                    }
                     else
                     {
-                        //var colorList = notEnded.Select(x => brushLookup.GetValueOrDefault(x.ApplicationName(), brush)).Distinct().OrderBy(x => x).Cast<SolidBrush>().ToList();
-                        var colorList = notEnded
-                            .Select(x => brushLookup.GetValueOrDefault(x.ApplicationName())?.Color ?? brush.Color)
+                        var colorList = activeActivities.Select(a => ActivityBrush(a, brushLookup).Color)
                             .Distinct().OrderBy(x => x.Name).ToList();
                         var key = string.Join("|", colorList.Select(x => x.Name));
-                        if (textureBrushes.ContainsKey(key))
-                            thisBrush = textureBrushes[key];
+                        if (_textureBrushes.ContainsKey(key))
+                            thisBrush = _textureBrushes[key];
                         else
                         {
                             var scale = 3;
@@ -129,11 +141,10 @@
                                     img.SetPixel(0, ix++, color);
                                 }
                             }
-                            thisBrush =new TextureBrush(img);
-                            textureBrushes[key] = thisBrush;
+                            thisBrush = new TextureBrush(img);
+                            _textureBrushes[key] = thisBrush;
                         }
                     }
-                    // TODO combined
 
                     // Draw
                     graphicsObj.FillRectangle(thisBrush, span.DrawBox);

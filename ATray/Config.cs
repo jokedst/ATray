@@ -31,6 +31,11 @@
         [Description("Locks computer when the monitor is turned off (=laptop lid close)"), Category("General"), DefaultValue(false)]
         public bool LockOnMonitorOff { get; set; }
 
+        [Description("Activate a web server that allows some remote control"), Category("Web Server"), DefaultValue(false)]
+        public bool ActivateWebserver { get; set; }
+        [Description("TCP port to use"), Category("Web Server"), DefaultValue(14754)]
+        public int Port { get; set; }
+
         public Configuration(string filename = null)
         {
             // Set defaults

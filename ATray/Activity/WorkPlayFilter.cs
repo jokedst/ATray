@@ -20,7 +20,7 @@ namespace ATray.Activity
     {
         protected class Pattern
         {
-            public Regex Reg { get; }
+            public Regex RegularExpression { get; }
             public int Prio { get; }
             public bool IsWork { get; }
 
@@ -28,28 +28,49 @@ namespace ATray.Activity
             {
                 this.Prio = prio;
                 this.IsWork = isWork;
-                this.Reg = new Regex(pattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                this.RegularExpression = new Regex(pattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
             }
 
-            public string OriginalPattern => Reg.ToString();
+            public string OriginalPattern => RegularExpression.ToString();
         }
 
         protected Dictionary<string, Pattern> WorkPlayPatterns = new Dictionary<string, Pattern>();
 
-        public void Classify(MonthActivities history)
+        public void Classify(MonthActivities history, GuessWorkPlay guessWhenUnknown = GuessWorkPlay.Agressive)
         {
             var patterns = WorkPlayPatterns.Values.OrderBy(x => x.Prio).ToList();
             foreach (var day in history.Days)
             {
                 WorkPlayType lastType = WorkPlayType.Unknown;
                 var unsureActs = new List<ActivitySpan>();
+                uint lastActiveSecond = 0;
 
                 for (var a = 0; a < day.Value.Count; a++)
                 {
                     var act = day.Value[a];
                     var akey = Key(history.ComputerName, act.ApplicationName(), act.WindowTitle());
+
+                    var firstAfterGap = false;
+                    if (act.WasActive)
+                    {
+                        if (lastActiveSecond==0||act.StartSecond - lastActiveSecond > 60 * 60)
+                        {
+                            // There has been a 1 hour gap - don't guess across it
+                            firstAfterGap = true;
+                            if (unsureActs.Any() && guessWhenUnknown == GuessWorkPlay.SameBlock)
+                            {
+                                if(lastType != WorkPlayType.Unknown)
+                                    foreach (var unsureAct in unsureActs)
+                                        unsureAct.Classification = lastType;
+                                unsureActs.Clear();
+                                lastType = WorkPlayType.Unknown;
+                            }
+                        }
+
+                        lastActiveSecond = act.EndSecond;
+                    }
                     
-                    var found = patterns.FirstOrDefault(x => x.Reg.IsMatch(akey));
+                    var found = patterns.FirstOrDefault(x => x.RegularExpression.IsMatch(akey));
                     if (found == null)
                     {
                         unsureActs.Add(act);
@@ -58,7 +79,7 @@ namespace ATray.Activity
                     {
                         var thisActType = found.IsWork ? WorkPlayType.Work : WorkPlayType.Play;
 
-                        if (unsureActs.Any())
+                        if (guessWhenUnknown >= GuessWorkPlay.SameBlock && unsureActs.Any())
                         {
                             if(lastType == WorkPlayType.Unknown || lastType == thisActType)
                                 foreach (var unsureAct in unsureActs)
@@ -81,7 +102,7 @@ namespace ATray.Activity
                     }
                 }
 
-                if (unsureActs.Count == 0) continue;
+                if (guessWhenUnknown == GuessWorkPlay.Never || unsureActs.Count == 0) continue;
 
                 if (lastType == WorkPlayType.Unknown)
                 {
@@ -99,7 +120,7 @@ namespace ATray.Activity
             }
         }
 
-        public string Key(string computer, string program, string title) => $"^{computer}\t{program}\t{title}$";
+        public string Key(string computer, string program, string title) => $"{computer}\t{program}\t{title}";
         public string KeyPattern(string computer, string program, string title) => $"^{computer ?? ".*"}\t{program ?? ".*"}\t{title ?? ".*"}$";
         
         protected void AddPattern(Pattern playPattern)

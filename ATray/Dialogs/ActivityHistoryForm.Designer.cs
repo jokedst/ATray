@@ -1,4 +1,6 @@
-﻿namespace ATray
+﻿using ATray.Dialogs;
+
+namespace ATray
 {
     partial class ActivityHistoryForm
     {
@@ -29,12 +31,13 @@
         private void InitializeComponent()
         {
             this.btnHistoryOk = new System.Windows.Forms.Button();
-            this.historyPanel = new System.Windows.Forms.Panel();
+            this.historyPanel = new AutoScrollPanel();
             this.historyPicture = new System.Windows.Forms.PictureBox();
             this.lastMonthButton = new System.Windows.Forms.Button();
             this.monthDropDown = new System.Windows.Forms.ComboBox();
             this.nextMonthButton = new System.Windows.Forms.Button();
             this.computerDropDown = new System.Windows.Forms.ComboBox();
+            this.showWork = new System.Windows.Forms.CheckBox();
             this.historyPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.historyPicture)).BeginInit();
             this.SuspendLayout();
@@ -119,11 +122,24 @@
             this.computerDropDown.Size = new System.Drawing.Size(200, 33);
             this.computerDropDown.TabIndex = 5;
             // 
+            // showWork
+            // 
+            this.showWork.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.showWork.AutoSize = true;
+            this.showWork.Location = new System.Drawing.Point(958, 12);
+            this.showWork.Name = "showWork";
+            this.showWork.Size = new System.Drawing.Size(94, 29);
+            this.showWork.TabIndex = 6;
+            this.showWork.Text = "Work";
+            this.showWork.UseVisualStyleBackColor = true;
+            this.showWork.CheckedChanged += new System.EventHandler(this.OnShowWorkCheckboxChange);
+            // 
             // ActivityHistoryForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1270, 900);
+            this.Controls.Add(this.showWork);
             this.Controls.Add(this.computerDropDown);
             this.Controls.Add(this.nextMonthButton);
             this.Controls.Add(this.monthDropDown);
@@ -140,17 +156,19 @@
             this.historyPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.historyPicture)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
         private System.Windows.Forms.Button btnHistoryOk;
-        private System.Windows.Forms.Panel historyPanel;
+        private AutoScrollPanel historyPanel;
         private System.Windows.Forms.PictureBox historyPicture;
         private System.Windows.Forms.Button lastMonthButton;
         private System.Windows.Forms.ComboBox monthDropDown;
         private System.Windows.Forms.Button nextMonthButton;
         private System.Windows.Forms.ComboBox computerDropDown;
+        private System.Windows.Forms.CheckBox showWork;
     }
 }

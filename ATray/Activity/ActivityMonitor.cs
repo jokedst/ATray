@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -62,6 +63,7 @@ namespace ATray.Activity
         [NotifyPropertyChangedInvocator]
         private void SetProperty<T>(ref T underlyingField, T newValue, [CallerMemberName] string propertyName = null)
         {
+            // someone: if (EqualityComparer<T>.Default.Equals(underlyingField, newValue)) return;
             if (newValue.Equals(underlyingField)) return;
             underlyingField = newValue;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

@@ -27,7 +27,6 @@ namespace ATray
         private bool reallyClose;
         private ActivityHistoryForm historyForm;
         private OverallStatusType OverallStatus;
-        private WebServer webServer;
 
         private readonly IRepositoryCollection _repositoryCollection;
         private readonly IFactory<ISettingsDialog> _settingsDialogFactory;
@@ -73,16 +72,14 @@ namespace ATray
             lblDebug.DataBindings.Add(new Binding(nameof(Label.Text), activityMonitor, nameof(ActivityMonitor.CurrentlyActiveWindow)));
 #if DEBUG
             // DEBUG! Show dialog on boot for convinience
-            OnMenuClickSettings(null, null);
-            //OnMenuClickHistory(null, null);
+            //OnMenuClickSettings(null, null);
+            OnMenuClickHistory(null, null);
             //  new DiskUsageForm().Show();
 #endif
             CreateRepositoryMenyEntries();
             //var animTray = new IconAnimator(trayIcon, Properties.Resources.anim1);
             //animTray.StartAnimation();
 
-            this.webServer = new WebServer(this, "http://localhost:14754");
-            this.webServer.Run();
 
             NativeMethods.RegisterForPowerNotifications(this.Handle);
         }

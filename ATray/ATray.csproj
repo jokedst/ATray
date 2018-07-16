@@ -188,6 +188,9 @@
       <DependentUpon>AddRepositoryForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Config.cs" />
+    <Compile Include="Dialogs\AutoScrollPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Dialogs\DiskUsageForm.cs">
       <SubType>Form</SubType>
     </Compile>

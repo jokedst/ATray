@@ -38,15 +38,18 @@ namespace ATray
         internal static Configuration Configuration;
         private static MainWindow MainWindowInstance;
         internal static Task UpdateTask;
+        private static WebServer webServer;
 
         internal static string GitBashLocation;
         internal static string TortoiseGitLocation;
         private static TraceSource Tracer = new TraceSource("Atray.Program", SourceLevels.Information);
+        internal static WorkPlayFilter ActivityClassifyer = new WorkPlayFilter();
 
         internal static IServiceProvider InitializeIoC()
         {
             var serviceCollection = new ServiceCollection()
-                .AddSingleton<IRepositoryCollection, RepositoryCollection>(s => new RepositoryCollection(RepoListFilePath))
+                .AddSingleton<IRepositoryCollection, RepositoryCollection>(s =>
+                    new RepositoryCollection(RepoListFilePath))
                 .AddTransient<IAddRepositoryDialog, AddRepositoryForm>()
                 .AddTransient<ISettingsDialog, SettingsForm>()
                 .AddSingleton<MainWindow>()
@@ -83,6 +86,21 @@ namespace ATray
             var repositories = ServiceProvider.GetService<IRepositoryCollection>();
             Configuration = new Configuration(ConfigurationFilePath);
             repositories.SetFileListening(FileListeningMode.AllChanges);
+
+            if (Configuration.ActivateWebserver)
+            {
+                webServer = new WebServer("http://localhost:" + Configuration.Port);
+                webServer.Run();
+            }
+
+            ActivityClassifyer.AddWorkPattern("devenv", ".*Cosmoz.*");
+            ActivityClassifyer.AddWorkProgram("Slack");
+            ActivityClassifyer.AddWorkProgram("Ssms");
+            ActivityClassifyer.AddWorkPattern("chrome", ".*neovici.*");
+            ActivityClassifyer.AddPlayPattern("chrome", @"\[unknown\]");
+            ActivityClassifyer.AddPlayPattern("chrome", ".*ICA Banken.*");
+            ActivityClassifyer.AddPlayPattern("chrome", @".*jokedst@gmail\.com.*");
+            ActivityClassifyer.AddPlayProgram("RobloxPlayerBeta");
 
             UpdateTask = Task.Run(() => UpdateApp(false));
             DetectInstalledPrograms();

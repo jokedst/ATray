@@ -1,4 +1,6 @@
-﻿namespace ATray
+﻿using System.Diagnostics;
+
+namespace ATray
 {
     using System;
     using System.Collections.Generic;
@@ -27,6 +29,7 @@
         private int _currentMonth = (DateTime.Now.Year * 100) + DateTime.Now.Month;
 
         private bool _forceRedraw;
+        private bool _ignoreEvents;
 
         private uint _graphWidth;
         private uint _graphSeconds;
@@ -56,6 +59,7 @@
 
         private void InitComputerDropDown()
         {
+            // Two magic strings: Empty string means current computer, '*' means all computers
             var computers = ActivityManager.GetSharedHistoryComputers().Select(x =>new Tuple<string,string> (x, x)).ToList();
             computers.RemoveAll(x => x.Item1 == Environment.MachineName);
             computers.Add(new Tuple<string, string>(AllComputers, "All"));
@@ -64,7 +68,7 @@
             computerDropDown.ValueMember = "item1";
             computerDropDown.DisplayMember = "item2";
             computerDropDown.DataSource = computers;
-            computerDropDown.SelectedValue = _showSharedHistory ? AllComputers : string.Empty;
+            computerDropDown.SelectedValue = string.Empty;
             computerDropDown.SelectedValueChanged += computerDropDown_SelectedValueChanged;
         }
 
@@ -79,14 +83,29 @@
                 return;
             }
 
-            var months = rawMonths.Select(x => Tuple.Create(x, new DateTime(x / 100, x % 100, 1).ToString("MMMM yyyy"))).ToList();
-            monthDropDown.ValueMember = "item1";
-            monthDropDown.DisplayMember = "item2";
-            monthDropDown.DataSource = months;
-            monthDropDown.SelectedValue = rawMonths.LastOrDefault();
+            try
+            {
+                _ignoreEvents = true;
+                var selectedMonth = monthDropDown.SelectedValue as int?;
 
-            nextMonthButton.Enabled = false;
-            lastMonthButton.Enabled = rawMonths.Count > 1;
+                var months = rawMonths
+                    .Select(x => Tuple.Create(x, new DateTime(x / 100, x % 100, 1).ToString("MMMM yyyy"))).ToList();
+                monthDropDown.ValueMember = "item1";
+                monthDropDown.DisplayMember = "item2";
+                monthDropDown.DataSource = months;
+
+                var month = selectedMonth.HasValue && rawMonths.Contains(selectedMonth.Value)
+                    ? selectedMonth.Value
+                    : rawMonths.LastOrDefault();
+                monthDropDown.SelectedValue = month;
+
+                nextMonthButton.Enabled = rawMonths.Any(x => x > month);
+                lastMonthButton.Enabled = rawMonths.Any(x => x < month);
+            }
+            finally
+            {
+                _ignoreEvents = false;
+            }
         }
 
         private void HistoryPictureOnMouseLeave(object sender, EventArgs eventArgs) => _tipLabel.Hide();
@@ -115,7 +134,7 @@
             var second = (((uint)e.X - GraphStartPixel) * _graphSeconds / _graphWidth) + _graphFirstSecond;
 
             var graphPixel = e.X - GraphStartPixel;
-            var slot=    DaySlots.GetValueOrDefault(dayNumber).FirstOrDefault(d => d.EndX >= graphPixel);
+            var slot = DaySlots.GetValueOrDefault(dayNumber).FirstOrDefault(d => d.EndX >= graphPixel);
             if (slot == null || slot.StartX > graphPixel)
                 _tipLabel.Text = $"{SecondToTime(second)} (no activity)";
             else
@@ -152,19 +171,26 @@
             {
                 return;
             }
+            Debug.WriteLine("Redrawing history because " + (_forceRedraw?"forced to":(ClientRectangle.Width != _lastWindowWidth)?"width changed": imageGettingOld?"it's getting stale":(_historyGraph==null)?"there is none yet":"aliens"));
 
             // Get activity for selected year/month
             var year = (short)(_currentMonth / 100);
             var month = (byte)(_currentMonth % 100);
             Dictionary<string, MonthActivities> history;
-            if (_showSharedHistory)
+
+            var computer = (string) computerDropDown.SelectedValue;
+            if (string.IsNullOrEmpty(computer))
             {
-                var computer = (string) computerDropDown.SelectedValue;
+                history = new Dictionary<string, MonthActivities>
+                {
+                    [string.Empty] = ActivityManager.GetMonthActivity(year, month)
+                };
+            }
+            else
+            {
                 if (computer == AllComputers) computer = null;
                 history = ActivityManager.GetSharedMonthActivities(year, month, computer);
             }
-            else
-                history = new Dictionary<string, MonthActivities>{[string.Empty] = ActivityManager.GetMonthActivity(year, month)};
 
             // if(hidePlay)
             //history = WorkPlayFilter.Filter(history, WorkPlayType.WorkOnly);
@@ -243,6 +269,7 @@
 
         private void monthDropDown_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (_ignoreEvents) return;
             _currentMonth = (int)monthDropDown.SelectedValue;
 
             var availableMonths = monthDropDown.Items.Cast<Tuple<int, string>>().Select(x => x.Item1);
@@ -274,6 +301,13 @@
 
             InitHistoryDropDown();
 
+            _forceRedraw = true;
+            Refresh();
+        }
+
+        private void OnShowWorkCheckboxChange(object sender, EventArgs e)
+        {
+            Trace.TraceInformation("work checkbox changed: " + showWork.Checked);
             _forceRedraw = true;
             Refresh();
         }

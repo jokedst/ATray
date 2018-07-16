@@ -21,10 +21,9 @@ namespace ATray.Tools
         private readonly Dictionary<string, RequestHandler> _handlers;
         private readonly JsonSerializerSettings _jsonSettings;
         private HttpListener _listener = new HttpListener();
-        private readonly MainWindow _mainWindow;
         private readonly string[] _prefixes;
 
-        public WebServer(MainWindow mainWindow, params string[] prefixes)
+        public WebServer(params string[] prefixes)
         {
             if (!HttpListener.IsSupported)
                 throw new NotSupportedException("HttpListener is not supported on this OS");
@@ -32,7 +31,6 @@ namespace ATray.Tools
             // URI "prefix" is the base URI we listen on, e.g. "http://localhost:8080/api/".
             if (prefixes == null || prefixes.Length == 0)
                 throw new ArgumentException(@"Web server must have a prefix to bind to", nameof(prefixes));
-            this._mainWindow = mainWindow;
             this._prefixes = prefixes;
 
             this._handlers = new Dictionary<string, RequestHandler>(StringComparer.InvariantCultureIgnoreCase)

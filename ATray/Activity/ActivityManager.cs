@@ -17,9 +17,10 @@
         private static readonly int ActivityFileFormatVersion = int.Parse(ConfigurationManager.AppSettings["ActivityFileFormatVersion"] ?? "1");
 
 #if DEBUG
-        private static string SharedPath => Program.Configuration.SharedActivityStorage != null
-            ? Path.Combine(Program.Configuration.SharedActivityStorage, "DEBUG")
-            : null;
+        private static string SharedPath => Program.Configuration.SharedActivityStorage == null ? null :
+            Program.Configuration.SharedActivityStorage.EndsWith("DEBUG")
+            ? Program.Configuration.SharedActivityStorage 
+            : Path.Combine(Program.Configuration.SharedActivityStorage, "DEBUG");
 #else
         private static string SharedPath => Program.Configuration.SharedActivityStorage;
 #endif

@@ -142,6 +142,11 @@
             if (fileNameParts.Length > 1 && fileNameParts[1].StartsWith("Acts"))
                 ComputerName = fileNameParts[0];
             else ComputerName = Environment.MachineName;
+
+            if (Program.ActivityClassifyer != null)
+            {
+                Program.ActivityClassifyer.Classify(this, GuessWorkPlay.SameBlock);
+            }
         }
 
         /// <summary>

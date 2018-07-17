@@ -1,6 +1,4 @@
-﻿using ATray.Tools;
-
-namespace ATray
+﻿namespace ATray
 {
     using System;
     using System.Collections.Generic;
@@ -15,18 +13,14 @@ namespace ATray
     using Newtonsoft.Json;
     using RepositoryManager;
     using RepositoryManager.Git;
-
-    public interface IShowNotifications
-    {
-        void ShowNotification(string text);
-    }
+    using Tools;
 
     public partial class MainWindow : Form, IShowNotifications
     {
-        private bool inWarnState;
-        private bool reallyClose;
-        private ActivityHistoryForm historyForm;
-        private OverallStatusType OverallStatus;
+        private bool _inWarnState;
+        private bool _reallyExitProgram;
+        private ActivityHistoryForm _historyForm;
+        private OverallStatusType _overallStatus;
 
         private readonly IRepositoryCollection _repositoryCollection;
         private readonly IFactory<ISettingsDialog> _settingsDialogFactory;
@@ -53,14 +47,14 @@ namespace ATray
                 lblInfo.Text = "Take a break!";
                 ShowMe();
                 TopMost = true;
-                inWarnState = true;
+                _inWarnState = true;
             };
             activityMonitor.UserHasTakenBreak += (sender, e) =>
             {
                 BackColor = Color.Green;
                 lblInfo.Text = "You can start working now";
                 TopMost = false;
-                inWarnState = false;
+                _inWarnState = false;
             };
             activityMonitor.UserIsBackFromAbsense += (sender, e) =>
             {
@@ -79,8 +73,6 @@ namespace ATray
             CreateRepositoryMenyEntries();
             //var animTray = new IconAnimator(trayIcon, Properties.Resources.anim1);
             //animTray.StartAnimation();
-
-
             NativeMethods.RegisterForPowerNotifications(this.Handle);
         }
 
@@ -142,9 +134,9 @@ namespace ATray
         private void UpdateIcon()
         {
             var worstStatus = _repositoryCollection.Select(x => x.LastStatus.ToOverallStatus()).OrderBy(x=>x).LastOrDefault();
-            if (worstStatus == OverallStatus) return;
-            OverallStatus = worstStatus;
-            switch (OverallStatus)
+            if (worstStatus == _overallStatus) return;
+            _overallStatus = worstStatus;
+            switch (_overallStatus)
             {
                 case OverallStatusType.Ok:
                     this.trayIcon.Icon = Program.GreyIcon;
@@ -195,7 +187,7 @@ namespace ATray
 
         private void OnResize(object sender, EventArgs e)
         {
-            if (inWarnState) ShowMe();
+            if (_inWarnState) ShowMe();
             else if (WindowState == FormWindowState.Minimized) Hide();
         }
 
@@ -216,7 +208,7 @@ namespace ATray
         /// </summary>
         private void OnMenuClickExit(object sender, EventArgs e)
         {
-            reallyClose = true;
+            _reallyExitProgram = true;
             Close();
         }
 
@@ -225,31 +217,31 @@ namespace ATray
         /// </summary>
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
-            if (!inWarnState)
+            if (!_inWarnState)
                 Hide();
         }
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
             // Don't close the program, just minimize it (unless they used the menu)
-            if (e.CloseReason == CloseReason.UserClosing && !reallyClose)
+            if (e.CloseReason == CloseReason.UserClosing && !_reallyExitProgram)
             {
                 e.Cancel = true;
                 WindowState = FormWindowState.Minimized;
             }
             else
             {
-                historyForm?.Close();
+                _historyForm?.Close();
             }
         }
 
         private void OnMenuClickHistory(object sender, EventArgs e)
         {
-            if (historyForm == null || historyForm.IsDisposed)
-                historyForm = new ActivityHistoryForm();
-            if (historyForm.IsDisposed) return;
-            historyForm.Show();
-            historyForm.Focus();
+            if (_historyForm == null || _historyForm.IsDisposed)
+                _historyForm = new ActivityHistoryForm();
+            if (_historyForm.IsDisposed) return;
+            _historyForm.Show();
+            _historyForm.Focus();
         }
 
         private void OnMenuClickSettings(object sender, EventArgs e)

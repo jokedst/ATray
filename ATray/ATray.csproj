@@ -222,8 +222,10 @@
     <Compile Include="Dialogs\SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Tools\Extensions.cs" />
     <Compile Include="Tools\IFactory.cs" />
     <Compile Include="Tools\InternalTraceListener.cs" />
+    <Compile Include="Tools\IShowNotifications.cs" />
     <Compile Include="Tools\OverallStatusType.cs" />
     <Compile Include="Tools\PubSubHub.cs" />
     <Compile Include="Tools\SimpleFactory.cs" />

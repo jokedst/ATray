@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using ATray.Tools;
 
 namespace ATray
 {
@@ -26,7 +27,7 @@ namespace ATray
         private Point _lastPosition;
         private int _lastScrollPositionY;
 
-        private int _currentMonth = (DateTime.Now.Year * 100) + DateTime.Now.Month;
+        private int _currentMonth = DateTime.Now.IntegerMonth();
 
         private bool _forceRedraw;
         private bool _ignoreEvents;
@@ -34,7 +35,6 @@ namespace ATray
         private uint _graphWidth;
         private uint _graphSeconds;
         private uint _graphFirstSecond;
-        //private Dictionary<string, MonthActivities> _shownHistory;
         private byte[] _indexToDaynumber;
 
         private bool _showSharedHistory;
@@ -160,8 +160,9 @@ namespace ATray
         private void ActivityHistoryForm_Paint(object sender, PaintEventArgs e)
         {
             // If we're showing the current month, redraw regularly so the image don't get stale
-            var monthNow = DateTime.Now.Year * 100 + DateTime.Now.Month;
-            var imageAgeInMinutes = DateTime.Now.Subtract(_lastHistoryRedraw).TotalMinutes;
+            var now = DateTime.Now;
+            var monthNow = now.Year * 100 + now.Month;
+            var imageAgeInMinutes = now.Subtract(_lastHistoryRedraw).TotalMinutes;
             var imageGettingOld = _currentMonth == monthNow && imageAgeInMinutes > Program.Configuration.HistoryRedrawTimeout;
 
             if (_historyGraph != null 
@@ -191,9 +192,6 @@ namespace ATray
                 if (computer == AllComputers) computer = null;
                 history = ActivityManager.GetSharedMonthActivities(year, month, computer);
             }
-
-            // if(hidePlay)
-            //history = WorkPlayFilter.Filter(history, WorkPlayType.WorkOnly);
             
             _indexToDaynumber = history.SelectMany(x=>x.Value.Days.Keys).Distinct().OrderBy(x => x).ToArray();
          
@@ -251,7 +249,7 @@ namespace ATray
             }
 
             _lastWindowWidth = ClientRectangle.Width;
-            _lastHistoryRedraw = DateTime.Now;
+            _lastHistoryRedraw = now;
             _forceRedraw = false;
         }
 

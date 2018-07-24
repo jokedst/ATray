@@ -31,13 +31,14 @@ namespace ATray
         private void InitializeComponent()
         {
             this.btnHistoryOk = new System.Windows.Forms.Button();
-            this.historyPanel = new AutoScrollPanel();
+            this.historyPanel = new ATray.Dialogs.AutoScrollPanel();
             this.historyPicture = new System.Windows.Forms.PictureBox();
             this.lastMonthButton = new System.Windows.Forms.Button();
             this.monthDropDown = new System.Windows.Forms.ComboBox();
             this.nextMonthButton = new System.Windows.Forms.Button();
             this.computerDropDown = new System.Windows.Forms.ComboBox();
             this.showWork = new System.Windows.Forms.CheckBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.historyPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.historyPicture)).BeginInit();
             this.SuspendLayout();
@@ -134,11 +135,24 @@ namespace ATray
             this.showWork.UseVisualStyleBackColor = true;
             this.showWork.CheckedChanged += new System.EventHandler(this.OnShowWorkCheckboxChange);
             // 
+            // checkBox1
+            // 
+            this.checkBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(870, 12);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(82, 29);
+            this.checkBox1.TabIndex = 7;
+            this.checkBox1.Text = "Blur";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.OnBlurCheckboxChange);
+            // 
             // ActivityHistoryForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1270, 900);
+            this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.showWork);
             this.Controls.Add(this.computerDropDown);
             this.Controls.Add(this.nextMonthButton);
@@ -170,5 +184,6 @@ namespace ATray
         private System.Windows.Forms.Button nextMonthButton;
         private System.Windows.Forms.ComboBox computerDropDown;
         private System.Windows.Forms.CheckBox showWork;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }

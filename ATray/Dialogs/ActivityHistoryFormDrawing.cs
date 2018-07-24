@@ -56,7 +56,7 @@
             _graphWidth = (uint) (target.Width - 80);
             _graphSeconds = lastTime - firstTime;
             if (_graphSeconds == 0) _graphSeconds = 1;
-             var daylineHeight = 2;
+            var daylineHeight = 2;
 
             // Draw hour lines
             var greypen = new Pen(Color.LightGray, 1);

@@ -306,6 +306,16 @@ namespace ATray
         private void OnShowWorkCheckboxChange(object sender, EventArgs e)
         {
             Trace.TraceInformation("work checkbox changed: " + showWork.Checked);
+            ForceRedraw();
+        }
+
+        private void OnBlurCheckboxChange(object sender, EventArgs e)
+        {
+            ForceRedraw();
+        }
+
+        private void ForceRedraw()
+        {
             _forceRedraw = true;
             Refresh();
         }

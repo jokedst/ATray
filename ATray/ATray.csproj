@@ -320,12 +320,12 @@
   <!-- Squirrel - create release package on Release builds  -->
   <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Release'">
     <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
-      <Output TaskParameter="Assemblies" ItemName="myAssemblyInfo" />
+      <Output TaskParameter="Assemblies" ItemName="ATrayAssemblyInfo" />
     </GetAssemblyIdentity>
 	<PropertyGroup>
 		<SymVer3>$([System.Version]::Parse(%(ATrayAssemblyInfo.Version)).ToString(3))</SymVer3>
 	</PropertyGroup>
-    <Exec Command="$(SolutionDir)packages\NuGet.CommandLine.4.4.1\tools\NuGet.exe pack ATray.nuspec -Version %(myAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir) -BasePath $(OutDir)" />
-    <Exec Command="$(SolutionDir)packages\squirrel.windows.1.7.9\tools\squirrel --releasify $(OutDir)ATray.$(SymVer3).nupkg -baseUrl https://github.com/jokedst/ATray/releases/download/v$(SymVer3)/" />
+    <Exec Command="$(SolutionDir)packages\NuGet.CommandLine.4.4.1\tools\NuGet.exe pack ATray.nuspec -Version %(ATrayAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir) -BasePath $(OutDir)" />
+    <Exec Command="$(SolutionDir)packages\squirrel.windows.1.8.0\tools\squirrel --releasify $(OutDir)ATray.$(SymVer3).nupkg -baseUrl https://github.com/jokedst/ATray/releases/download/v$(SymVer3)/" />
   </Target>
 </Project>

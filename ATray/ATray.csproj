@@ -304,19 +304,6 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  
-  <!-- <Target Name="GetVersion" AfterTargets="CopyFilesToOutputDirectory"> -->
-	<!-- <Message Text="Running getversion" /> -->
-    <!-- <GetAssemblyIdentity AssemblyFiles="$(TargetPath)"> -->
-      <!-- <Output TaskParameter="Assemblies" ItemName="ATrayAssemblyInfo" /> -->
-    <!-- </GetAssemblyIdentity> -->
-	<!-- <Message Text="getversion: %(ATrayAssemblyInfo.Version)" /> -->
-	<!-- <PropertyGroup> -->
-		<!-- <SymVer3>$([System.Version]::Parse(%(ATrayAssemblyInfo.Version)).ToString(3))</SymVer3> -->
-	<!-- </PropertyGroup> -->
-	<!-- <Message Text="getversion: $(SymVer3)" /> -->
-  <!-- </Target> -->
-  
   <!-- Squirrel - create release package on Release builds  -->
   <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Release'">
     <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">

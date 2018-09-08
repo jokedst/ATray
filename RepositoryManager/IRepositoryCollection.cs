@@ -92,5 +92,11 @@ namespace RepositoryManager
         /// </summary>
         /// <param name="repository"> Repo that was modified. Must be part of collection already </param>
         void RepositoryModified(ISourceRepository repository);
+
+        /// <summary>
+        /// Returns the highest ("worst") status of all repositories.
+        /// </summary>
+        /// <returns>Status of the repo with highest status, or Unknown if no repos are registered</returns>
+        RepoStatus WorstStatus();
     }
 }

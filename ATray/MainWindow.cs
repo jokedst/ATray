@@ -133,7 +133,7 @@
 
         private void UpdateIcon()
         {
-            var worstStatus = _repositoryCollection.Select(x => x.LastStatus.ToOverallStatus()).OrderBy(x=>x).LastOrDefault();
+            var worstStatus = _repositoryCollection.WorstStatus().ToOverallStatus();
             if (worstStatus == _overallStatus) return;
             _overallStatus = worstStatus;
             switch (_overallStatus)

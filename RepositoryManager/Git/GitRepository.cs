@@ -1,9 +1,12 @@
+using SharpSvn.Remote;
+
 namespace RepositoryManager.Git
 {
     using System;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using LibGit2Sharp;
     using LibGit2Sharp.Handlers;
 
@@ -84,19 +87,24 @@ namespace RepositoryManager.Git
         }
 
         /// <inheritdoc />
-        public RepoStatus UpdateStatus()
+        public RepoStatus RefreshRemoteStatus()
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
                 using (var repo = new Repository(Location))
                 {
-                    if (!repo.Head.IsTracking) return LastStatus = RepoStatus.Disconnected;
+                    if (!repo.Network.Remotes.Any())
+                    {
+                        RefreshLocalStatus();
+                        return LastStatus;
+                    }
+                    //if (!repo.Head.IsTracking) return LastStatus = RepoStatus.Disconnected;
                     var credentialHelper = repo.Config.Get<string>("credential.helper");
-                    var origin = repo.Network.Remotes[repo.Head.RemoteName];
+                    var origin = repo.Network.Remotes.FirstOrDefault(r=>r.Name == (repo.Head.RemoteName ?? "origin"));
                     if (origin == null) return RepoStatus.Error;
                     var fetchOptions = new FetchOptions();
-                    if (!origin.Url.Contains("://"))
+                    if (Regex.IsMatch(origin.Url, @"(^ssh://|@.*:)"))
                         throw new Exception("git over SSH is not aupported by Atray");
                     if (credentialHelper?.Value == "wincred")
                         fetchOptions.CredentialsProvider = CredentialsProvider.WinCred;
@@ -134,12 +142,30 @@ namespace RepositoryManager.Git
                 using (var repo = new Repository(Location))
                 {
                     var status = repo.RetrieveStatus(new StatusOptions());
-
                     var dirty = status.IsDirty;
-                    var behind = (repo.Head.TrackingDetails.BehindBy ?? 0) != 0;
-                    var ahead = (repo.Head.TrackingDetails.AheadBy ?? 0) != 0;
+
+                    // If current branch isn't tracking these two will be zero
+                    var behind = repo.Head.TrackingDetails.BehindBy > 0;
+                    var ahead = repo.Head.TrackingDetails.AheadBy > 0;
+
+                    // Common work states:
+                    // * On master, ahead or behind
+                    // * On tracking branch, ahead/behind tracking, but behind master is important too
+                    // * On local branch, clean/dirty, ahead/behind master
+                    if (repo.Head.FriendlyName != "master" && repo.Branches.Any(b => b.FriendlyName == "master"))
+                    {
+                        var master = repo.Branches["master"];
+                        if (master.IsTracking)
+                        {
+                            // This only checks the local master vs remote master
+                            behind = behind || master.TrackingDetails.BehindBy > 0;
+                            ahead = ahead || master.TrackingDetails.AheadBy > 0;
+                            // TODO: compare local branch to remote master?
+                        }
+                    }
 
                     var repoStatus = RepoStatusFlags.Clean;
+                    if (!repo.Network.Remotes.Any()) repoStatus |= RepoStatusFlags.Disconnected;
                     if (dirty) repoStatus |= RepoStatusFlags.LocalChanges;
                     if (behind) repoStatus |= RepoStatusFlags.RemoteUnmergedCommits;
                     if (ahead) repoStatus |= RepoStatusFlags.LocalUnpushedCommits;

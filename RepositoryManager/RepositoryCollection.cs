@@ -34,7 +34,17 @@
 
         private FileListeningMode _useFileListeners;
         private readonly Dictionary<string, DelayedFileSystemWatcher> _fileListeners = new Dictionary<string, DelayedFileSystemWatcher>();
-  
+
+        /// <summary>
+        /// Creates a new empty <see cref="RepositoryCollection"/>
+        /// </summary>
+        public RepositoryCollection()
+        {
+            _repositories=new List<ISourceRepository>();
+            _repositoriesByName = new Dictionary<string, ISourceRepository>();
+            _timer = new Timer(TimerTick, null, SampleFrequency, SampleFrequency);
+        }
+
         /// <summary>
         /// Load a reposet from a file
         /// </summary>
@@ -271,7 +281,7 @@
             if (repo.LastStatusAt.AddMinutes((int) repo.UpdateSchedule) >= DateTime.Now)
                 return;
             var previousStatus = repo.LastStatus;
-            repo.UpdateStatus();
+            repo.RefreshRemoteStatus();
             var eventArgs = new RepositoryEventArgs(repo.Location, previousStatus, repo.LastStatus, repo.Name, RepositoryEventType.Updated);
             OnRepositoryUpdated(eventArgs);
 
@@ -398,6 +408,14 @@
                 }
             }
         }
+
+        /// <summary>
+        /// Returns the highest ("worst") status of all repositories.
+        /// </summary>
+        /// <returns>Status of the repo with highest status, or Unknown if no repos are registered</returns>
+        public RepoStatus WorstStatus() 
+            => _repositories?.Aggregate(RepoStatus.Unknown, (status, repo) => repo.LastStatus > status ? repo.LastStatus : status)
+            ?? RepoStatus.Unknown;
     }
 
     /// <summary> Delegate for repo update events </summary>

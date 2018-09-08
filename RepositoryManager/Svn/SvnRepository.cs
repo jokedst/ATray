@@ -83,7 +83,7 @@ namespace RepositoryManager
         }
 
         /// <inheritdoc/>
-        public RepoStatus UpdateStatus()
+        public RepoStatus RefreshRemoteStatus()
         {
             var stopwatch = Stopwatch.StartNew();
             using (SvnClient client = new SvnClient())

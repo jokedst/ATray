@@ -8,23 +8,10 @@ namespace ATray.Tools
     {
         public static OverallStatusType ToOverallStatus(this RepoStatus status)
         {
-            switch (status)
-            {
-                case RepoStatus.Conflict:
-                    return OverallStatusType.CodeRed;
-                case RepoStatus.Behind:
-                    return OverallStatusType.WarnBehind;
-                case RepoStatus.Dirty:
-                    return OverallStatusType.WarnAhead;
-                default:
-                    return OverallStatusType.Ok;
-            }
-        }
-
-        public static OverallStatusType WorstOf(this OverallStatusType overallStatus,RepoStatus status)
-        {
-            var converted = status.ToOverallStatus();
-            return converted > overallStatus ? converted : overallStatus;
+            if (status >= RepoStatus.Mergeable) return OverallStatusType.CodeRed;
+            if (status >= RepoStatus.Behind) return OverallStatusType.WarnBehind;
+            if (status >= RepoStatus.Dirty) return OverallStatusType.WarnAhead;
+            return OverallStatusType.Ok;
         }
 
         public static Color ToColor(OverallStatusType overallStatus)

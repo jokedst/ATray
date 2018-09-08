@@ -21,7 +21,7 @@ namespace RepositoryManager
 
         /// <summary> Updates the status </summary>
         /// <returns></returns>
-        RepoStatus UpdateStatus();
+        RepoStatus RefreshRemoteStatus();
 
         /// <summary>
         /// Updates the dir with remote changes

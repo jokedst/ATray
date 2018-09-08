@@ -3,28 +3,29 @@ namespace RepositoryManager
     using System;
 
     /// <summary>
-    /// Current (or last known) status on a repository
+    /// Current (or last known) status on a repository.
+    /// Roughly in order of severity (higher value = more important)
     /// </summary>
     public enum RepoStatus
     {
         /// <summary> Update has never run  </summary>
-        Unknown,
+        Unknown = 0,
         /// <summary> No origin set </summary>
         Disconnected,
         /// <summary> No local changes, up to date with remote </summary>
         Clean,
         /// <summary> Local changes only </summary>
         Dirty,
+        /// <summary> Local commits are not pushed </summary>
+        Ahead,
         /// <summary> No local changes, behind remote </summary>
         Behind,
-        /// <summary> Local changes and remote updates. Can not merge cleanly or haven't tried </summary>
-        Conflict,
         /// <summary> Local changes and remote updates. Can merge cleanly </summary>
         Mergeable,
+        /// <summary> Local changes and remote updates. Can not merge cleanly or haven't tried </summary>
+        Conflict,
         /// <summary> Could not retrieve status </summary>
-        Error,
-        /// <summary> Local commits are not pushed </summary>
-        Ahead
+        Error
     }
 
     /// <summary>

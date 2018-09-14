@@ -27,9 +27,9 @@
         private List<ISourceRepository> _repositories;
         private Dictionary<string, ISourceRepository> _repositoriesByName;
 
-        private string RepoListFilePath { get; set; }
+        private string _repoListFilePath;
         private readonly Timer _timer;
-        private readonly ConcurrentDictionary<string, Task> runningUpdates = new ConcurrentDictionary<string, Task>();
+        private readonly ConcurrentDictionary<string, Task> _runningUpdates = new ConcurrentDictionary<string, Task>();
         private readonly object _lockObject = new object();
 
         private FileListeningMode _useFileListeners;
@@ -40,7 +40,7 @@
         /// </summary>
         public RepositoryCollection()
         {
-            _repositories=new List<ISourceRepository>();
+            _repositories = new List<ISourceRepository>();
             _repositoriesByName = new Dictionary<string, ISourceRepository>();
             _timer = new Timer(TimerTick, null, SampleFrequency, SampleFrequency);
         }
@@ -51,12 +51,7 @@
         /// <param name="filepath"></param>
         public RepositoryCollection(string filepath)
         {
-            RepoListFilePath = filepath;
-            //if (File.Exists(RepoListFilePath))
-            //{
-            //    _repositories = JsonConvert.DeserializeObject<List<ISourceRepository>>(File.ReadAllText(RepoListFilePath), JsonSettings);
-            //}
-            //_repositories = _repositories ?? new List<ISourceRepository>();
+            _repoListFilePath = filepath;
             ReloadFromFile();
             _timer = new Timer(TimerTick, null, SampleFrequency, SampleFrequency);
         }
@@ -68,9 +63,9 @@
         {
             lock (_lockObject)
             {
-                if (File.Exists(RepoListFilePath))
+                if (File.Exists(_repoListFilePath))
                 {
-                    var json = File.ReadAllText(RepoListFilePath);
+                    var json = File.ReadAllText(_repoListFilePath);
                     // Legacy fix for a moved class
                     json = json.Replace("RepositoryManager.GitRepository, RepositoryManager", "RepositoryManager.Git.GitRepository, RepositoryManager");
                     _repositories = JsonConvert.DeserializeObject<List<ISourceRepository>>(json, JsonSettings);
@@ -96,56 +91,69 @@
             }
         }
 
-        private void TimerTick(object tick)
-        {
-            TriggerScheduledUpdates();
-        }
-
-        /// <summary>
-        /// Trigger update of repos that should be according to their schedule
-        /// </summary>
-        public void TriggerScheduledUpdates()
-        {
-            // Only repos with  schedule, and where lastupdate was long enough ago
-            TriggerUpdate(repo => repo.UpdateSchedule != Schedule.Never
-                && repo.LastStatusAt.AddMinutes((int)repo.UpdateSchedule) <= DateTime.Now);
-        }
-
-        /// <summary>
-        /// Trigger repo updates. All updates are done in separate threads
-        /// </summary>
-        /// <param name="where"></param>
-        /// <param name="ignoreRunningUpdates"> If true starts an update even if one is running </param>     
-        public void TriggerUpdate(Func<ISourceRepository, bool> where, bool ignoreRunningUpdates=false)
-        {
-            lock (_lockObject)
-            {
-                foreach (var repository in _repositories.Where(where))
-                {
-                    if (runningUpdates.TryGetValue(repository.Location, out Task task))
-                    {
-                        if (!task.IsCompleted) continue;
-                    }
-
-                    Trace.TraceInformation("About to update repo " + repository.Name);
-
-                    var repoUnclousure = repository;
-                    var newTask = Task.Factory.StartNew(() => CheckRepo(repoUnclousure));
-                    runningUpdates.AddOrUpdate(repository.Location, newTask, (loc, oldTask) => newTask);
-                }
-            }
-        }
-
         /// <summary>
         /// Save the current list of repos to a file
         /// </summary>
         /// <param name="filepath"> File to save to. If null will use same as when loaded/saved last time </param>
         public void Save(string filepath = null)
         {
-            if (filepath != null) RepoListFilePath = filepath;
-            if (RepoListFilePath == null) throw new ArgumentNullException(nameof(filepath), "Can not save file - no path specified");
+            if (filepath != null) _repoListFilePath = filepath;
+            if (_repoListFilePath == null) throw new ArgumentNullException(nameof(filepath), "Can not save file - no path specified");
             lock (_lockObject)
-                File.WriteAllText(RepoListFilePath, JsonConvert.SerializeObject(_repositories, JsonSettings), Encoding.UTF8);
+                File.WriteAllText(_repoListFilePath, JsonConvert.SerializeObject(_repositories, JsonSettings), Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// Trigger update of repos according to their schedule
+        /// </summary>
+        private void TimerTick(object tick)
+        {
+            // Only repos with a schedule, and where lastupdate was long enough ago
+            TriggerUpdate(repo => repo.UpdateSchedule != Schedule.Never
+                && repo.LastStatusAt.AddMinutes((int)repo.UpdateSchedule) <= DateTime.Now);
+        }
+
+        /// <summary>
+        /// Trigger an update of a repo
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="force"> If true does not wait for running updates </param>
+        public Task TriggerUpdate(string location, bool force)
+        {
+            lock (_lockObject)
+            {
+                var repository = _repositories.FirstOrDefault(x => x.Location == location);
+                if (!force && _runningUpdates.TryGetValue(repository.Location, out var task) && !task.IsCompleted)
+                    return task;
+
+                Trace.TraceInformation("About to update repo " + repository.Name);
+                var repoUnclousure = repository;
+                var newTask = Task.Factory.StartNew(() => CheckRepo(repoUnclousure));
+                _runningUpdates.AddOrUpdate(repository.Location, newTask, (loc, oldTask) => newTask);
+                return newTask.ContinueWith(t=>Task.Delay(10000));
+            }
+        }
+
+        /// <summary>
+        /// Trigger repo updates. All updates are done in separate threads
+        /// </summary>
+        /// <param name="where"> Predicate that must be true to trigger update</param>
+        /// <param name="force"> If true starts an update even if one is running </param>     
+        public void TriggerUpdate(Func<ISourceRepository, bool> where, bool force = false)
+        {
+            lock (_lockObject)
+            {
+                foreach (var repository in _repositories.Where(where))
+                {
+                    if (!force && _runningUpdates.TryGetValue(repository.Location, out var task) && !task.IsCompleted)
+                        continue;
+
+                    Trace.TraceInformation("About to update repo " + repository.Name);
+                    var repoUnclousure = repository;
+                    var newTask = Task.Factory.StartNew(() => CheckRepo(repoUnclousure));
+                    _runningUpdates.AddOrUpdate(repository.Location, newTask, (loc, oldTask) => newTask);
+                }
+            }
         }
 
         /// <summary>
@@ -217,14 +225,14 @@
         /// <param name="repositoryLocation"> repo location </param>
         public bool Remove(string repositoryLocation)
         {
-            var result = false;
-            ISourceRepository repo = null;
+            var removedSomething = false;
+            ISourceRepository repo;
             lock (_lockObject)
             {
                 repo = _repositories.FirstOrDefault(x => x.Location == repositoryLocation);
                 if(repo != null)
                 {
-                    result = _repositories.Remove(repo);
+                    removedSomething = _repositories.Remove(repo);
                     repo.RepositoryStatusChanged -= OnRepoChangedEventPropagator;
                 }
 
@@ -235,10 +243,10 @@
                 }
             }
 
-            if(result)
-                // Raise event
+            // Raise event
+            if(removedSomething)
                 OnRepositoryListChanged(new RepositoryEventArgs(repo.Location, repo.LastStatus, repo.LastStatus, repo.Name, RepositoryEventType.Removed));
-            return result;
+            return removedSomething;
         }
 
         /// <summary>
@@ -289,24 +297,6 @@
         }
 
         /// <summary>
-        /// Trigger an update of a repo
-        /// </summary>
-        /// <param name="location"></param>
-        public void UpdateRepo(string location)
-        {
-            lock (_lockObject)
-            {
-                foreach (var repository in _repositories.Where(repo => repo.Location == location))
-                {
-                    // This does NOT let running updates finish - if something broke this might fix it
-                    var repoUnclousure = repository;
-                    var newTask = Task.Factory.StartNew(() => CheckRepo(repoUnclousure));
-                    runningUpdates.AddOrUpdate(repository.Location, newTask, (loc, oldTask) => newTask);
-                }
-            }
-        }
-
-        /// <summary>
         /// Trigger a pull of a repo
         /// </summary>
         /// <param name="location"></param>
@@ -318,7 +308,7 @@
                 {
                     var repoUnclousure = repository;
                     // If another task is running on this repo, schedule the pull to be done after
-                    if (runningUpdates.TryGetValue(repository.Location, out Task task))
+                    if (_runningUpdates.TryGetValue(repository.Location, out Task task))
                     {
                         if (!task.IsCompleted)
                         {
@@ -328,7 +318,7 @@
                     }
 
                     var newTask = Task.Factory.StartNew(() => PullRepoTask(repoUnclousure));
-                    runningUpdates.AddOrUpdate(repository.Location, newTask, (loc, oldTask) => newTask);
+                    _runningUpdates.AddOrUpdate(repository.Location, newTask, (loc, oldTask) => newTask);
                 }
             }
         }
@@ -413,9 +403,12 @@
         /// Returns the highest ("worst") status of all repositories.
         /// </summary>
         /// <returns>Status of the repo with highest status, or Unknown if no repos are registered</returns>
-        public RepoStatus WorstStatus() 
-            => _repositories?.Aggregate(RepoStatus.Unknown, (status, repo) => repo.LastStatus > status ? repo.LastStatus : status)
-            ?? RepoStatus.Unknown;
+        public RepoStatus WorstStatus()
+        {
+            if (_repositories?.Count > 0)
+                return _repositories.Max(x => x.LastStatus);
+            return RepoStatus.Unknown;
+        }
     }
 
     /// <summary> Delegate for repo update events </summary>

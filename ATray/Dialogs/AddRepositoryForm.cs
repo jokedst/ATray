@@ -34,11 +34,13 @@ namespace ATray
             {
                 if (frm.ShowDialog(Owner) != DialogResult.OK) return;
                 textboxPath.Text = frm.Folder;
+                var repo = new GitRepository(textboxPath.Text);
                 if (string.IsNullOrWhiteSpace(NameTextBox.Text))
                 {
-                    var repo = new GitRepository(textboxPath.Text);
                     NameTextBox.Text = repo.Name;
                 }
+
+                validationResultLabel.Text = repo.Valid() ? "Valid!" : "Directory is not a valid repository!";
             }
         }
 
@@ -92,11 +94,6 @@ namespace ATray
             set => NameTextBox.Text = value;
         }
 
-        public string OkButtonText
-        {
-            set => button2.Text = value;
-        }
-
         private void OnClickValidate(object sender, EventArgs e)
         {
             var repo = new GitRepository(textboxPath.Text);
@@ -105,26 +102,22 @@ namespace ATray
 
         private void OnClickOk(object sender, EventArgs e)
         {
-            var adding = false;
-            if (_repo == null)
+            var repo = new GitRepository(textboxPath.Text);
+            if (!repo.Valid())
             {
-                adding = true;
-                _repo = new GitRepository(textboxPath.Text);
-            }
-            if (!_repo.Valid())
-            {
-                MessageBox.Show("Invalid directory! This is not a supported repository path.", "Invalid repository path");
+                 MessageBox.Show("Invalid directory! This is not a supported repository path", "ATray Repository", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            _repo.UpdateSchedule = ChosenSchedule;
-            if (!string.IsNullOrWhiteSpace(RepoName))
-                _repo.Name = RepoName;
-            if (adding && _repositoryCollection.ContainsName(_repo.Name))
+            if ((_repo == null || _repo.Name != RepoName) && _repositoryCollection.ContainsName(RepoName))
             {
-                MessageBox.Show("A repository with name'" + _repo.Name + "' exists already", "Error adding repository");
+                MessageBox.Show($"A repository with name '{RepoName}' exists already", "ATray Repository", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
+            _repo = _repo ?? repo;
+            _repo.UpdateSchedule = ChosenSchedule;
+            _repo.Name = RepoName;
 
             DialogResult = DialogResult.OK;
         }
@@ -144,7 +137,7 @@ namespace ATray
             _repo = repository;
             Owner = owningWindow as Form;
             Text = "Edit Repository";
-            OkButtonText = "&Save";
+            button2.Text = "&Save";
             textboxPath.Text = _repo.Location;
             RepoName = _repo.Name;
             SetSchedule((int)_repo.UpdateSchedule);

@@ -1,10 +1,3 @@
-using System.Drawing;
-using System.Reflection;
-using ATray.Activity;
-using ATray.Tools;
-using Microsoft.Extensions.DependencyInjection;
-using NuGet;
-
 namespace ATray
 {
     using System;
@@ -16,6 +9,12 @@ namespace ATray
     using System.Windows.Forms;
     using RepositoryManager;
     using Squirrel;
+    using System.Drawing;
+    using System.Reflection;
+    using ATray.Activity;
+    using ATray.Tools;
+    using Microsoft.Extensions.DependencyInjection;
+    using NuGet;
 
     public static class Program
     {
@@ -70,7 +69,7 @@ namespace ATray
             // Due to the constant reading/writing to the activities files, running two instances of ATray (for the same config) is a really bad idea. So quit.
             if (!new Mutex(false, "Jokedst.Atray.single-exe-mutex." + SettingsDirectory.Replace('\\','¤')).WaitOne(0, false))
             {
-                MessageBox.Show("An instance of the application is already running.");
+                MessageBox.Show("An instance of ATray is already running!", "ATray");
                 return;
             }
 
@@ -153,7 +152,7 @@ namespace ATray
         public static async Task UpdateApp(bool verbose)
         {
             Thread.CurrentThread.Name = "SquirrelUpdateThread";
-            var thisVersion =new SemanticVersion( Assembly.GetExecutingAssembly().GetName().Version);
+            var thisVersion = new SemanticVersion(Assembly.GetExecutingAssembly().GetName().Version);
 
             try
             {
@@ -164,12 +163,12 @@ namespace ATray
                     if (latestVersion == null)
                     {
                         if (verbose)
-                            MessageBox.Show("No Updates are available at this time.");
+                            MessageBox.Show("No Updates are available at this time", "ATray Update");
                         return;
                     }
 
                     if (MessageBox.Show($"An update to version {latestVersion.Version} is available. Do you want to update?",
-                            "Update available", MessageBoxButtons.OKCancel) != DialogResult.OK)
+                            "ATray Update available", MessageBoxButtons.OKCancel) != DialogResult.OK)
                         return;
 
                     await mgr.DownloadReleases(new[] {latestVersion});
@@ -181,7 +180,7 @@ namespace ATray
             }
             catch (Exception e)
             {
-                MessageBox.Show("Update check failed with an exception: " + e.Message);
+                MessageBox.Show("Update check failed with an exception: " + e.Message, "ATray Update");
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RepositoryManager
 {
@@ -12,18 +13,6 @@ namespace RepositoryManager
         /// Reloads the repo list from file
         /// </summary>
         void ReloadFromFile();
-
-        /// <summary>
-        /// Trigger update of repos that should be according to their schedule
-        /// </summary>
-        void TriggerScheduledUpdates();
-
-        /// <summary>
-        /// Trigger repo updates. All updates are done in separate threads
-        /// </summary>
-        /// <param name="where"></param>
-        /// <param name="ignoreRunningUpdates"> If true starts an update even if one is running </param>     
-        void TriggerUpdate(Func<ISourceRepository, bool> where, bool ignoreRunningUpdates=false);
 
         /// <summary>
         /// Save the current list of repos to a file
@@ -56,10 +45,18 @@ namespace RepositoryManager
         void StopScheduler();
 
         /// <summary>
+        /// Trigger repo updates. All updates are done in separate threads
+        /// </summary>
+        /// <param name="where"></param>
+        /// <param name="force"> If true starts an update even if one is running </param>     
+        void TriggerUpdate(Func<ISourceRepository, bool> where, bool force = false);
+
+        /// <summary>
         /// Trigger an update of a repo
         /// </summary>
         /// <param name="location"></param>
-        void UpdateRepo(string location);
+        /// <param name="force"> If true does not wait for running updates </param>
+        Task TriggerUpdate(string location, bool force);
 
         /// <summary>
         /// Trigger a pull of a repo

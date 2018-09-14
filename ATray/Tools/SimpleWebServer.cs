@@ -1,19 +1,15 @@
-﻿using System.Windows.Forms;
-using ATray;
-using Newtonsoft.Json.Linq;
-
-namespace ATray.Tools
+﻿namespace ATray.Tools
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
     using System.Net;
-    using System.ServiceProcess;
     using System.Text;
     using System.Threading;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
+    using Newtonsoft.Json.Linq;
 
     public class WebServer
     {
@@ -199,20 +195,6 @@ namespace ATray.Tools
         {
             context.Response.StatusCode = 404;
             return new { status = "not found" };
-        }
-    }
-
-    public class LogHelper
-    {
-        public static void LogError(object sender, string message)
-        {
-            Debug.WriteLine(message);
-            MessageBox.Show(message, "Error in ATray");
-        }
-
-        public static void LogInfo(object sender, string message)
-        {
-            Debug.WriteLine(message);
         }
     }
 }

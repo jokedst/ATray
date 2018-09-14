@@ -78,7 +78,7 @@ namespace ATray
             var rawMonths = ActivityManager.ListAvailableMonths((string)computerDropDown.SelectedValue);
             if (rawMonths.Count == 0)
             {
-                MessageBox.Show("No history to show!");
+                MessageBox.Show("No history to show!", "ATray History");
                 Close();
                 return;
             }

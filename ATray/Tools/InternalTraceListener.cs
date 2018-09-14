@@ -5,6 +5,8 @@ using System.Globalization;
 
 namespace ATray.Tools
 {
+    using Annotations;
+
     public class InternalTraceListener : TraceListener
     {
         public List<string> Messages { get; } = new List<string>();
@@ -31,7 +33,7 @@ namespace ATray.Tools
         }
 
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id,
-            string format, params object[] args)
+            string format, [CanBeNull] params object[] args)
         {
             if (Filter != null && !Filter.ShouldTrace(eventCache, source, eventType, id, format, args, null, null))
                 return;

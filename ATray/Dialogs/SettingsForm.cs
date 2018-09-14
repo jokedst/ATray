@@ -6,7 +6,7 @@
     using System.Reflection;
     using RepositoryManager;
 
-    public interface ISettingsDialog:IDisposable
+    public interface ISettingsDialog : IDisposable
     {
         bool Focus();
         void Show(IWin32Window owner);
@@ -18,7 +18,6 @@
     {
         private readonly IAddRepositoryDialog _addRepositoryDialog;
         private readonly IRepositoryCollection _repositories;
-        //private List<ISourceRepository> _updatedRepoList = Program.Repositories;
 
         public SettingsForm(IAddRepositoryDialog addRepositoryDialog, IRepositoryCollection repositories)
         {
@@ -92,7 +91,7 @@
             var newConfig = (Configuration) propertyGrid.SelectedObject;
             if (!Program.Configuration.ApplyChanges(newConfig))
             {
-                MessageBox.Show("Invalid configuration for some reason", "Configuration error");
+                MessageBox.Show("Invalid configuration for some reason", "ATray Configuration error");
                 return;
             }
             Program.Configuration = newConfig;
@@ -142,33 +141,13 @@
                 _repositories.RepositoryModified(repository);
                 UpdateRepoList();
             }
-
-            //// Old code
-            //var location = _clickedRepository.SubItems[columnPath.Index].Text;
-            //var repo = _repositories.Single(x => x.Location == location);
-
-            //var dialog = new AddRepositoryForm(this.Owner ?? this)
-            //{
-            //    Text = "Edit Repository",
-            //    OkButtonText = "&Save",
-            //    textboxPath = {Text = location},
-            //    RepoName = repo.Name
-            //};
-            //dialog.SetSchedule((int)repo.UpdateSchedule);
-            //if (dialog.ShowDialog() != DialogResult.OK) return;
-
-            //Trace.TraceInformation($"About to edit repo {dialog.textboxPath.Text}");
-            //repo.Location = dialog.textboxPath.Text;
-            //repo.UpdateSchedule = dialog.ChosenSchedule;
-            //repo.Name = dialog.RepoName;
-            //UpdateRepoList();
         }
 
         private void OnClickUpdateRepo(object sender, EventArgs e)
         {
             if (_clickedRepository == null) return;
             var location = _clickedRepository.SubItems[columnPath.Index].Text;
-            _repositories.UpdateRepo(location);
+            _repositories.TriggerUpdate(location, true);
         }
 
         private void OnClickRemoveRepo(object sender, EventArgs e)

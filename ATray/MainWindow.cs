@@ -7,7 +7,7 @@
     using System.Drawing;
     using System.IO;
     using System.IO.Pipes;
-    using System.Linq;
+    using System.Threading.Tasks;
     using System.Windows.Forms;
     using Activity;
     using Newtonsoft.Json;
@@ -66,8 +66,8 @@
             lblDebug.DataBindings.Add(new Binding(nameof(Label.Text), activityMonitor, nameof(ActivityMonitor.CurrentlyActiveWindow)));
 #if DEBUG
             // DEBUG! Show dialog on boot for convinience
-            //OnMenuClickSettings(null, null);
-            OnMenuClickHistory(null, null);
+            OnMenuClickSettings(null, null);
+            //OnMenuClickHistory(null, null);
             //  new DiskUsageForm().Show();
 #endif
             CreateRepositoryMenyEntries();
@@ -119,9 +119,13 @@
                     submenu.DropDownItems.Add(new ToolStripMenuItem("Git Bash", null, (sender, args) => Process.Start(new ProcessStartInfo(Program.GitBashLocation) { WorkingDirectory = repoLocation })));
 
                 submenu.DropDownItems.Add(new ToolStripMenuItem("Open in explorer", null, (sender, args) => Process.Start(repoLocation)));
-                submenu.DropDownItems.Add(new ToolStripMenuItem("Update", null, (sender, args) => _repositoryCollection.UpdateRepo(repoLocation)));
+                submenu.DropDownItems.Add(new ToolStripMenuItem("Force Update", null, (sender, args) =>
+                {
+                    this.UIThread(()=>{submenu.Text = $"{repo.Name}: {Environment.NewLine}...updating"; });
+                    _repositoryCollection.TriggerUpdate(repoLocation, true).ContinueWith(t => UpdateRepoMenu(submenu, repo.Name, repo.LastStatus));
+                }));
                 var pullOption = new ToolStripMenuItem("Pull Changes", null,
-                    (sender, args) => _repositoryCollection.UpdateRepo(repoLocation));
+                    (sender, args) => _repositoryCollection.TriggerUpdate(repoLocation, false));
                 if (repo.LastStatus != RepoStatus.Behind) pullOption.Visible = false;
                 submenu.DropDownItems.Add(pullOption);
                 UpdateRepoMenu(submenu, repo.Name, repo.LastStatus);
@@ -274,7 +278,7 @@
                 {
                     // 1223 = The operation was canceled by the user
                     if (ex.NativeErrorCode != 1223) throw;
-                    MessageBox.Show("Operation aborted");
+                    MessageBox.Show("Operation aborted", "ATray DiskUsage");
                     return;
                 }
 
@@ -290,6 +294,16 @@
 
                 duProcess.WaitForExit(1000);
             }
+        }
+
+        private void OnMenuClickCheckForUpdates(object sender, EventArgs e)
+        {
+            if (!Program.UpdateTask.IsCompleted)
+            {
+                MessageBox.Show("Update check is already running", "ATray Update");
+                return;
+            }
+            Program.UpdateTask = Task.Run(() => Program.UpdateApp(true));
         }
 
         protected override void WndProc(ref Message m)

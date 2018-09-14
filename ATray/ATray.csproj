@@ -226,6 +226,7 @@
     <Compile Include="Tools\IFactory.cs" />
     <Compile Include="Tools\InternalTraceListener.cs" />
     <Compile Include="Tools\IShowNotifications.cs" />
+    <Compile Include="Tools\LogHelper.cs" />
     <Compile Include="Tools\OverallStatusType.cs" />
     <Compile Include="Tools\PubSubHub.cs" />
     <Compile Include="Tools\SimpleFactory.cs" />
@@ -309,9 +310,9 @@
     <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
       <Output TaskParameter="Assemblies" ItemName="ATrayAssemblyInfo" />
     </GetAssemblyIdentity>
-	<PropertyGroup>
-		<SymVer3>$([System.Version]::Parse(%(ATrayAssemblyInfo.Version)).ToString(3))</SymVer3>
-	</PropertyGroup>
+    <PropertyGroup>
+      <SymVer3>$([System.Version]::Parse(%(ATrayAssemblyInfo.Version)).ToString(3))</SymVer3>
+    </PropertyGroup>
     <Exec Command="$(SolutionDir)packages\NuGet.CommandLine.4.4.1\tools\NuGet.exe pack ATray.nuspec -Version %(ATrayAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir) -BasePath $(OutDir)" />
     <Exec Command="$(SolutionDir)packages\squirrel.windows.1.8.0\tools\squirrel --releasify $(OutDir)ATray.$(SymVer3).nupkg -baseUrl https://github.com/jokedst/ATray/releases/download/v$(SymVer3)/" />
   </Target>

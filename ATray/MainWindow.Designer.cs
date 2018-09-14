@@ -39,6 +39,8 @@
             this.lblSmall = new System.Windows.Forms.Label();
             this.lblWork = new System.Windows.Forms.Label();
             this.lblDebug = new System.Windows.Forms.Label();
+            this.submenuTools = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuCheckForUpdates = new System.Windows.Forms.ToolStripMenuItem();
             this.trayMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,38 +55,38 @@
             // 
             this.trayMenu.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.trayMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.diskUsageToolStripMenuItem,
+            this.submenuTools,
             this.menuSettings,
             this.menuHistory,
             this.menuExit});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(231, 148);
+            this.trayMenu.Size = new System.Drawing.Size(301, 228);
             // 
             // diskUsageToolStripMenuItem
             // 
             this.diskUsageToolStripMenuItem.Name = "diskUsageToolStripMenuItem";
-            this.diskUsageToolStripMenuItem.Size = new System.Drawing.Size(230, 36);
+            this.diskUsageToolStripMenuItem.Size = new System.Drawing.Size(300, 36);
             this.diskUsageToolStripMenuItem.Text = "Disk usage";
             this.diskUsageToolStripMenuItem.Click += new System.EventHandler(this.OnMenuClickDiskUsage);
             // 
             // menuSettings
             // 
             this.menuSettings.Name = "menuSettings";
-            this.menuSettings.Size = new System.Drawing.Size(230, 36);
+            this.menuSettings.Size = new System.Drawing.Size(300, 36);
             this.menuSettings.Text = "&Settings";
             this.menuSettings.Click += new System.EventHandler(this.OnMenuClickSettings);
             // 
             // menuHistory
             // 
             this.menuHistory.Name = "menuHistory";
-            this.menuHistory.Size = new System.Drawing.Size(230, 36);
+            this.menuHistory.Size = new System.Drawing.Size(300, 36);
             this.menuHistory.Text = "Show &History";
             this.menuHistory.Click += new System.EventHandler(this.OnMenuClickHistory);
             // 
             // menuExit
             // 
             this.menuExit.Name = "menuExit";
-            this.menuExit.Size = new System.Drawing.Size(230, 36);
+            this.menuExit.Size = new System.Drawing.Size(300, 36);
             this.menuExit.Text = "&Exit";
             this.menuExit.Click += new System.EventHandler(this.OnMenuClickExit);
             // 
@@ -131,6 +133,22 @@
             this.lblDebug.Size = new System.Drawing.Size(0, 25);
             this.lblDebug.TabIndex = 4;
             // 
+            // submenuTools
+            // 
+            this.submenuTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.diskUsageToolStripMenuItem,
+            this.menuCheckForUpdates});
+            this.submenuTools.Name = "submenuTools";
+            this.submenuTools.Size = new System.Drawing.Size(300, 36);
+            this.submenuTools.Text = "&Tools";
+            // 
+            // menuCheckForUpdates
+            // 
+            this.menuCheckForUpdates.Name = "menuCheckForUpdates";
+            this.menuCheckForUpdates.Size = new System.Drawing.Size(324, 38);
+            this.menuCheckForUpdates.Text = "Check for &updates";
+            this.menuCheckForUpdates.Click += new System.EventHandler(this.OnMenuClickCheckForUpdates);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -164,6 +182,8 @@
         private System.Windows.Forms.ToolStripMenuItem menuHistory;
         private System.Windows.Forms.ToolStripMenuItem menuSettings;
         private System.Windows.Forms.ToolStripMenuItem diskUsageToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem submenuTools;
+        private System.Windows.Forms.ToolStripMenuItem menuCheckForUpdates;
     }
 }
 

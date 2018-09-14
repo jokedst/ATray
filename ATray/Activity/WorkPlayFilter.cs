@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
-using System.Text.RegularExpressions;
-using ATray.Dialogs;
-
-namespace ATray.Activity
+﻿namespace ATray.Activity
 {
-    using ATray;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Classifies activities as work or play

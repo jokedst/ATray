@@ -1,10 +1,13 @@
 ﻿namespace ATray
 {
     using System;
+    using System.Diagnostics;
     using System.Drawing;
     using System.Windows.Forms;
     using System.Reflection;
+    using System.Threading.Tasks;
     using RepositoryManager;
+    using Tools;
 
     public interface ISettingsDialog : IDisposable
     {
@@ -18,12 +21,14 @@
     {
         private readonly IAddRepositoryDialog _addRepositoryDialog;
         private readonly IRepositoryCollection _repositories;
+        private readonly IHaveLogs _logSource;
 
-        public SettingsForm(IAddRepositoryDialog addRepositoryDialog, IRepositoryCollection repositories)
+        public SettingsForm(IAddRepositoryDialog addRepositoryDialog, IRepositoryCollection repositories, IHaveLogs logSource)
         {
             _addRepositoryDialog = addRepositoryDialog;
             _repositories = repositories;
-            
+            _logSource = logSource;
+
             InitializeComponent();
 #if DEBUG
             Icon = new Icon(GetType(), "debug.ico");
@@ -33,6 +38,9 @@
 
             var v = Assembly.GetExecutingAssembly().GetName().Version;
             versionLabel.Text = $"v{v.Major}.{v.Minor}.{v.Build}";
+
+            logTextbox.Text = logSource.RegisterCallback(this,
+                s => this.UIThread(() => logTextbox.AppendText(s + Environment.NewLine)));
         }
 
         private void OnRepositoryUpdated(object sender, RepositoryEventArgs repositoryEventArgs)
@@ -51,6 +59,7 @@
             {
                 components?.Dispose();
                 _repositories.RepositoryUpdated -= OnRepositoryUpdated;
+                _logSource.Unregister(this);
             }
             base.Dispose(disposing);
         }
@@ -80,6 +89,7 @@
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
+            Trace.TraceInformation("Setting dialog was cancelled");
             // Since the repo list actually modifies the live list, on cancel we simply restore the last list
             _repositories.ReloadFromFile();
             Close();

@@ -46,7 +46,11 @@ namespace ATray
 
         internal static IServiceProvider InitializeIoC()
         {
+            var traceListener = new InternalTraceListener("atrayTrace");
+            Trace.Listeners.Add(traceListener);
+
             var serviceCollection = new ServiceCollection()
+                .AddSingleton<IHaveLogs>(traceListener)
                 .AddSingleton<IRepositoryCollection, RepositoryCollection>(s =>
                     new RepositoryCollection(RepoListFilePath))
                 .AddTransient<IAddRepositoryDialog, AddRepositoryForm>()
@@ -72,9 +76,6 @@ namespace ATray
                 MessageBox.Show("An instance of ATray is already running!", "ATray");
                 return;
             }
-
-            Tracer.Listeners.Add(new InternalTraceListener(){Name = "InternalTracer"});
-            Tracer.TraceInformation("Starting ATray");
 
             ServiceProvider = InitializeIoC();
             LoadIcons();

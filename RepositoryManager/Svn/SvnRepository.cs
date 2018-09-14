@@ -32,7 +32,7 @@ namespace RepositoryManager
 
                 if (previousValue != _lastStatus)
                 {
-                    Debug.WriteLine($"Git repo '{Name}' status changed from {previousValue} to {_lastStatus}");
+                    Trace.WriteLine($"Git repo '{Name}' status changed from {previousValue} to {_lastStatus}");
                     OnRepositoryStatusChanged(new RepositoryEventArgs(Location, previousValue, _lastStatus, Name, RepositoryEventType.Updated));
                 }
             }

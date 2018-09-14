@@ -34,10 +34,6 @@
                 ["GET /"] = this.MainPage,
                 ["GET /swagger"] = this.Swagger,
                 ["GET /workday"] = this.WorkDay,
-                //["POST stop"] = this.StopService,
-                //["POST stopAll"] = this.StopAllServices,
-                //["POST start"] = this.StartService,
-                //["POST startAll"] = this.StartAllServices
             };
 
             this._jsonSettings = new JsonSerializerSettings { Formatting = Formatting.Indented };
@@ -86,15 +82,14 @@
             }
             catch (Exception ex)
             {
-                LogHelper.LogError(this, $"API Could not start listening on {string.Join(", ", this._prefixes)}, exception ({ex.GetType().Name}):\n {ex.Message}");
+                Log.ShowError(this, $"API Could not start listening on {string.Join(", ", this._prefixes)}, exception ({ex.GetType().Name}):\n {ex.Message}");
                 this._listener = null;
                 return;
             }
 
             ThreadPool.QueueUserWorkItem(o =>
             {
-                Trace.TraceInformation("Webserver running...");
-                LogHelper.LogInfo(this, "HTTP API listening on " + string.Join(", ", this._prefixes));
+                Trace.TraceInformation("Webserver running. HTTP API listening on " + string.Join(", ", this._prefixes));
                 try
                 {
                     while (this._listener.IsListening)
@@ -102,7 +97,7 @@
                         {
                             var ctx = c as HttpListenerContext ?? throw new Exception("Could not cast parameter to HttpListenerContext");
 
-                            LogHelper.LogInfo(this, $"API call ({ctx.Request.HttpMethod}) to {ctx.Request.Url.AbsoluteUri}");
+                            Log.Info(this, $"API call ({ctx.Request.HttpMethod}) to {ctx.Request.Url.AbsoluteUri}");
                             try
                             {
                                 var relativePath = ctx.Request.Url.AbsolutePath;
@@ -123,7 +118,7 @@
                             }
                             catch (Exception ex)
                             {
-                                LogHelper.LogError(this, $"API Exception ({ex.GetType().Name}) on {ctx.Request.HttpMethod} to {ctx.Request.Url.AbsoluteUri}\n{ex.Message}");
+                                Log.ShowError(this, $"API Exception ({ex.GetType().Name}) on {ctx.Request.HttpMethod} to {ctx.Request.Url.AbsoluteUri}\n{ex.Message}");
 
                                 ctx.Response.StatusCode = 500;
                                 ctx.Response.ContentType = "text/plain";
@@ -141,7 +136,7 @@
                 catch (Exception ex)
                 {
                     // Just log it
-                    LogHelper.LogError(this, $"Web Server exception ({ex.GetType().Name}):\n{ex.Message}");
+                    Log.ShowError(this, $"Web Server exception ({ex.GetType().Name}):\n{ex.Message}");
                 }
             });
         }

@@ -172,7 +172,7 @@ namespace ATray
             {
                 return;
             }
-            Debug.WriteLine("Redrawing history because " + (_forceRedraw?"forced to":(ClientRectangle.Width != _lastWindowWidth)?"width changed": imageGettingOld?"it's getting stale":(_historyGraph==null)?"there is none yet":"aliens"));
+            Log.Info(this, "Redrawing history because " + (_forceRedraw?"forced to":(ClientRectangle.Width != _lastWindowWidth)?"width changed": imageGettingOld?"it's getting stale":(_historyGraph==null)?"there is none yet":"aliens"));
 
             // Get activity for selected year/month
             var year = (short)(_currentMonth / 100);

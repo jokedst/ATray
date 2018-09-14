@@ -298,12 +298,15 @@
 
         private void OnMenuClickCheckForUpdates(object sender, EventArgs e)
         {
+            Trace.TraceInformation("Update check requested");
             if (!Program.UpdateTask.IsCompleted)
             {
+                Trace.TraceInformation("Update check aborted: already running");
                 MessageBox.Show("Update check is already running", "ATray Update");
                 return;
             }
             Program.UpdateTask = Task.Run(() => Program.UpdateApp(true));
+            Trace.TraceInformation("Update check task started");
         }
 
         protected override void WndProc(ref Message m)

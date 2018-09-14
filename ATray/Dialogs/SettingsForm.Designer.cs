@@ -16,6 +16,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             this.repoList = new System.Windows.Forms.ListView();
             this.columnName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -35,13 +36,16 @@
             this.editRepoMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.updateNowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.versionLabel = new System.Windows.Forms.Label();
             this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.versionLabel = new System.Windows.Forms.Label();
+            this.tabLog = new System.Windows.Forms.TabPage();
+            this.logTextbox = new System.Windows.Forms.TextBox();
             this.repoListMenu.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             this.tabRepoMan.SuspendLayout();
             this.editRepoMenu.SuspendLayout();
+            this.tabLog.SuspendLayout();
             this.SuspendLayout();
             // 
             // repoList
@@ -112,6 +116,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl.Controls.Add(this.tabGeneral);
             this.tabControl.Controls.Add(this.tabRepoMan);
+            this.tabControl.Controls.Add(this.tabLog);
             this.tabControl.Location = new System.Drawing.Point(24, 23);
             this.tabControl.Margin = new System.Windows.Forms.Padding(6);
             this.tabControl.Name = "tabControl";
@@ -211,21 +216,28 @@
             this.editToolStripMenuItem,
             this.removeToolStripMenuItem});
             this.editRepoMenu.Name = "editRepoMenu";
-            this.editRepoMenu.Size = new System.Drawing.Size(301, 156);
+            this.editRepoMenu.Size = new System.Drawing.Size(220, 112);
             // 
             // updateNowToolStripMenuItem
             // 
             this.updateNowToolStripMenuItem.Name = "updateNowToolStripMenuItem";
-            this.updateNowToolStripMenuItem.Size = new System.Drawing.Size(300, 36);
+            this.updateNowToolStripMenuItem.Size = new System.Drawing.Size(219, 36);
             this.updateNowToolStripMenuItem.Text = "&Update now";
             this.updateNowToolStripMenuItem.Click += new System.EventHandler(this.OnClickUpdateRepo);
             // 
             // editToolStripMenuItem
             // 
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(300, 36);
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(219, 36);
             this.editToolStripMenuItem.Text = "&Edit";
             this.editToolStripMenuItem.Click += new System.EventHandler(this.OnClickEdit);
+            // 
+            // removeToolStripMenuItem
+            // 
+            this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
+            this.removeToolStripMenuItem.Size = new System.Drawing.Size(219, 36);
+            this.removeToolStripMenuItem.Text = "&Remove";
+            this.removeToolStripMenuItem.Click += new System.EventHandler(this.OnClickRemoveRepo);
             // 
             // versionLabel
             // 
@@ -236,12 +248,28 @@
             this.versionLabel.Size = new System.Drawing.Size(0, 25);
             this.versionLabel.TabIndex = 4;
             // 
-            // removeToolStripMenuItem
+            // tabLog
             // 
-            this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-            this.removeToolStripMenuItem.Size = new System.Drawing.Size(300, 36);
-            this.removeToolStripMenuItem.Text = "&Remove";
-            this.removeToolStripMenuItem.Click += new System.EventHandler(this.OnClickRemoveRepo);
+            this.tabLog.Controls.Add(this.logTextbox);
+            this.tabLog.Location = new System.Drawing.Point(8, 39);
+            this.tabLog.Name = "tabLog";
+            this.tabLog.Padding = new System.Windows.Forms.Padding(3);
+            this.tabLog.Size = new System.Drawing.Size(844, 551);
+            this.tabLog.TabIndex = 2;
+            this.tabLog.Text = "Log";
+            this.tabLog.UseVisualStyleBackColor = true;
+            // 
+            // logTextbox
+            // 
+            this.logTextbox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.logTextbox.Location = new System.Drawing.Point(3, 3);
+            this.logTextbox.Multiline = true;
+            this.logTextbox.Name = "logTextbox";
+            this.logTextbox.ReadOnly = true;
+            this.logTextbox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.logTextbox.Size = new System.Drawing.Size(838, 545);
+            this.logTextbox.TabIndex = 0;
+            this.logTextbox.Text = resources.GetString("logTextbox.Text");
             // 
             // SettingsForm
             // 
@@ -263,6 +291,8 @@
             this.tabRepoMan.ResumeLayout(false);
             this.tabRepoMan.PerformLayout();
             this.editRepoMenu.ResumeLayout(false);
+            this.tabLog.ResumeLayout(false);
+            this.tabLog.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -291,5 +321,7 @@
         private System.Windows.Forms.PropertyGrid propertyGrid;
         private System.Windows.Forms.Label versionLabel;
         private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabLog;
+        private System.Windows.Forms.TextBox logTextbox;
     }
 }

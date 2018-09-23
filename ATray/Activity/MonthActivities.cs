@@ -38,6 +38,10 @@
             ComputerName = computerName;
         }
 
+        /// <summary>
+        /// Copy constructor
+        /// </summary>
+        /// <param name="toCopy"></param>
         public MonthActivities(MonthActivities toCopy)
         { 
             Year = toCopy.Year;
@@ -50,7 +54,8 @@
                 var activityList = new DayActivityList(this, day.Value.DayNumber);
                 foreach (var act in day.Value)
                 {
-                    activityList.Add(new ActivitySpan(activityList, act.StartSecond,act.EndSecond,act.WasActive,act.ApplicationName(),act.WindowTitle()));
+                    activityList.Add(new ActivitySpan(activityList, act.StartSecond, act.EndSecond, act.WasActive,
+                        act.ApplicationName(), act.WindowTitle()){Classification = act.Classification});
                 }
                 this.Days[day.Key] = activityList;
             }

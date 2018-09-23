@@ -159,6 +159,7 @@ namespace ATray
 
         private void ActivityHistoryForm_Paint(object sender, PaintEventArgs e)
         {
+            if (ClientRectangle.Width <= 0 || ClientRectangle.Height <= 0) return;
             // If we're showing the current month, redraw regularly so the image don't get stale
             var now = DateTime.Now;
             var monthNow = now.Year * 100 + now.Month;

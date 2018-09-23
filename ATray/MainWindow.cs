@@ -66,8 +66,8 @@
             lblDebug.DataBindings.Add(new Binding(nameof(Label.Text), activityMonitor, nameof(ActivityMonitor.CurrentlyActiveWindow)));
 #if DEBUG
             // DEBUG! Show dialog on boot for convinience
-            OnMenuClickSettings(null, null);
-            //OnMenuClickHistory(null, null);
+            //OnMenuClickSettings(null, null);
+            OnMenuClickHistory(null, null);
             //  new DiskUsageForm().Show();
 #endif
             CreateRepositoryMenyEntries();

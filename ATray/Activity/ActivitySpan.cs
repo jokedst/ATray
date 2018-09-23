@@ -12,7 +12,14 @@
         public MonthActivities Owner { get; }
         public DayActivityList Day { get; }
 
+        /// <summary>
+        /// Start second. Seconds are inclusive and a second should never exist in two activities
+        /// </summary>
         public uint StartSecond;
+
+        /// <summary>
+        /// End second. Seconds are inclusive and a second should never exist in two activities
+        /// </summary>
         public uint EndSecond;
         public bool WasActive;
         public int ApplicationNameIndex;
@@ -56,6 +63,11 @@
         public string WindowTitle()
         {
             return Owner.WindowTitles[this.WindowTitleIndex];
+        }
+
+        public override string ToString()
+        {
+            return $"{(WasActive ? "Active" : "Inactive")} [{StartSecond}-{EndSecond}] ({(EndSecond - StartSecond)}s)";
         }
     }
 }

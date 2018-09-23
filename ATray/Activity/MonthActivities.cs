@@ -38,6 +38,24 @@
             ComputerName = computerName;
         }
 
+        public MonthActivities(MonthActivities toCopy)
+        { 
+            Year = toCopy.Year;
+            Month = toCopy.Month;
+            ComputerName = toCopy.ComputerName;
+            ApplicationNames = new List<string>(toCopy.ApplicationNames);
+            WindowTitles = new  List<string>(toCopy.WindowTitles);
+            foreach (var day in toCopy.Days)
+            {
+                var activityList = new DayActivityList(this, day.Value.DayNumber);
+                foreach (var act in day.Value)
+                {
+                    activityList.Add(new ActivitySpan(activityList, act.StartSecond,act.EndSecond,act.WasActive,act.ApplicationName(),act.WindowTitle()));
+                }
+                this.Days[day.Key] = activityList;
+            }
+        }
+
         public int GetApplicationNameIndex(string appName) => ApplicationNames.IndexOfOrAdd(appName);
         public int GetWindowTitleIndex(string appName) => WindowTitles.IndexOfOrAdd(appName);
 

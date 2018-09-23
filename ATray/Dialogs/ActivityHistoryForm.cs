@@ -193,6 +193,9 @@ namespace ATray
                 if (computer == AllComputers) computer = null;
                 history = ActivityManager.GetSharedMonthActivities(year, month, computer);
             }
+
+            if (showBlurred.Checked)
+                history = new Blurrer().Blur(history);
             
             _indexToDaynumber = history.SelectMany(x=>x.Value.Days.Keys).Distinct().OrderBy(x => x).ToArray();
          
@@ -207,6 +210,13 @@ namespace ATray
                 lastHistoryGraph = _historyGraph;
                 _historyGraph = new Bitmap(width, height, PixelFormat.Format24bppRgb);
                 _historyGraph.MakeTransparent();
+            }
+            else
+            {
+                using (var g = Graphics.FromImage(_historyGraph))
+                {
+                    g.Clear(Color.Transparent);
+                }
             }
 
             // Make sure we have as many labels as we need

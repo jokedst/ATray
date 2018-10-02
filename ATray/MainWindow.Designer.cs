@@ -31,7 +31,9 @@
             this.components = new System.ComponentModel.Container();
             this.trayIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.trayMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.submenuTools = new System.Windows.Forms.ToolStripMenuItem();
             this.diskUsageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuCheckForUpdates = new System.Windows.Forms.ToolStripMenuItem();
             this.menuSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.menuHistory = new System.Windows.Forms.ToolStripMenuItem();
             this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
@@ -39,8 +41,7 @@
             this.lblSmall = new System.Windows.Forms.Label();
             this.lblWork = new System.Windows.Forms.Label();
             this.lblDebug = new System.Windows.Forms.Label();
-            this.submenuTools = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuCheckForUpdates = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuResetIcon = new System.Windows.Forms.ToolStripMenuItem();
             this.trayMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -60,14 +61,31 @@
             this.menuHistory,
             this.menuExit});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(301, 228);
+            this.trayMenu.Size = new System.Drawing.Size(301, 192);
+            // 
+            // submenuTools
+            // 
+            this.submenuTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.diskUsageToolStripMenuItem,
+            this.menuCheckForUpdates,
+            this.menuResetIcon});
+            this.submenuTools.Name = "submenuTools";
+            this.submenuTools.Size = new System.Drawing.Size(300, 36);
+            this.submenuTools.Text = "&Tools";
             // 
             // diskUsageToolStripMenuItem
             // 
             this.diskUsageToolStripMenuItem.Name = "diskUsageToolStripMenuItem";
-            this.diskUsageToolStripMenuItem.Size = new System.Drawing.Size(300, 36);
+            this.diskUsageToolStripMenuItem.Size = new System.Drawing.Size(324, 38);
             this.diskUsageToolStripMenuItem.Text = "Disk usage";
             this.diskUsageToolStripMenuItem.Click += new System.EventHandler(this.OnMenuClickDiskUsage);
+            // 
+            // menuCheckForUpdates
+            // 
+            this.menuCheckForUpdates.Name = "menuCheckForUpdates";
+            this.menuCheckForUpdates.Size = new System.Drawing.Size(324, 38);
+            this.menuCheckForUpdates.Text = "Check for &updates";
+            this.menuCheckForUpdates.Click += new System.EventHandler(this.OnMenuClickCheckForUpdates);
             // 
             // menuSettings
             // 
@@ -133,21 +151,12 @@
             this.lblDebug.Size = new System.Drawing.Size(0, 25);
             this.lblDebug.TabIndex = 4;
             // 
-            // submenuTools
+            // menuResetIcon
             // 
-            this.submenuTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.diskUsageToolStripMenuItem,
-            this.menuCheckForUpdates});
-            this.submenuTools.Name = "submenuTools";
-            this.submenuTools.Size = new System.Drawing.Size(300, 36);
-            this.submenuTools.Text = "&Tools";
-            // 
-            // menuCheckForUpdates
-            // 
-            this.menuCheckForUpdates.Name = "menuCheckForUpdates";
-            this.menuCheckForUpdates.Size = new System.Drawing.Size(324, 38);
-            this.menuCheckForUpdates.Text = "Check for &updates";
-            this.menuCheckForUpdates.Click += new System.EventHandler(this.OnMenuClickCheckForUpdates);
+            this.menuResetIcon.Name = "menuResetIcon";
+            this.menuResetIcon.Size = new System.Drawing.Size(324, 38);
+            this.menuResetIcon.Text = "Reset &Icon";
+            this.menuResetIcon.Click += new System.EventHandler(this.OnMenuClickResetIcon);
             // 
             // MainWindow
             // 
@@ -184,6 +193,7 @@
         private System.Windows.Forms.ToolStripMenuItem diskUsageToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem submenuTools;
         private System.Windows.Forms.ToolStripMenuItem menuCheckForUpdates;
+        private System.Windows.Forms.ToolStripMenuItem menuResetIcon;
     }
 }
 

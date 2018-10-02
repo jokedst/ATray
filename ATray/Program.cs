@@ -114,7 +114,7 @@ namespace ATray
             Trace.TraceInformation("LEAVING!");
         }
 
-        private static void LoadIcons()
+        internal static void LoadIcons()
         {
             int y = 0;
 #if DEBUG

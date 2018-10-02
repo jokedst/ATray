@@ -152,6 +152,9 @@
                 case OverallStatusType.CodeRed:
                     this.trayIcon.Icon = Program.MainIcon;
                     break;
+                default:
+                    this.trayIcon.Icon = Program.MainIcon;
+                    break;
             }
         }
 
@@ -313,6 +316,12 @@
         {
             _activityMonitor.HandleWindowsMessage(m);
             base.WndProc(ref m);
+        }
+
+        private void OnMenuClickResetIcon(object sender, EventArgs e)
+        {
+            Program.LoadIcons();
+            this.UpdateIcon();
         }
     }
 }

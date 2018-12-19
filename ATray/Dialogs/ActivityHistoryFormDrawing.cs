@@ -41,8 +41,6 @@
                 .OrderByDescending(x => x.Value);
 
             // Assign unique colors to the most used programs
-            //var colors = new[] {Color.BlueViolet, Color.CornflowerBlue, Color.Green, Color.DarkRed};
-            //var brushes = colors.Select(x => new SolidBrush(x)).ToArray();
             var brushLookup = programs.Zip(_programBrushes, (program, color) => new {program, color})
                 .ToDictionary(x => x.program.Key, x => x.color);
             var idleBrush = new SolidBrush(Color.Gray);
@@ -51,7 +49,6 @@
 
             var graphicsObj = Graphics.FromImage(_historyGraph);
             var pen = new Pen(Color.Olive, 1);
-            var brush = new SolidBrush(Color.Olive);
 
             _graphWidth = (uint) (target.Width - 80);
             _graphSeconds = lastTime - firstTime;

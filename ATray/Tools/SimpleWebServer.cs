@@ -180,8 +180,9 @@
                 paths[path][verb.ToLower()] = new JObject {["produces"] = new JArray {"application/json"}};
             }
             meh["paths"] = paths;
-            meh["paths"]["/workday"]["get"]["parameters"] =
-                new JArray {new JObject {["name"] = "date",["description"]="Date to ge work info for", ["in"] = "query",["type"]="string", ["format"] = "date"}};
+            meh["paths"]["/workday"]["get"]["parameters"] = new JArray {new JObject {["name"] = "date",["description"]="Date to ge work info for", ["in"] = "query",["type"]="string", ["format"] = "date", ["minLength"]=3}};
+            meh["paths"]["/workday"]["get"]["operationId"] = "get_workday";
+            meh["paths"]["/workday"]["get"]["tags"] = new JArray("workday");
 
             return meh;
         }

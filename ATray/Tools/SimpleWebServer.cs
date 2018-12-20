@@ -67,7 +67,7 @@ namespace ATray.Tools
                 
             var acts = ActivityManager.GetSharedMonthActivities((short)day.Year, (byte)day.Month, "*", blur);
             var dayActs = acts.Values.Where(x => x.Days.ContainsKey((byte) day.Day)).Select(x => x.Days[(byte) day.Day]).ToList();
-            var xx = dayActs.SelectMany(x => x.RangesWhere(y => y.Classification == WorkPlayType.Work));
+            var xx = dayActs.SelectMany(x => x.RangesWhere(y => y.WasActive && y.Classification == WorkPlayType.Work));
             var combined = RangeContainer.UintRangeContainer();
             combined.Add(xx);
           var totalTime = SecondToTime( (uint) combined.Sum(x => x.End - x.Start + 1));

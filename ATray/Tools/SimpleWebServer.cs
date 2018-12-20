@@ -1,4 +1,6 @@
-﻿namespace ATray.Tools
+﻿using ATray.Activity;
+
+namespace ATray.Tools
 {
     using System;
     using System.Collections.Generic;
@@ -46,16 +48,42 @@
         private object WorkDay(HttpListenerContext context, string path)
         {
             var parameters = this.QueryParser(context.Request.Url.Query);
-            if(parameters.TryGetValue("date", out var date))
+            if (!parameters.TryGetValue("date", out var dateString) || !DateTime.TryParse(dateString, out var day))
             {
-                if (DateTime.TryParse(date, out var workday))
+                context.Response.StatusCode = 400;
+                return new { status = "Bad Request: parameter 'date' was missing or malformed" };
+            }
+            int blur = 35;
+            if (parameters.TryGetValue("blur", out string blurValue))
+            {
+                if (byte.TryParse(blurValue, out byte blurParam))
+                    blur = blurParam;
+                else
                 {
-                    return new {date = workday, start = "09:25", end = "17:27"};
+                    context.Response.StatusCode = 400;
+                    return new { status = "Bad Request: parameter 'blur' was malformed" };
                 }
             }
+                
+            var acts = ActivityManager.GetSharedMonthActivities((short)day.Year, (byte)day.Month, "*", blur);
+            var dayActs = acts.Values.Where(x => x.Days.ContainsKey((byte) day.Day)).Select(x => x.Days[(byte) day.Day]).ToList();
+            var xx = dayActs.SelectMany(x => x.RangesWhere(y => y.Classification == WorkPlayType.Work));
+            var combined = RangeContainer.UintRangeContainer();
+            combined.Add(xx);
+          var totalTime = SecondToTime( (uint) combined.Sum(x => x.End - x.Start + 1));
 
-            context.Response.StatusCode = 400;
-            return new { status = "Bad Request: parameter 'date' was missing or malformed" };
+            return new
+            {
+                date = day.ToString("yyyy-MM-dd"),
+                totalTime,
+                dayNumber =day.Day,
+                work =combined.Select(x=>new[]{ SecondToTime(x.Start), SecondToTime(x.End)})
+            };
+        }
+        private string SecondToTime(uint second)
+        {
+            var minute = second % (60 * 60) / 60;
+            return $"{second / (60 * 60):00}:{minute:00}";
         }
 
         private Dictionary<string, string> QueryParser(string query)
@@ -180,7 +208,12 @@
                 paths[path][verb.ToLower()] = new JObject {["produces"] = new JArray {"application/json"}};
             }
             meh["paths"] = paths;
-            meh["paths"]["/workday"]["get"]["parameters"] = new JArray {new JObject {["name"] = "date",["description"]="Date to ge work info for", ["in"] = "query",["type"]="string", ["format"] = "date", ["minLength"]=3}};
+            meh["paths"]["/workday"]["get"]["parameters"] = new JArray
+            {
+                new JObject {["name"] = "date",["description"]="Date to ge work info for", ["in"] = "query",["type"]="string", ["format"] = "date", ["minLength"]=3},
+               
+                new JObject {["name"] = "blur",["description"]="Amount of blur, 0-100", ["in"] = "query",["type"]="integer", ["minimum"]=0,["maximum"]=100},
+            };
             meh["paths"]["/workday"]["get"]["operationId"] = "get_workday";
             meh["paths"]["/workday"]["get"]["tags"] = new JArray("workday");
 

@@ -55,20 +55,22 @@ namespace ATray
 #endif
             InitComputerDropDown();
             InitHistoryDropDown();
+
+            blurAmount.ValueChanged += (sender, args) => ForceRedraw();
         }
 
         private void InitComputerDropDown()
         {
             // Two magic strings: Empty string means current computer, '*' means all computers
-            var computers = ActivityManager.GetSharedHistoryComputers().Select(x =>new Tuple<string,string> (x, x)).ToList();
+            var computers = ActivityManager.GetComputers().Select(x =>new Tuple<string,string> (x, x)).ToList();
             computers.RemoveAll(x => x.Item1 == Environment.MachineName);
             computers.Add(new Tuple<string, string>(AllComputers, "All"));
-            computers.Insert(0, new Tuple<string, string>(string.Empty,$"{Environment.MachineName} (this computer)"));
+            computers.Insert(0, new Tuple<string, string>(Environment.MachineName, $"{Environment.MachineName} (this computer)"));
 
             computerDropDown.ValueMember = "item1";
             computerDropDown.DisplayMember = "item2";
             computerDropDown.DataSource = computers;
-            computerDropDown.SelectedValue = string.Empty;
+            computerDropDown.SelectedValue = Environment.MachineName;
             computerDropDown.SelectedValueChanged += computerDropDown_SelectedValueChanged;
         }
 
@@ -178,25 +180,27 @@ namespace ATray
             // Get activity for selected year/month
             var year = (short)(_currentMonth / 100);
             var month = (byte)(_currentMonth % 100);
-            Dictionary<string, MonthActivities> history;
 
             var computer = (string) computerDropDown.SelectedValue;
-            if (string.IsNullOrEmpty(computer))
-            {
-                history = new Dictionary<string, MonthActivities>
-                {
-                    [string.Empty] = ActivityManager.GetMonthActivity(year, month)
-                };
-            }
-            else
-            {
-                if (computer == AllComputers) computer = null;
-                history = ActivityManager.GetSharedMonthActivities(year, month, computer);
-            }
+            var history = ActivityManager.GetSharedMonthActivities(year, month, computer, showBlurred.Checked? blurAmount.Value:0);
+            //if (string.IsNullOrEmpty(computer))
+            //{
+            //    history = new Dictionary<string, MonthActivities>
+            //    {
+            //        [string.Empty] = ActivityManager.GetMonthActivity(year, month)
+            //    };
+            //}
+            //else
+            //{
+            //   // if (computer == AllComputers) computer = null;
+            //    history = ActivityManager.GetSharedMonthActivities(year, month, computer, blurAmount.Value);
+            //}
 
-            if (showBlurred.Checked)
-                history = new Blurrer().Blur(history);
-            
+            //if (showBlurred.Checked)
+            //{
+            //    var blur = blurAmount.Value;
+            //    history = new Blurrer().Blur(history);
+            //}
             _indexToDaynumber = history.SelectMany(x=>x.Value.Days.Keys).Distinct().OrderBy(x => x).ToArray();
          
             // Create a new bitmap that is as wide as the windows and as high as it needs to be to fit all days
@@ -305,8 +309,7 @@ namespace ATray
 
         private void computerDropDown_SelectedValueChanged(object sender, EventArgs e)
         {
-            var value = (string)computerDropDown.SelectedValue;
-            _showSharedHistory = !string.IsNullOrEmpty(value);
+            _showSharedHistory = (string)computerDropDown.SelectedValue != ActivityManager.ThisComputer;
 
             InitHistoryDropDown();
 
@@ -322,6 +325,7 @@ namespace ATray
 
         private void OnBlurCheckboxChange(object sender, EventArgs e)
         {
+            blurAmount.Visible = showBlurred.Checked;
             ForceRedraw();
         }
 

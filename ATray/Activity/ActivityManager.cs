@@ -1,4 +1,6 @@
-﻿namespace ATray.Activity
+﻿using System.Runtime.Caching;
+
+namespace ATray.Activity
 {
     using System;
     using System.Collections.Generic;
@@ -10,10 +12,15 @@
 
     internal class ActivityManager
     {
+        public const string AllComputers = "*";
+        public static readonly string ThisComputer = Environment.MachineName;
+
+
         private const string SavefilePattern = "Acts{0}.bin";
         private static readonly Dictionary<int, MonthActivities> ActivityCache = new Dictionary<int, MonthActivities>();
         private static readonly Dictionary<string, Dictionary<string, MonthActivities>> SharedActivityCache = new Dictionary<string, Dictionary<string, MonthActivities>>(StringComparer.InvariantCultureIgnoreCase);
         private static readonly int ActivityFileFormatVersion = int.Parse(ConfigurationManager.AppSettings["ActivityFileFormatVersion"] ?? "1");
+        private static readonly MemoryCache BlurredCache = new MemoryCache("blurredActivites");
 
 #if DEBUG
         private static string SharedPath => Program.Configuration.SharedActivityStorage == null ? null :
@@ -39,7 +46,7 @@
                 return;
             }
 
-            var activities = GetMonthActivity((short) now.Year, (byte) now.Month);
+            var activities = GetLocalComputerMonthActivity((short) now.Year, (byte) now.Month);
             var dayNumber = (byte) now.Day;
             if (!activities.Days.ContainsKey(dayNumber))
                 activities.Days.Add(dayNumber, new DayActivityList(activities, dayNumber));
@@ -79,8 +86,64 @@
 
             StoreActivity(activities);
         }
+        
+        public static Dictionary<string, MonthActivities> GetSharedMonthActivities(short year, byte month, string computers, int blurAmount)
+        {
+            if (blurAmount == 0)
+                return GetSharedMonthActivities(year, month, computers);
 
-        public static MonthActivities GetMonthActivity(short year, byte month)
+            var cachekey = $"{computers ?? "*"}_Acts{year * 100 + month}.bin Blur={blurAmount}".ToLowerInvariant();
+            var cacheItem = (Dictionary<string, MonthActivities>)BlurredCache.Get(cachekey);
+            if (cacheItem != null)
+                return cacheItem;
+
+            var activities = GetSharedMonthActivities(year, month, computers);
+            var blurrer = new Blurrer();
+            activities = blurrer.Blur(activities, blurAmount * blurAmount);
+
+            // Check if the year/month is ~now, meaning we can only have a short cache time
+            DateTimeOffset cacheExpire;
+            if (new DateTime(year, month, 1).AddMonths(1).AddHours(-22) > DateTime.Now)
+                cacheExpire = DateTimeOffset.Now.AddMinutes(5);
+            else
+                cacheExpire = DateTimeOffset.Now.AddHours(8);
+            BlurredCache.Add(cachekey, activities, cacheExpire);
+
+            return activities;
+        }
+
+        /// <summary>
+        /// Get activities for given month for the specified <paramref name="computers"/>
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
+        /// <param name="computers"> Name of computers to get. '*' means all computers </param>
+        /// <returns></returns>
+        public static Dictionary<string, MonthActivities> GetSharedMonthActivities(short year, byte month, string computers)
+        {
+            if (computers.Equals(Environment.MachineName, StringComparison.OrdinalIgnoreCase))
+                return new Dictionary<string, MonthActivities> {[ThisComputer] = GetLocalComputerMonthActivity(year, month)};
+            var key = $"{computers ?? "*"}_Acts{year * 100 + month}.bin";
+            
+            if (SharedActivityCache.ContainsKey(key))
+                return SharedActivityCache[key];
+
+            var sharedPath = SharedPath;
+            foreach (var file in Directory.EnumerateFiles(sharedPath, key, SearchOption.TopDirectoryOnly))
+            {
+                var monthActivities = new MonthActivities(file);
+                var computerInFile = Path.GetFileName(file).Split('_')[0];
+                if (!SharedActivityCache.ContainsKey(key))
+                    SharedActivityCache.Add(key, new Dictionary<string, MonthActivities>(StringComparer.OrdinalIgnoreCase));
+                SharedActivityCache[key].Add(computerInFile, monthActivities);
+            }
+
+            if (SharedActivityCache.ContainsKey(key))
+                return SharedActivityCache[key];
+            return new Dictionary<string, MonthActivities>();
+        }
+
+        private static MonthActivities GetLocalComputerMonthActivity(short year, byte month)
         {
             var key = (year * 100) + month;
             if (ActivityCache.ContainsKey(key))
@@ -99,33 +162,11 @@
             return newMonth;
         }
 
-        public static Dictionary<string, MonthActivities> GetSharedMonthActivities(short year, byte month, string onlyComputer=null)
+        public static ISet<string> GetComputers()
         {
-            var key = $"{onlyComputer ?? "*"}_Acts{year * 100 + month}.bin";
-            
-            if (SharedActivityCache.ContainsKey(key))
-                return SharedActivityCache[key];
-
-            var sharedPath = SharedPath;
-            foreach (var file in Directory.EnumerateFiles(sharedPath, key, SearchOption.TopDirectoryOnly))
-            {
-                var monthActivities = new MonthActivities(file);
-                var computer = Path.GetFileName(file).Split('_')[0];
-                if (!SharedActivityCache.ContainsKey(key))
-                    SharedActivityCache.Add(key, new Dictionary<string, MonthActivities>());
-                SharedActivityCache[key].Add(computer, monthActivities);
-            }
-
-            if (SharedActivityCache.ContainsKey(key))
-                return SharedActivityCache[key];
-            return new Dictionary<string, MonthActivities>();
-        }
-
-        public static IEnumerable<string> GetSharedHistoryComputers()
-        {
-            if (string.IsNullOrEmpty(SharedPath)) return Enumerable.Empty<string>();
-            return Directory.EnumerateFiles(SharedPath, $"*_Acts*.bin", SearchOption.TopDirectoryOnly)
-                .Select(file => Path.GetFileName(file).Split(new[] {'_'}, 2)[0]).Distinct();
+            if (string.IsNullOrEmpty(SharedPath)) return new HashSet<string>();
+            return new HashSet<string>(Directory.EnumerateFiles(SharedPath, $"*_Acts*.bin", SearchOption.TopDirectoryOnly)
+                .Select(file => Path.GetFileName(file).Split(new[] {'_'}, 2)[0]));
         }
 
         private static readonly Regex FileNameParser = new Regex(string.Format(SavefilePattern, @"(\d*)"), RegexOptions.Compiled);
@@ -159,10 +200,12 @@
 
         public static List<int> ListAvailableMonths(string computer)
         {
-            var result = new HashSet<int>();
-            var fileFilter = string.Format(SavefilePattern, "*");
+            if(string.IsNullOrEmpty(computer)) throw new ArgumentException("No computer was given (use '.' for current computer)");
+            var local = computer.Equals(Environment.MachineName, StringComparison.OrdinalIgnoreCase);
+
+            var fileFilter = string.Format(SavefilePattern, "*"); //"Acts{0}.bin"
             var path = Program.SettingsDirectory;
-            if (!string.IsNullOrEmpty(computer) && computer != ".")
+            if (!local)
             {
                 fileFilter = computer + "_" + fileFilter;
                 path = SharedPath;
@@ -170,6 +213,7 @@
 
             if (string.IsNullOrEmpty(path)) return new List<int>();
 
+            var result = new HashSet<int>();
             foreach (var file in Directory.EnumerateFiles(path, fileFilter, SearchOption.TopDirectoryOnly))
             {
                 var match = FileNameParser.Match(file);

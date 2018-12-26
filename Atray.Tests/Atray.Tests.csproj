@@ -78,7 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activity\DayActivityListFacts.cs" />
-    <Compile Include="AtrayFacts.cs" />
+    <Compile Include="Activity\MonthActivitiesFacts.cs" />
     <Compile Include="ExpectedExceptionAttribute.cs" />
     <Compile Include="HashListFacts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

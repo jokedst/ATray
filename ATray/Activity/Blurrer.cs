@@ -5,7 +5,7 @@ using System.Linq;
 namespace ATray.Activity
 {
     /// <summary>
-    /// Makes the history easier to read by removing small acivities and merging small gaps
+    /// Makes the history easier to read by removing small activities and merging small gaps
     /// </summary>
     /// <remarks>
     /// We can't modify the existing activities, since that would (for current month) be saved and change the history 

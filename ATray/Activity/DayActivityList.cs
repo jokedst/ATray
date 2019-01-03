@@ -61,33 +61,8 @@ namespace ATray.Activity
 
         public RangeContainer<uint> RangesWhere(Predicate<ActivitySpan> predicate)
         {
-            var lastValue = false;
-            uint lastStart = 0;
-            uint lastEnd = 0;
             var result = RangeContainer.UintRangeContainer();
-            foreach (var span in this)
-            {
-                if (span.StartSecond - 1 > lastEnd)
-                {
-                    // Gap between activities
-                    if (lastValue)
-                    {
-                        result.Add(lastStart, lastEnd);
-                        lastValue = false;
-                    }
-                }
-                var value = predicate(span);
-                if (value && !lastValue)
-                {
-                    lastStart = span.StartSecond;
-                }
-                if (!value && lastValue)
-                {
-                    result.Add(lastStart, span.EndSecond);
-                }
-                lastEnd = span.EndSecond;
-                lastValue = value;
-            }
+            result.Add(this.Where(x => predicate(x)).Select(r => new Range<uint>(r.StartSecond, r.EndSecond)));
             return result;
         }
     }

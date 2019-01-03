@@ -159,7 +159,7 @@ namespace ATray
             this.blurAmount.Size = new System.Drawing.Size(126, 26);
             this.blurAmount.TabIndex = 8;
             this.blurAmount.TickStyle = System.Windows.Forms.TickStyle.None;
-            this.blurAmount.Value = 25;
+            this.blurAmount.Value = 35;
             // 
             // ActivityHistoryForm
             // 

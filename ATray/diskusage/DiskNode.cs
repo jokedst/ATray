@@ -1,7 +1,23 @@
-﻿namespace ATray
+﻿namespace ATray.Diskusage
 {
     using System;
+    using System.Collections;
+    using System.Linq;
     using Newtonsoft.Json;
+
+    [JsonArray]
+    public class DiskEntry:IEnumerable
+    {
+        public string Name;
+        public int Size;
+        public DiskEntry[] Children;
+        public IEnumerator GetEnumerator()
+        {
+            if(Children!=null && Children.Any())
+                return new object[] { this.Name, this.Size, this.Children }.GetEnumerator();
+            return new object[] {this.Name, this.Size}.GetEnumerator();
+        }
+    }
 
     public class DiskNode
     {

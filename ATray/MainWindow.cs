@@ -10,6 +10,7 @@
     using System.Threading.Tasks;
     using System.Windows.Forms;
     using Activity;
+    using Diskusage;
     using Newtonsoft.Json;
     using RepositoryManager;
     using RepositoryManager.Git;

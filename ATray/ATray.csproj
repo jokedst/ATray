@@ -160,7 +160,7 @@
     <Compile Include="Dialogs\OpenFolderDialog.cs" />
     <Compile Include="Dialogs\ScreenSlot.cs" />
     <Compile Include="Activity\WorkPlayType.cs" />
-    <Compile Include="DiskNode.cs" />
+    <Compile Include="diskusage\DiskNode.cs" />
     <Compile Include="FloatingLabel.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -123,7 +123,7 @@ namespace ATray
 
             if (_lastPosition.X == x && _lastPosition.Y == y && _lastScrollPositionY == e.Y) return;
             if (e.X < GraphStartPixel) return;
-            if (_indexToDaynumber.Length == 0) return;
+            if (_indexToDaynumber == null || _indexToDaynumber.Length == 0) return;
 
             _lastPosition = new Point(x, y);
 

@@ -3,13 +3,16 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.ComponentModel.Design;
     using System.Drawing.Design;
     using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices;
     using System.Text;
+    using System.Web.UI.Design.WebControls;
     using System.Windows.Forms;
     using System.Windows.Forms.Design;
+    using Activity;
 
     /// <summary>
     /// All configurable values should go here
@@ -35,6 +38,16 @@
         public bool ActivateWebserver { get; set; }
         [Description("TCP port to use"), Category("Web Server"), DefaultValue(14754)]
         public int Port { get; set; }
+        [Editor(typeof(MultilineStringEditor), typeof(UITypeEditor))]
+        [Description("Classification of work activities"), Category("History"), DefaultValue("")]
+        public string WorkPlayConfiguration { get; set; }
+
+        [Editor(typeof(SomeTypeEditor), typeof(UITypeEditor))]
+        [Description("RegexTypeEditor activities"), Category("History")]
+        public List<ActivityClassifyer> WorkActivities { get; set; } = new List<ActivityClassifyer>();
+
+        // RegexTypeEditor
+
 
         public Configuration(string filename = null)
         {

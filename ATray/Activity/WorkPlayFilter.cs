@@ -2,8 +2,63 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.ComponentModel.Design;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Windows.Forms;
+
+    [Description("Work/Play Classifyer"), Category("Activity"), DisplayName("aname")]
+    public class ActivityClassifyer
+    {
+        [Description("Name of executable"), Category("Classifyer")]
+        public string Executable { get; set; }
+        [Description("Window title pattern"), Category("Classifyer")]
+        public string WindowTitleRegEx { get; set; }
+        public ActivityClassifyer() { }
+        public override string ToString()
+        {
+            return Executable + (string.IsNullOrEmpty(WindowTitleRegEx) ? "" : "\\"+ WindowTitleRegEx);
+        }
+    }
+    public class SomeTypeEditor : CollectionEditor
+    {
+
+        public SomeTypeEditor(Type type) : base(type) { }
+
+        public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
+        {
+            object result = base.EditValue(context, provider, value);
+
+            // assign the temporary collection from the UI to the property
+            ((Configuration)context.Instance).WorkActivities = (List<ActivityClassifyer>)result;
+
+            return result;
+        }
+
+        protected override CollectionForm CreateCollectionForm()
+        {
+            var form = base.CreateCollectionForm();
+            form.Shown += (sender, args) => ShowDescription(form);
+            //form.Shown += delegate { ShowDescription(form); };
+            return form;
+        }
+        static void ShowDescription(Control control)
+        {
+            if (control is PropertyGrid grid) grid.HelpVisible = true;
+            foreach (Control child in control.Controls)
+            {
+                ShowDescription(child);
+            }
+        }
+
+        protected override string GetDisplayText(object value)
+        {
+            if (value is ActivityClassifyer classifyer)
+                return classifyer.ToString();
+            return base.GetDisplayText(value);
+        }
+    }
 
     /// <summary>
     /// Classifies activities as work or play

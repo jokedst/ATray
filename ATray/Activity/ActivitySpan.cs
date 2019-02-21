@@ -25,7 +25,14 @@
         public int ApplicationNameIndex;
         public int WindowTitleIndex;
 
-        [NonSerialized] public WorkPlayType Classification;
+     public WorkPlayType Classification { get; private set; }
+        [NonSerialized] public string ClassificationFrom;
+
+        public void Classify(WorkPlayType type, string from)
+        {
+            Classification = type;
+            ClassificationFrom = from;
+        }
 
         /// <summary>
         /// Default constructor (for deserializers)

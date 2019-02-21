@@ -93,14 +93,14 @@ namespace ATray
                 webServer.Run();
             }
 
-            ActivityClassifyer.AddWorkPattern("devenv", ".*Cosmoz.*");
-            ActivityClassifyer.AddWorkProgram("Slack");
-            ActivityClassifyer.AddWorkProgram("Ssms");
-            ActivityClassifyer.AddWorkPattern("chrome", ".*neovici.*");
-            ActivityClassifyer.AddPlayPattern("chrome", @"\[unknown\]");
-            ActivityClassifyer.AddPlayPattern("chrome", ".*ICA Banken.*");
-            ActivityClassifyer.AddPlayPattern("chrome", @".*jokedst@gmail\.com.*");
-            ActivityClassifyer.AddPlayProgram("RobloxPlayerBeta");
+            //ActivityClassifyer.AddWorkPattern("devenv", ".*Cosmoz.*");
+            //ActivityClassifyer.AddWorkProgram("Slack");
+            //ActivityClassifyer.AddWorkProgram("Ssms");
+            //ActivityClassifyer.AddWorkPattern("chrome", ".*neovici.*");
+            //ActivityClassifyer.AddPlayPattern("chrome", @"\[unknown\]");
+            //ActivityClassifyer.AddPlayPattern("chrome", ".*ICA Banken.*");
+            //ActivityClassifyer.AddPlayPattern("chrome", @".*jokedst@gmail\.com.*");
+            //ActivityClassifyer.AddPlayProgram("RobloxPlayerBeta");
 
             UpdateTask = Task.Run(() => UpdateApp(false));
             DetectInstalledPrograms();

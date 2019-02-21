@@ -1,6 +1,4 @@
-﻿using ATray.Annotations;
-
-namespace ATray.Activity
+﻿namespace ATray.Activity
 {
     using System;
     using System.Collections.Generic;

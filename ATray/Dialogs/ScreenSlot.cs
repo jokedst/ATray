@@ -42,7 +42,8 @@
             var first = !includeComputerName;
             foreach (var activity in Activities)
             {
-                if (first) first = false; else sb.Append(Environment.NewLine);
+                if (first) first = false;
+                else sb.Append(Environment.NewLine);
                 sb.Append('(').Append(activity.Classification.ToString()[0]).Append(") ");
                 if (includeComputerName) sb.Append(activity.Owner.ComputerName).Append(": ");
                 sb.Append(activity.ApplicationName());
@@ -50,6 +51,15 @@
                 var title = activity.WindowTitle();
                 if (!string.IsNullOrWhiteSpace(title)) sb.Append(" - ").Append(title);
             }
+
+            if (Program.Configuration.ShowClassificationReason)
+            {
+                foreach (var span in Activities.Where(x => x.WasActive && x.Classification != WorkPlayType.Unknown))
+                {
+                    sb.AppendLine().Append("W/P: ").Append(span.ClassificationFrom);
+                }
+            }
+
             return sb.ToString();
         }
     }

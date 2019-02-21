@@ -54,8 +54,10 @@
                 var activityList = new DayActivityList(this, day.Value.DayNumber);
                 foreach (var act in day.Value)
                 {
-                    activityList.Add(new ActivitySpan(activityList, act.StartSecond, act.EndSecond, act.WasActive,
-                        act.ApplicationName(), act.WindowTitle()){Classification = act.Classification});
+                    var copy = new ActivitySpan(activityList, act.StartSecond, act.EndSecond, act.WasActive,
+                        act.ApplicationName(), act.WindowTitle());
+                    copy.Classify(act.Classification, act.ClassificationFrom);
+                    activityList.Add(copy);
                 }
                 this.Days[day.Key] = activityList;
             }

@@ -3,13 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
-    using System.ComponentModel.Design;
     using System.Drawing.Design;
     using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices;
     using System.Text;
-    using System.Web.UI.Design.WebControls;
     using System.Windows.Forms;
     using System.Windows.Forms.Design;
     using Activity;
@@ -38,16 +36,17 @@
         public bool ActivateWebserver { get; set; }
         [Description("TCP port to use"), Category("Web Server"), DefaultValue(14754)]
         public int Port { get; set; }
-        [Editor(typeof(MultilineStringEditor), typeof(UITypeEditor))]
-        [Description("Classification of work activities"), Category("History"), DefaultValue("")]
-        public string WorkPlayConfiguration { get; set; }
 
-        [Editor(typeof(SomeTypeEditor), typeof(UITypeEditor))]
-        [Description("RegexTypeEditor activities"), Category("History")]
-        public List<ActivityClassifyer> WorkActivities { get; set; } = new List<ActivityClassifyer>();
+        [Editor(typeof(ActivityClassifyerEditor), typeof(UITypeEditor))]
+        [Description("Activities that will be classified as 'work'"), Category("History")]
+        public ActivityClassifyerCollection WorkActivities { get; set; } = new ActivityClassifyerCollection();
 
-        // RegexTypeEditor
+        [Editor(typeof(ActivityClassifyerEditor), typeof(UITypeEditor))]
+        [Description("Activities that will be classified as 'play'"), Category("History")]
+        public ActivityClassifyerCollection PlayActivities { get; set; } = new ActivityClassifyerCollection();
 
+        [Description("Show classification reason in tooltip"), Category("History"), DefaultValue(false)]
+        public bool ShowClassificationReason { get; set; }
 
         public Configuration(string filename = null)
         {
@@ -75,6 +74,31 @@
         {
             if(_autostart.IsSetToAutoStart() != StartAtLogin)
                 _autostart.SetStartup(StartAtLogin);
+            if (WorkActivities == null || WorkActivities.Count == 0)
+            {
+                WorkActivities = new ActivityClassifyerCollection
+                {
+                    "Slack",
+                    "Ssms",
+                    {"devenv", ".*Cosmoz.*"},
+                    {"chrome", ".*neovici.*"}
+                };
+            }
+
+            if (PlayActivities == null || PlayActivities.Count == 0)
+            {
+                PlayActivities = new ActivityClassifyerCollection
+                {
+                    "RobloxPlayerBeta",
+                    {"chrome", @"\[unknown\]"},
+                    {"chrome", ".*ICA Banken.*"},
+                    {"chrome", @".*jokedst@gmail\.com.*"}
+                };
+            }
+
+            Program.ActivityClassifyer.Clear();
+            Program.ActivityClassifyer.AddPatterns(WorkActivities, true);
+            Program.ActivityClassifyer.AddPatterns(PlayActivities, false);
 #if DEBUG
             if (string.IsNullOrWhiteSpace(SharedActivityStorage)) return;
             var sharedPath = Path.GetFullPath(SharedActivityStorage);
@@ -82,8 +106,6 @@
             if (!sharedPath.EndsWith("DEBUG") && Directory.Exists(sharedPath))
             {
                 sharedPath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
-
-
             }
 #endif
         }
@@ -180,7 +202,7 @@
 
         [DllImport("kernel32.dll")]
         private static extern int GetPrivateProfileSection(string lpAppName, byte[] lpszReturnBuffer, int nSize, string lpFileName);
-        
+
         /// <summary>
         /// Validates new setting values
         /// </summary>
@@ -193,6 +215,10 @@
             // If all ok, act on changes
             if (StartAtLogin != newConfig.StartAtLogin)
                 _autostart.SetStartup(newConfig.StartAtLogin);
+
+            Program.ActivityClassifyer.Clear();
+            Program.ActivityClassifyer.AddPatterns(WorkActivities, true);
+            Program.ActivityClassifyer.AddPatterns(PlayActivities, false);
             return true;
         }
     }

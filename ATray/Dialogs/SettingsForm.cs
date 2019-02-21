@@ -5,7 +5,6 @@
     using System.Drawing;
     using System.Windows.Forms;
     using System.Reflection;
-    using System.Threading.Tasks;
     using RepositoryManager;
     using Tools;
 

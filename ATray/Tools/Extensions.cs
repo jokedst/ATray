@@ -4,6 +4,8 @@ using RepositoryManager;
 
 namespace ATray.Tools
 {
+    using System.Collections.Generic;
+
     public static class Extensions
     {
         public static OverallStatusType ToOverallStatus(this RepoStatus status)
@@ -38,6 +40,31 @@ namespace ATray.Tools
         public static int IntegerMonth(this DateTime date)
         {
            return date.Year * 100 + date.Month;
+        }
+
+
+        public static IEnumerable<T> DepthFirst<T>(this T tree, Func<T, IEnumerable<T>> childSelector)
+        {
+            yield return tree;
+            var enumerators = new Stack<IEnumerator<T>>();
+            var e = childSelector(tree).GetEnumerator();
+            while (e != null)
+            {
+                if (e.MoveNext())
+                {
+                    yield return e.Current;
+                    var x = childSelector(e.Current)?.GetEnumerator();
+                    if (x == null) continue;
+                    enumerators.Push(e);
+                    e = x;
+                }
+                else
+                {
+                    e.Dispose();
+                    if (enumerators.Count == 0) break;
+                    e = enumerators.Pop();
+                }
+            }
         }
     }
 }

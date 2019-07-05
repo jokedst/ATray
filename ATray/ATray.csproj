@@ -291,6 +291,6 @@
       <SymVer3>$([System.Version]::Parse(%(ATrayAssemblyInfo.Version)).ToString(3))</SymVer3>
     </PropertyGroup>
     <Exec Command="NuGet.exe pack ATray.nuspec -Version %(ATrayAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir) -BasePath $(OutDir)" />
-    <Exec Command="$(NuGetPackageFolders)squirrel.windows\1.9.0\tools\squirrel --releasify $(OutDir)ATray.$(SymVer3).nupkg -baseUrl https://github.com/jokedst/ATray/releases/download/v$(SymVer3)/" />
+    <Exec Command='"$(NuGetPackageFolders)squirrel.windows\1.9.0\tools\squirrel" --releasify $(OutDir)ATray.$(SymVer3).nupkg -baseUrl https://github.com/jokedst/ATray/releases/download/v$(SymVer3)/' />
   </Target>
 </Project>

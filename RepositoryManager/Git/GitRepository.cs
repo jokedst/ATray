@@ -212,7 +212,7 @@ namespace RepositoryManager.Git
                     // which might not work on local changes...
                 }
             }
-            catch (RepositoryNotFoundException)
+            catch (Exception)
             {
                 LastStatus = RepoStatus.Error;
                 GitStatus = RepoStatusFlags.Error;

@@ -120,7 +120,7 @@
       <Version>3.17.3</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
-      <Version>11.0.2</Version>
+      <Version>13.0.1</Version>
     </PackageReference>
     <PackageReference Include="SharpSvn.1.9-x64">
       <Version>1.9007.3987.251</Version>

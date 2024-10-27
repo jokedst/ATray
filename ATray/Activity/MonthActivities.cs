@@ -125,7 +125,8 @@
                     acts.Add(act);
                 }
 
-                Days.Add(dayNumber, acts);
+                if (acts.Count > 0)
+                    Days.Add(dayNumber, acts);
             }
 
             ApplicationNames = new List<string>(br.ReadStrings());

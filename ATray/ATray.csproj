@@ -270,28 +270,28 @@
       <Version>2.1.1</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
-      <Version>11.0.2</Version>
+      <Version>13.0.3</Version>
     </PackageReference>
     <PackageReference Include="NuGet.CommandLine">
-      <Version>6.0.2</Version>
+      <Version>6.11.1</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="squirrel.windows" GeneratePathProperty="true" >
+    <PackageReference Include="squirrel.windows" GeneratePathProperty="true">
       <Version>2.0.1</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- Squirrel - create release package on Release builds  -->
   <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Release'">
-	<Message Text="Message from MSBuild: $(Pkgsquirrel_windows)" />
+    <Message Text="Message from MSBuild: $(Pkgsquirrel_windows)" />
     <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
-	  <Output TaskParameter="Assemblies" ItemName="ATrayAssemblyInfo"/>
+      <Output TaskParameter="Assemblies" ItemName="ATrayAssemblyInfo" />
     </GetAssemblyIdentity>
     <PropertyGroup>
       <SymVer3>$([System.Version]::Parse(%(ATrayAssemblyInfo.Version)).ToString(3))</SymVer3>
-    </PropertyGroup>  
-    <Exec Command='"$(PkgNuGet_CommandLine)\tools\NuGet.exe" pack ATray.nuspec -Version %(ATrayAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir) -BasePath $(OutDir)' />
-    <Exec Command='"$(Pkgsquirrel_windows)\tools\squirrel" --releasify $(OutDir)ATray.$(SymVer3).nupkg -baseUrl https://github.com/jokedst/ATray/releases/download/v$(SymVer3)/' />
-</Target>
+    </PropertyGroup>
+    <Exec Command="&quot;$(PkgNuGet_CommandLine)\tools\NuGet.exe&quot; pack ATray.nuspec -Version %(ATrayAssemblyInfo.Version) -Properties Configuration=Release -OutputDirectory $(OutDir) -BasePath $(OutDir)" />
+    <Exec Command="&quot;$(Pkgsquirrel_windows)\tools\squirrel&quot; --releasify $(OutDir)ATray.$(SymVer3).nupkg -baseUrl https://github.com/jokedst/ATray/releases/download/v$(SymVer3)/" />
+  </Target>
 </Project>

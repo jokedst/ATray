@@ -52,9 +52,17 @@ namespace ATray.Activity
         private MonthActivities Blur(MonthActivities monthActivities, int secondsRequired)
         {
             var m = new MonthActivities(monthActivities);
+            var toRemove = new List<byte>();
             foreach (var day in m.Days)
             {
                 Blur(day.Value, secondsRequired);
+                if (day.Value.Count == 0)
+                    toRemove.Add(day.Key);
+            }
+
+            foreach (var emptyDay in toRemove)
+            {
+                m.Days.Remove(emptyDay);
             }
 
             return m;

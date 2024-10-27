@@ -7,6 +7,9 @@ using Newtonsoft.Json;
 
 // Attempt to rewrite DiskUsage, since I lost my source files
 // This program has to be run as Admin! So a bit tricky to debug.
+// Ugh, it seems I messed around with the NtfsReader source as well. I think I added the "SizeWithChildren" property.
+// And it seems I calculate byte size, not size on disk (e.g. include block size). Block size seems available in ntfsReader.DiskInfo.BytesPerCluster
+// Aaaaand I found the original source :P
 namespace DiskUsage
 {
     class Program
